@@ -77,6 +77,26 @@ class User extends Model
         } elseif ($this->class == 2) {
             $this->isMod = true;
         }
+
+        // No functions for nongolds
+        if ($this->goldLevel == 0) {
+            $this->resetGoldSettings();
+        } else {
+            // Override settings for golds
+            // TODO: add file maxsize
+        }
+    }
+
+    protected function resetGoldSettings()
+    {
+        if ($this->goldLevel >= 1) {
+            return true;
+        }
+
+        // TODO: Add rest of them
+        $this->preferences->useName = false;
+        $this->preferences->hideAds = false;
+        $this->preferences->tinfoilMode = false;
     }
 
     public function delete() : bool

@@ -14,6 +14,11 @@ class UserPreferences extends UserSubModel
     public $threadsPerCatalogPage = 100;
     public $hiddenNotificationTypes = [];
 
+    // Gold functions
+    public $hideAds = false;
+    public $tinfoilMode = false;
+    public $useName = false;
+
     protected $preferences;
     protected $toUpdate = [];
 
@@ -26,6 +31,9 @@ class UserPreferences extends UserSubModel
         6 => 'repliesPerThread',
         7 => 'threadsPerCatalogPage',
         8 => 'hiddenNotificationTypes',
+        9 => 'hideAds',
+        10 => 'tinfoilMode',
+        11 => 'useName',
     ];
 
     public function __destruct()

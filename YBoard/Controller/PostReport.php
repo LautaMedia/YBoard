@@ -3,6 +3,7 @@ namespace YBoard\Controller;
 
 use YBoard\Abstracts\ExtendedController;
 use YBoard\Model\Bans;
+use YBoard\Model\Log;
 use YBoard\Model\PostReports;
 use YBoard\Model\Posts;
 
@@ -35,6 +36,8 @@ class PostReport extends ExtendedController
             $this->throwJsonError(404, _('Report does not exist'));
         }
 
+        $log = new Log($this->db);
+        $log->write(Log::ACTION_ID_MOD_REPORT_CHECKED, $this->user->id, $report->id);
         $report->setChecked($this->user->id);
     }
 

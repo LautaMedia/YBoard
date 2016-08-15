@@ -2,6 +2,7 @@
 namespace YBoard\Controller;
 
 use YBoard\Abstracts\ExtendedController;
+use YBoard\Library\BbCode;
 use YBoard\Library\Cache;
 use YBoard\Library\GeoIP;
 use YBoard\Library\HttpResponse;
@@ -200,7 +201,7 @@ class Post extends ExtendedController
 
         // Message options
         $sage = empty($_POST['sage']) ? false : true;
-        $hideName = empty($_POST['hidename']) ? false : true;
+        $useName = empty($_POST['usename']) ? false : true;
 
         // TODO: Add functionality
         if ($this->user->goldLevel == 0) {
@@ -219,6 +220,11 @@ class Post extends ExtendedController
             $message = mb_substr($message, 0, $this->config['view']['messageMaxLength']);
         }
 
+        // Only most basic text formatting for non-golds.
+        if ($this->user->goldLevel == 0) {
+            $message = BbCode::removeDisallowed($message);
+        }
+
         // Check blacklist
         $wordBlacklist = new WordBlacklist($this->db);
         $blacklistReason = $wordBlacklist->match($message);
@@ -232,7 +238,7 @@ class Post extends ExtendedController
         }
 
         $username = null;
-        if (!$hideName && $this->user->goldLevel != 0) {
+        if ($useName && $this->user->goldLevel != 0) {
             $username = $this->user->username;
         }
 
