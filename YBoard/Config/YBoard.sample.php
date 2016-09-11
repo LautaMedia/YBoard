@@ -27,7 +27,7 @@ return [
         'threadIntervalLimit' => 30,
     ],
     'files' => [
-        'savePath' => ROOT_PATH . '/static/files',
+        'savePath' => ROOT_PATH . '/public/static/files',
         'diskMinFree' => 1073741824,
         'maxSize' => 10485760,
         'maxPixelCount' => 50000000,

@@ -29,8 +29,12 @@ trait ErrorPages
         $errorTitle = empty($errorTitle) ? _('Page not found') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. Probably never did.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/static/img/404/*.*');
-        $image = $this->imagePathToUrl($images[array_rand($images)]);
+        $images = glob(ROOT_PATH . '/public/static/img/404/*.*');
+        if(!empty($images)) {
+            $image = $this->imagePathToUrl($images[array_rand($images)]);
+        } else {
+            $images = false;
+        }
 
         $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
     }
@@ -40,8 +44,12 @@ trait ErrorPages
         $errorTitle = empty($errorTitle) ? _('Oh noes!') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('We\'re terribly sorry. An internal error occurred when we tried to complete your request.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/static/img/500/*.*');
-        $image = $this->imagePathToUrl($images[array_rand($images)]);
+        $images = glob(ROOT_PATH . '/public/static/img/500/*.*');
+        if(!empty($images)) {
+            $image = $this->imagePathToUrl($images[array_rand($images)]);
+        } else {
+            $images = false;
+        }
 
         $this->dieWithMessage($errorTitle, $errorMessage, 500, 'internalerror', $image);
     }

@@ -15,7 +15,7 @@ class Cleanup extends CliDatabase
         $files = new Files($this->db);
         $files->deleteOrphans();
 
-        $glob = glob(ROOT_PATH . '/static/files/*/*/*.*');
+        $glob = glob(ROOT_PATH . '/public/static/files/*/*/*.*');
         $i = 1;
         $count = 0;
         foreach ($glob AS $file) {

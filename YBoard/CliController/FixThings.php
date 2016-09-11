@@ -10,7 +10,7 @@ class FixThings extends CliDatabase
     {
         $files = new Files($this->db);
 
-        $glob = glob(ROOT_PATH . '/static/files/*/t/*.*');
+        $glob = glob(ROOT_PATH . '/public/static/files/*/t/*.*');
         foreach ($glob AS $filePath) {
             $fileName = pathinfo($filePath, PATHINFO_FILENAME);
 

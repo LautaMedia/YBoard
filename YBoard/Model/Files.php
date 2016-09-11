@@ -270,6 +270,9 @@ class Files extends Model
         $q->execute();
 
         $uploadedFile->id = $this->db->lastInsertId();
+        if (!$uploadedFile->id) {
+            throw new FileUploadException(sprintf(_('File upload failed')));
+        }
 
         if ($sendMessage) {
             $mq = new MessageQueue();
