@@ -2,6 +2,7 @@
 namespace YBoard\Model;
 
 use YBoard\Abstracts\UserSubModel;
+use YBoard\Library\Database;
 
 class UserPreferences extends UserSubModel
 {
@@ -114,8 +115,8 @@ class UserPreferences extends UserSubModel
         }
 
         $q = $this->db->prepare("DELETE FROM user_preferences WHERE preferences_key = :preferences_key AND user_id = :user_id");
-        $q->bindValue('preferences_key', $key);
-        $q->bindValue('user_id', $this->userId);
+        $q->bindValue('preferences_key', $key, Database::PARAM_INT);
+        $q->bindValue('user_id', $this->userId, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -124,7 +125,7 @@ class UserPreferences extends UserSubModel
     protected function load() : bool
     {
         $q = $this->db->prepare("SELECT preferences_key, preferences_value FROM user_preferences WHERE user_id = :user_id");
-        $q->bindValue('user_id', $this->userId);
+        $q->bindValue('user_id', $this->userId, Database::PARAM_INT);
         $q->execute();
 
         while ($row = $q->fetch()) {

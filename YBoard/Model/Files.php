@@ -3,6 +3,7 @@ namespace YBoard\Model;
 
 use YBoard\Exceptions\FileUploadException;
 use YBoard\Exceptions\InternalException;
+use YBoard\Library\Database;
 use YBoard\Library\FileHandler;
 use YBoard\Library\MessageQueue;
 use YBoard\Library\Text;
@@ -45,7 +46,7 @@ class Files extends Model
     public function get(int $fileId)
     {
         $q = $this->db->prepare('SELECT ' . $this->selectQuery . ' FROM files WHERE id = :file_id LIMIT 1');
-        $q->bindValue('file_id', $fileId);
+        $q->bindValue('file_id', $fileId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -258,14 +259,14 @@ class Files extends Model
         $q->bindValue('folder', $uploadedFile->folder);
         $q->bindValue('name', $uploadedFile->name);
         $q->bindValue('extension', $uploadedFile->destinationFormat);
-        $q->bindValue('size', $uploadedFile->size);
-        $q->bindValue('width', $uploadedFile->width);
-        $q->bindValue('height', $uploadedFile->height);
-        $q->bindValue('duration', $uploadedFile->duration);
-        $q->bindValue('has_thumbnail', $uploadedFile->hasThumbnail);
-        $q->bindValue('has_sound', $uploadedFile->hasSound);
-        $q->bindValue('is_gif', $uploadedFile->isGif);
-        $q->bindValue('in_progress', $uploadedFile->inProgress);
+        $q->bindValue('size', $uploadedFile->size, Database::PARAM_INT);
+        $q->bindValue('width', $uploadedFile->width, Database::PARAM_INT);
+        $q->bindValue('height', $uploadedFile->height, Database::PARAM_INT);
+        $q->bindValue('duration', $uploadedFile->duration, Database::PARAM_INT);
+        $q->bindValue('has_thumbnail', $uploadedFile->hasThumbnail, Database::PARAM_INT);
+        $q->bindValue('has_sound', $uploadedFile->hasSound, Database::PARAM_INT);
+        $q->bindValue('is_gif', $uploadedFile->isGif, Database::PARAM_INT);
+        $q->bindValue('in_progress', $uploadedFile->inProgress, Database::PARAM_INT);
         $q->execute();
 
         $uploadedFile->id = $this->db->lastInsertId();

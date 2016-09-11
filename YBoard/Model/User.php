@@ -104,7 +104,7 @@ class User extends Model
         // Relations will handle the deletion of rest of the data, so we don't have to care.
         // Thank you relations!
         $q = $this->db->prepare("DELETE FROM users WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id);
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -130,7 +130,7 @@ class User extends Model
 
         $q = $this->db->prepare("UPDATE users SET password = :new_password WHERE id = :id LIMIT 1");
         $q->bindValue('new_password', $newPassword);
-        $q->bindValue('id', $this->id);
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;

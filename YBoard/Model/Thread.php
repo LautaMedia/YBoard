@@ -64,7 +64,7 @@ class Thread extends Post
     public function bump() : bool
     {
         $q = $this->db->prepare("UPDATE posts SET bump_time = NOW() WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -74,7 +74,7 @@ class Thread extends Post
     {
         $q = $this->db->prepare("UPDATE posts a LEFT JOIN posts b ON a.id = b.thread_id
             SET a.bump_time = IFNULL(b.time, a.time) WHERE a.id = :thread_id");
-        $q->bindValue('thread_id', (int)$this->id);
+        $q->bindValue('thread_id', (int)$this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -83,8 +83,8 @@ class Thread extends Post
     public function setLocked(bool $locked) : bool
     {
         $q = $this->db->prepare("UPDATE posts SET locked = :locked WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id);
-        $q->bindValue('locked', $locked);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue('locked', $locked, Database::PARAM_INT);
         $q->execute();
 
         $this->locked = $locked;
@@ -95,8 +95,8 @@ class Thread extends Post
     public function setSticky(bool $sticky) : bool
     {
         $q = $this->db->prepare("UPDATE posts SET sticky = :sticky WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id);
-        $q->bindValue('sticky', $sticky);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue('sticky', $sticky, Database::PARAM_INT);
         $q->execute();
 
         $this->sticky = $sticky;
@@ -115,8 +115,8 @@ class Thread extends Post
             (user_id, thread_id, ip, country_code, username, message)
             VALUES (:user_id, :thread_id, :ip, :country_code, :username, :message)
         ");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('thread_id', $this->id);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
         $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->bindValue('country_code', $countryCode);
         $q->bindValue('username', $username);
@@ -151,9 +151,9 @@ class Thread extends Post
         }
 
         $q = $this->db->prepare($this->getPostsQuery('WHERE a.thread_id = :thread_id' . $from . ' ORDER BY a.id ' . $order . $limit));
-        $q->bindValue('thread_id', $this->id);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
         if ($from) {
-            $q->bindValue('from', $fromId);
+            $q->bindValue('from', $fromId, Database::PARAM_INT);
         }
         $q->execute();
 
@@ -192,9 +192,9 @@ class Thread extends Post
         $q = $this->db->prepare("INSERT INTO thread_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
             ON DUPLICATE KEY UPDATE " . $column . " =  " . $column . "+:val_2");
 
-        $q->bindValue('thread_id', $this->id);
-        $q->bindValue('val', $val);
-        $q->bindValue('val_2', $val);
+        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue('val', $val, Database::PARAM_INT);
+        $q->bindValue('val_2', $val, Database::PARAM_INT);
         $q->execute();
 
         return true;

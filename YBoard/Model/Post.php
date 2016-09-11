@@ -67,12 +67,12 @@ class Post extends Model
         $q = $this->db->prepare("INSERT IGNORE INTO posts_deleted (id, user_id, board_id, thread_id, ip, time, subject, message, time_deleted)
             SELECT id, user_id, board_id, thread_id, ip, time, subject, message, NOW() FROM posts
             WHERE id = :post_id OR thread_id = :post_id_2");
-        $q->bindValue('post_id', $this->id);
-        $q->bindValue('post_id_2', $this->id);
+        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue('post_id_2', $this->id, Database::PARAM_INT);
         $q->execute();
 
         $q = $this->db->prepare("DELETE FROM posts WHERE id = :post_id LIMIT 1");
-        $q->bindValue('post_id', $this->id);
+        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return $q->rowCount() != 0;
@@ -81,7 +81,7 @@ class Post extends Model
     public function getRepliedPosts() : array
     {
         $q = $this->db->prepare("SELECT post_id_replied FROM posts_replies WHERE post_id = :post_id");
-        $q->bindValue('post_id', $this->id);
+        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return $q->fetchAll(Database::FETCH_COLUMN);
@@ -90,7 +90,7 @@ class Post extends Model
     public function removeFiles() : bool
     {
         $q = $this->db->prepare("DELETE FROM posts_files WHERE post_id = :post_id");
-        $q->bindValue('post_id', $this->id);
+        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -100,8 +100,8 @@ class Post extends Model
     {
         $q = $this->db->prepare("INSERT INTO posts_files (post_id, file_id, file_name)
             VALUES (:post_id, :file_id, :file_name)");
-        $q->bindValue('post_id', $this->id);
-        $q->bindValue('file_id', $fileId);
+        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue('file_id', $fileId, Database::PARAM_INT);
         $q->bindValue('file_name', $fileName);
         $q->execute();
 
@@ -125,7 +125,7 @@ class Post extends Model
 
         if ($clearOld) {
             $q = $this->db->prepare("DELETE FROM posts_replies WHERE post_id = :post_id");
-            $q->bindValue('post_id', $this->id);
+            $q->bindValue('post_id', $this->id, Database::PARAM_INT);
             $q->execute();
         }
 

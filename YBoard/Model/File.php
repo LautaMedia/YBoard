@@ -74,8 +74,8 @@ class File extends Model
     public function updateSize(int $fileSize) : bool
     {
         $q = $this->db->prepare('UPDATE files SET size = :size WHERE id = :id LIMIT 1');
-        $q->bindValue('size', $fileSize);
-        $q->bindValue('id', $this->id);
+        $q->bindValue('size', $fileSize, Database::PARAM_INT);
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -84,8 +84,8 @@ class File extends Model
     public function updateInProgress(bool $inProgress) : bool
     {
         $q = $this->db->prepare('UPDATE files SET in_progress = :in_progress WHERE id = :id LIMIT 1');
-        $q->bindValue('in_progress', $inProgress);
-        $q->bindValue('id', $this->id);
+        $q->bindValue('in_progress', $inProgress, Database::PARAM_INT);
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;

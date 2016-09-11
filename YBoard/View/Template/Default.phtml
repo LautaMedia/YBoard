@@ -20,11 +20,11 @@
 
     <link rel="icon" sizes="192x192" href="<?= $staticUrl ?>/img/norppa_icon.png">
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.2/toastr.min.js"></script>
-    <script src="<?= $staticUrl ?>/js/tooltipster.min.js"></script>
-
+    <script src="<?= $staticUrl ?>/js/jquery.min.js" defer></script>
+    <script src="<?= $staticUrl ?>/js/toastr.min.js" defer></script>
+    <script src="<?= $staticUrl ?>/js/tooltipster.min.js" defer></script>
     <script src="<?= $staticUrl ?>/js/scripts.js?<?=time()?>" defer></script>
+
     <script>
         <?php // TODO: Move to external file? (Pros: can cache, Cons: requires loading everything twice) ?>
         var config = {

@@ -24,7 +24,7 @@ class Posts extends Model
             $q = $this->db->prepare("SELECT id, board_id, user_id, ip, country_code, time, locked, sticky
             FROM posts WHERE id = :id AND thread_id IS NULL LIMIT 1");
         }
-        $q->bindValue('id', (int)$id);
+        $q->bindValue('id', $id, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -63,9 +63,9 @@ class Posts extends Model
             WHERE board_id = :board_id AND thread_id IS NULL AND bump_time < DATE_SUB(NOW(), INTERVAL :hours HOUR)
             AND sticky = 0
             LIMIT :limit");
-        $q->bindValue('board_id', $boardId);
-        $q->bindValue('hours', $hours);
-        $q->bindValue('limit', $limit);
+        $q->bindValue('board_id', $boardId, Database::PARAM_INT);
+        $q->bindValue('hours', $hours, Database::PARAM_INT);
+        $q->bindValue('limit', $limit, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -179,8 +179,8 @@ class Posts extends Model
             (user_id, board_id, ip, country_code, username, subject, message, bump_time, locked, sticky)
             VALUES (:user_id, :board_id, :ip, :country_code, :username, :subject, :message, NOW(), 0, 0)
         ");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('board_id', $boardId);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue('board_id', $boardId, Database::PARAM_INT);
         $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->bindValue('country_code', $countryCode);
         $q->bindValue('username', $username);
@@ -230,7 +230,7 @@ class Posts extends Model
     public function getDeletedMessage(int $postId)
     {
         $q = $this->db->prepare("SELECT message FROM posts_deleted WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $postId);
+        $q->bindValue('id', $postId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -260,14 +260,14 @@ class Posts extends Model
         $q = $this->db->prepare("INSERT INTO posts_deleted (id, user_id, board_id, thread_id, ip, time, subject, message, time_deleted)
             SELECT id, user_id, board_id, thread_id, ip, time, subject, message, NOW() FROM posts
             WHERE user_id = :user_id AND time >= DATE_SUB(NOW(), INTERVAL :interval_hours HOUR)");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('interval_hours', $intervalHours);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue('interval_hours', $intervalHours, Database::PARAM_INT);
         $q->execute();
 
         $q = $this->db->prepare("DELETE FROM posts
             WHERE user_id = :user_id AND time >= DATE_SUB(NOW(), INTERVAL :interval_hours HOUR)");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('interval_hours', $intervalHours);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue('interval_hours', $intervalHours, Database::PARAM_INT);
         $q->execute();
 
         return true;

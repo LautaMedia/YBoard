@@ -1,6 +1,7 @@
 <?php
 namespace YBoard\Model;
 
+use YBoard\Library\Database;
 use YBoard\Model;
 
 class Log extends Model
@@ -15,8 +16,8 @@ class Log extends Model
     {
         $q = $this->db->prepare("INSERT INTO log (action_id, user_id, custom_data, ip)
             VALUES (:action_id, :user_id, :custom_data, :ip)");
-        $q->bindValue('action_id', $actionId);
-        $q->bindValue('user_id', $userId);
+        $q->bindValue('action_id', $actionId, Database::PARAM_INT);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
         $q->bindValue('custom_data', $customData);
         $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();

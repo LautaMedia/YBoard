@@ -10,8 +10,8 @@ class UserSessions extends Model
     {
         $q = $this->db->prepare("SELECT id, user_id, csrf_token, ip, login_time, last_active
             FROM user_sessions WHERE id = :id AND user_id = :user_id LIMIT 1");
-        $q->bindValue('id', $sessionId);
-        $q->bindValue('user_id', $userId);
+        $q->bindValue('id', $sessionId, Database::PARAM_INT);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -25,7 +25,7 @@ class UserSessions extends Model
     {
         $q = $this->db->prepare("SELECT id, user_id, csrf_token, ip, login_time, last_active
             FROM user_sessions WHERE user_id = :user_id");
-        $q->bindValue('user_id', $userId);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         $sessions = [];
@@ -43,8 +43,8 @@ class UserSessions extends Model
 
         $q = $this->db->prepare("INSERT INTO user_sessions (user_id, id, csrf_token, ip)
             VALUES (:user_id, :id, :csrf_token, :ip)");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('id', $sessionId);
+        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue('id', $sessionId, Database::PARAM_INT);
         $q->bindValue('csrf_token', $csrfToken);
         $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
