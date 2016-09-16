@@ -2,8 +2,8 @@
 
 return [
     'view' => [
-        'siteName' => 'Ylis taas vauhdis',
-        'siteMotto' => 'Suomalaisen internetkulttuurin sanansaattaja',
+        'siteName' => 'YBoard devel',
+        'siteMotto' => 'Ylis taas vauhdis',
         'baseUrl' => '//example.com',
         'staticUrl' => '//static.example.com',
         'uploadMaxSize' => 10485760,

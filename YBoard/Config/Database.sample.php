@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'pdoDsn' => 'mysql:host=xxx;dbname=xxx;charset=utf8mb4',
-    'dbUsername' => 'xxx',
-    'dbPassword' => 'xxx',
+    'pdoDsn' => 'mysql:host=localhost;dbname=yboard;charset=utf8mb4',
+    'dbUsername' => 'root',
+    'dbPassword' => 'vagrant',
     'debug' => false,
 ];

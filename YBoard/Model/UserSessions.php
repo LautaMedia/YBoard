@@ -10,7 +10,7 @@ class UserSessions extends Model
     {
         $q = $this->db->prepare("SELECT id, user_id, csrf_token, ip, login_time, last_active
             FROM user_sessions WHERE id = :id AND user_id = :user_id LIMIT 1");
-        $q->bindValue('id', $sessionId, Database::PARAM_INT);
+        $q->bindValue('id', $sessionId);
         $q->bindValue('user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
