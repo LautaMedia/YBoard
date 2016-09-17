@@ -5,26 +5,29 @@ $.ajaxSetup({
     headers: {
         'X-CSRF-Token': config.csrfToken
     },
-    error: function(xhr, textStatus, errorThrown) {
+    error: function (xhr, textStatus, errorThrown) {
         var errorMessage = errorThrown;
-        if (errorThrown == 'timeout') {
+        var errorTitle = messages.errorOccurred;
+        if (errorThrown.length == 0 && xhr.readyState == 0 && xhr.status == 0) {
+            errorMessage = messages.networkError;
+        } else if (errorThrown == 'timeout') {
             errorMessage = messages.timeoutWarning;
         } else {
             try {
                 var text = JSON.parse(xhr.responseText);
                 errorMessage = text.message;
+                if (typeof text.title != 'undefined' && text.title != null && text.title.length != 0) {
+                    errorTitle = text.title;
+                }
             } catch (e) {
                 errorMessage = xhr.status + ' ' + errorThrown;
             }
-        }
-        if (errorThrown.length == 0 && xhr.readyState == 0 && xhr.status == 0) {
-            errorMessage = messages.networkError;
         }
 
         if (xhr.status == '418') {
             toastr.info(errorMessage);
         } else {
-            toastr.error(errorMessage, messages.errorOccurred);
+            toastr.error(errorMessage, errorTitle);
         }
     }
 });
@@ -82,232 +85,543 @@ jQuery.fn.extend({
         });
     }
 });
-jQuery.fn.reverse = [].reverse;
 
 // -------------------------------------------
-// Post reporting
+// Localize dates and numbers
 // -------------------------------------------
-function reportPost(postId) {
-    $.modal.open('/scripts/report/getform', {
-        'onAjaxComplete': function () {
-            if (typeof grecaptcha != 'undefined' && $('#report-captcha').html().length == 0) {
-                grecaptcha.render('report-captcha', {
-                    'sitekey': config.reCaptchaPublicKey
-                });
-            }
-            $('#report-post-id').val(id);
+$('.datetime').localizeTimestamp();
+$('.number').localizeNumber();
+$('.currency').localizeCurrency();
+
+// -------------------------------------------
+// "Private" functions used by other functions
+// -------------------------------------------
+var YB = {
+    pageReload: function () {
+        window.location = window.location.href.split('#')[0];
+    },
+    returnToBoard: function () {
+        // Remove everything after the last slash and redirect
+        // Should work if we are in a thread, otherwise not really
+        var url = window.location.href;
+        url = url.substr(0, url.lastIndexOf('/') + 1);
+
+        window.location = url;
+    },
+    getSelectionText: function () {
+        var text = '';
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else if (document.selection && document.selection.type != "Control") {
+            text = document.selection.createRange().text;
         }
-    });
-}
-
-function submitReport(e) {
-    e.preventDefault();
-
-    if (!('FormData' in window)) {
-        toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
-        return false;
-    }
-
-    var form = $(e.target);
-    var fd = new FormData(e.target);
-
-    var oldHtml = $(e.target).html();
-    $(e.target).html(loadingAnimation());
-
-    $.ajax({
-        url: form.attr('action'),
-        type: "POST",
-        processData: false,
-        contentType: false,
-        data: fd
-    }).done(function () {
-        toastr.success(messages.postReported);
-        closeModals();
-    }).fail(function () {
-        if (xhr.status == '418') {
-            $.modal.closeAll();
+        return text;
+    },
+    spinnerHtml: function (classes) {
+        if (typeof classes == 'undefined') {
+            classes = '';
         } else {
-            $(e.target).html(oldHtml);
+            classes += ' ';
         }
-    });
-}
 
-// -------------------------------------------
-// Post deletion
-// -------------------------------------------
-function deletePost(id) {
-    if (!confirm(messages.confirmDeletePost)) {
-        return false;
-    }
+        return '<span class="' + classes + 'loading icon-loading spin"></span>';
+    },
+    submitForm: function(e) {
+        e.preventDefault();
 
-    $.ajax({
-        url: '/scripts/posts/delete',
-        type: "POST",
-        data: {'post_id': id}
-    }).done(function () {
-        $p(id).remove();
-        if ($('body').hasClass('thread-page')) {
-            if ($t(id).is('*')) {
-                // We're in the thread we just deleted
-                returnToBoard();
+        if (!('FormData' in window)) {
+            toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
+            return false;
+        }
+
+        var form = $(e.target);
+        var fd = new FormData(e.target);
+
+        var overlay = $('<div class="form-overlay"><div>' + YB.spinnerHtml() + '</div></div>');
+        form.append(overlay);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: fd,
+            dataType: 'json'
+        }).done(function (data) {
+            if (data.reload) {
+                if (data.url) {
+                    window.location = data.url;
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                overlay.remove();
+                toastr.success(data.message);
+                form.trigger('reset');
             }
-        } else {
-            // The deleted post is not the current thread
-            $t(id).remove();
-            toastr.success(messages.postDeleted);
-        }
-    });
-}
-function deleteFile(id) {
-    if (!confirm(messages.confirmDeleteFile)) {
-        return false;
-    }
+        }).fail(function () {
+            overlay.remove();
+        });
+    },
+    // Signup form in sidebar
+    // -------------------------------------------
+    signup: function(elm, e) {
+        e.preventDefault();
+        elm = $(elm);
 
-    $.ajax({
-        url: '/scripts/posts/deletefile',
-        type: "POST",
-        data: {'post_id': id}
-    }).done(function () {
-        $p(id).find('figure').remove();
-        toastr.success(messages.fileDeleted);
-    });
-}
-
-// -------------------------------------------
-// Thread following
-// -------------------------------------------
-function followThread(id) {
-    toggleFollowButton(id);
-    $.ajax({
-        url: '/scripts/follow/add',
-        type: "POST",
-        data: {'thread_id': id}
-    }).fail(function () {
-        toggleFollowButton(id);
-    });
-}
-
-function unfollowThread(id) {
-    toggleFollowButton(id);
-    $.ajax({
-        url: '/scripts/follow/remove',
-        type: "POST",
-        data: {'thread_id': id}
-    }).fail(function () {
-        toggleFollowButton(id);
-    });
-}
-
-function toggleFollowButton(threadId) {
-    var button = $t(threadId).find('.followbutton');
-
-    if (button.hasClass('icon-bookmark-add')) {
-        button
-            .removeClass('icon-bookmark-add')
-            .addClass('icon-bookmark-remove')
-            .attr('onclick', 'unfollowThread(' + threadId + ')');
-    } else {
-        button
-            .removeClass('icon-bookmark-remove')
-            .addClass('icon-bookmark-add')
-            .attr('onclick', 'followThread(' + threadId + ')');
-    }
-}
-
-function markAllFollowedRead() {
-    $('.icon-bookmark2 .unread-count').hide();
-    $('h3 .notification-count').hide();
-    $.ajax({
-        url: '/scripts/follow/markallread',
-        type: "POST"
-    }).fail(function () {
-        $('.icon-bookmark2 .unread-count').show();
-        $('h3 .notification-count').show();
-    });
-}
-
-// -------------------------------------------
-// Thread hiding
-// -------------------------------------------
-function hideThread(id, showNotification) {
-    showNotification = typeof showNotification == 'undefined';
-    $t(id).fadeToggle();
-    $.ajax({
-        url: '/scripts/threads/hide',
-        type: "POST",
-        data: {'thread_id': id}
-    }).done(function () {
-        if (showNotification) {
-            toastr.success(messages.threadHidden + '<button class="link" onclick="restoreThread(' + id + ', false)">' + messages.undo + '</button>');
-        }
-    }).fail(function () {
-        $t(id).stop().show();
-    });
-}
-
-function restoreThread(id, showNotification) {
-    showNotification = typeof showNotification == 'undefined';
-    $t(id).fadeToggle();
-    $.ajax({
-        url: '/scripts/threads/restore',
-        type: "POST",
-        data: {'thread_id': id}
-    }).done(function () {
-        if (showNotification) {
-            toastr.success(messages.threadRestored + '<button class="link" onclick="hideThread(' + id + ', false)">' + messages.undo + '</button>');
-        }
-    }).fail(function () {
-        $t(id).stop().show();
-    });
-}
-
-// -------------------------------------------
-// Signup form in sidebar
-// -------------------------------------------
-function signupForm(elm, e) {
-    e.preventDefault();
-    elm = $(elm);
-
-    if (typeof grecaptcha != 'undefined' && $('#signup-captcha').html().length == 0) {
-        grecaptcha.render('signup-captcha', {
-            'sitekey': config.reCaptchaPublicKey,
+        YB.captcha.render('signup-captcha', {
             'size': 'compact',
             'theme': 'dark'
         });
+
+        var form = $('#login');
+        var signupForm = $('#signup-form');
+
+        if (typeof form.data('login') == 'undefined') {
+            form.data('login', form.attr('action'));
+        }
+
+        if (!elm.data('open')) {
+            form.attr('action', form.data('signup'));
+            elm.html(messages.cancel);
+            $('#loginbutton').val(messages.signUp);
+            signupForm.slideDown();
+            elm.data('open', true);
+        } else {
+            form.attr('action', form.data('login'));
+            elm.html(messages.signUp);
+
+            $('#loginbutton').val(messages.logIn);
+            signupForm.slideUp();
+            signupForm.find('input').val('');
+            elm.data('open', false);
+        }
     }
+};
 
-    var form = $('#login');
-    var signupForm = $('#signup-form');
+// -------------------------------------------
+// reCAPTCHA
+// -------------------------------------------
+YB.captcha = {
+    render: function(elm, options) {
+        options = $.extend({
+            'sitekey': config.reCaptchaPublicKey
+        }, options);
 
-    if (typeof form.data('login') == 'undefined') {
-        form.data('login', form.attr('action'));
+        if (typeof grecaptcha == 'undefined' || !$('#' + elm).is('*')) {
+            return false;
+        }
+
+        if($('#' + elm).html().length != 0) {
+            return true;
+        }
+        grecaptcha.render(elm, options);
+    },
+    reset: function() {
+        if (typeof grecaptcha == 'undefined') {
+            return true;
+        }
+
+        grecaptcha.reset();
     }
-
-    if (!elm.data('open')) {
-        form.attr('action', form.data('signup'));
-        elm.html(messages.cancel);
-        $('#loginbutton').val(messages.signUp);
-        signupForm.slideDown();
-        elm.data('open', true);
-    } else {
-        form.attr('action', form.data('login'));
-        elm.html(messages.signUp);
-
-        $('#loginbutton').val(messages.logIn);
-        signupForm.slideUp();
-        signupForm.find('input').val('');
-        elm.data('open', false);
-    }
+};
+// Onload render callback
+function renderCaptcha() {
+    YB.captcha.render('post-form-captcha');
 }
+
+// -------------------------------------------
+// Theme functions
+// -------------------------------------------
+YB.theme = {
+    toggleSidebar: function () {
+        if ($('#hide-sidebar').is('*')) {
+            $('#hide-sidebar').remove();
+            $('#sidebar').removeClass('visible');
+        } else {
+            $('<link>').attr({
+                'rel': 'stylesheet',
+                'id': 'hide-sidebar',
+                'href': config.staticUrl + '/css/hide_sidebar.css',
+            }).appendTo('head');
+        }
+
+        $.post('/scripts/preferences/togglesidebar');
+    },
+    switchVariation: function () {
+        var css = $('.css:last');
+        var current = css.attr('href');
+        var variation = css.data('alt');
+
+        $('<link>').attr({
+            'rel': 'stylesheet',
+            'class': 'css',
+            'href': variation,
+            'data-alt': current
+        }).insertAfter(css);
+
+        var timeout = setTimeout(function () {
+            css.remove();
+        }, 5000);
+
+        $.post('/scripts/preferences/togglethemevariation').fail(function () {
+            clearTimeout(timeout);
+        });
+    }
+};
+
+// -------------------------------------------
+// Thread functions
+// -------------------------------------------
+YB.thread = {
+    getElm: function (id) {
+        return $('#thread-' + id);
+    },
+    toggleLock: function (id) {
+        if (this.getElm(id).find('h3 a .icon-lock').length == 0) {
+            $.post('/scripts/threads/lock', {'threadId': id}).done(function () {
+                YB.thread.getElm(id).find('h3 a').prepend('<span class="icon-lock icon"></span>');
+                toastr.success(messages.threadLocked);
+            });
+        } else {
+            $.post('/scripts/threads/unlock', {'threadId': id}).done(function () {
+                YB.thread(id).find('h3 a .icon-lock').remove();
+                toastr.success(messages.threadUnlocked);
+            });
+        }
+    },
+    toggleSticky: function (id) {
+        if (this.getElm(id).find('h3 a .icon-lock').length == 0) {
+            $.post('/scripts/threads/stick', {'threadId': id}).done(function () {
+                YB.thread.getElm(id).find('h3 a').prepend('<span class="icon-pushpin icon"></span>');
+                toastr.success(messages.threadStickied);
+            });
+        } else {
+            $.post('/scripts/threads/unstick', {'threadId': id}).done(function () {
+                YB.thread.getElm(id).find('h3 a .icon-pushpin').remove();
+                toastr.success(messages.threadUnstickied);
+            });
+        }
+    }, // Thread inline expansion
+    // -------------------------------------------
+    expand: function (threadId) {
+        var thread = this.getElm(threadId);
+        if (!thread.hasClass('expanded')) {
+            // Expand
+            thread.addClass('expanded', true);
+
+            var fromId = thread.find('.reply:first').attr('id').replace('post-', '');
+
+            $.post('/scripts/threads/getreplies', {
+                'threadId': threadId,
+                'fromId': fromId
+            }).done(function (data) {
+                // Update timestamps
+                data = $(data);
+                data.find('.datetime').localizeTimestamp(this);
+
+                thread.find('.more-replies-container').html(data);
+            });
+        } else {
+            // Contract
+            thread.removeClass('expanded').find('.more-replies-container').html('');
+        }
+    }
+};
+
+// Thread hiding
+// -------------------------------------------
+YB.thread.hide = {
+    add: function (id) {
+        YB.thread.getElm(id).fadeToggle();
+        $.post('/scripts/threads/hide', {'threadId': id}).done(function () {
+            toastr.success(messages.threadHidden + '<button class="link thread-restore" data-id="' + id + '">' + messages.undo + '</button>');
+        }).fail(function () {
+            YB.thread.getElm(id).stop().show();
+        });
+    },
+    remove: function (id) {
+        YB.thread.getElm(id).fadeToggle();
+        $.post('/scripts/threads/restore', {'threadId': id}).done(function () {
+            toastr.success(messages.threadRestored + '<button class="link thread-hide" data-id="' + id + '">' + messages.undo + '</button>');
+        }).fail(function () {
+            YB.thread.getElm(id).stop().show();
+        });
+    }
+};
+
+// Thread following
+// -------------------------------------------
+YB.thread.follow = {
+    add: function (id) {
+        this.doAjax(id, '/scripts/follow/add');
+    },
+    remove: function (id) {
+        this.doAjax(id, '/scripts/follow/remove');
+    },
+    markAllRead: function () {
+        $('.icon-bookmark2 .unread-count').hide();
+        $('h3 .notification-count').hide();
+        $.post('/scripts/follow/markallread').fail(function () {
+            $('.icon-bookmark2 .unread-count').show();
+            $('h3 .notification-count').show();
+        });
+    },
+    toggleButton: function (id) {
+        var button = YB.thread.getElm(id).find('.followbutton');
+
+        if (button.hasClass('add')) {
+            button
+                .removeClass('icon-bookmark-add add')
+                .addClass('icon-bookmark-remove remove');
+        } else {
+            button
+                .removeClass('icon-bookmark-remove remove')
+                .addClass('icon-bookmark-add add');
+        }
+    },
+    doAjax: function (id, url) {
+        this.toggleButton(id);
+        $.post(url, {'threadId': id}).fail(function () {
+            YB.thread.follow.toggleButton(id);
+        });
+    }
+};
+
+// -------------------------------------------
+// Post functions
+// -------------------------------------------
+YB.post = {
+    getElm: function (id) {
+        return $('#post-' + id);
+    },
+    delete: function (id) {
+        if (!confirm(messages.confirmDeletePost)) {
+            return false;
+        }
+
+        $.post('/scripts/posts/delete', {'postId': id}).done(function () {
+            this.getElm(id).remove();
+            if ($('body').hasClass('thread-page')) {
+                if (YB.thread.getElm(id).is('*')) {
+                    // We're in the thread we just deleted
+                    YB.returnToBoard();
+                }
+            } else {
+                // The deleted post is not the current thread
+                YB.thread.getElm(id).remove();
+                toastr.success(messages.postDeleted);
+            }
+        });
+    }, // Post higlighting
+    // -------------------------------------------
+    highlight: function (id) {
+        this.getElm(id).addClass('highlighted');
+    },
+    removeHighlights: function () {
+        $('.highlighted').removeClass('highlighted');
+    }
+};
+// File functions
+// -------------------------------------------
+YB.post.file = {
+    delete: function (id) {
+        if (!confirm(messages.confirmDeleteFile)) {
+            return false;
+        }
+
+        $.post('/scripts/posts/deletefile', {'post_id': id}).done(function () {
+            this.getElm(id).find('figure').remove();
+            toastr.success(messages.fileDeleted);
+        });
+    },
+    // Expand images
+    // -------------------------------------------
+    expandImage: function (elm, e) {
+        e.preventDefault();
+        var container = $(elm).parent();
+        var post = container.parent('.message');
+        var img = $(elm).find('img');
+
+        if (typeof img.data('expanding') != 'undefined') {
+            return true;
+        }
+
+        post.addClass('full');
+
+        if (typeof img.data('orig-src') == 'undefined') {
+            img.data('orig-src', img.attr('src'));
+            this.changeSrc(img, container.find('figcaption a').attr('href'));
+            container.removeClass('thumbnail');
+        } else {
+            this.changeSrc(img, img.data('orig-src'));
+            img.removeData('orig-src');
+            container.addClass('thumbnail');
+        }
+
+        // Scroll to top of image
+        var elmTop = container.offset().top;
+        if ($(document).scrollTop() > elmTop) {
+            $(document).scrollTop(elmTop);
+        }
+    },
+    changeSrc: function (img, src) {
+        img.data('expanding', 'true');
+        var loading = setTimeout(function () {
+            img.after(YB.spinnerHtml('overlay center'));
+        }, 200);
+        img.attr('src', src).on('load', function () {
+            img.removeData('expanding');
+            clearTimeout(loading);
+            img.parent().find('.loading').remove();
+        });
+    },
+
+    // Media player
+    // -------------------------------------------
+    playMedia: function(elm, e) {
+        e.preventDefault();
+        this.stopAllMedia();
+
+        var link = $(elm);
+        var container = link.parent();
+        var post = container.parent('.message');
+        var img = link.find('img');
+
+        var fileId = container.data('id');
+
+        if (typeof link.data('loading') != 'undefined') {
+            return false;
+        }
+
+        link.data('loading', 'true');
+
+        var loading = setTimeout(function () {
+            img.after(YB.spinnerHtml('overlay bottom left'));
+        }, 200);
+
+        $.post('/scripts/files/getmediaplayer', {'fileId': fileId}).done(function (data) {
+            container.removeClass('thumbnail').addClass('media-player-container');
+            post.addClass('full');
+            container.prepend(data);
+
+            var volume = YB.localStorage.get('videoVolume');
+            if (volume != null) {
+                container.find('video').prop('volume', volume);
+            }
+        }).always(function () {
+            clearTimeout(loading);
+            container.find('.loading').remove();
+            link.removeData('loading');
+        });
+    },
+    stopAllMedia: function() {
+        $('.media-player-container').each(function () {
+            var self = $(this);
+            var mediaPlayer = self.find('.media-player');
+
+            mediaPlayer.find('video').trigger('pause');
+            mediaPlayer.remove();
+
+            self.removeClass('media-player-container').addClass('thumbnail');
+        });
+    },
+    saveVolume: function(elm) {
+        YB.localStorage.store('videoVolume', $(elm).prop("volume"));
+    }
+};
+
+// Reporting
+// -------------------------------------------
+YB.post.report = {
+    openForm: function () {
+        YB.modal.open('/scripts/report/getform', {
+            'onAjaxComplete': function () {
+                YB.captcha.render('report-captcha');
+                $('#report-post-id').val(id);
+            }
+        });
+    },
+    submit: function (event) {
+        event.preventDefault();
+
+        if (!('FormData' in window)) {
+            toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
+            return false;
+        }
+
+        var form = $(event.target);
+        var fd = new FormData(event.target);
+
+        var oldHtml = $(event.target).html();
+        $(event.target).html(YB.spinnerHtml());
+
+        $.ajax({
+            url: form.attr('action'),
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: fd
+        }).done(function () {
+            toastr.success(messages.postReported);
+            YB.modal.closeAll();
+        }).fail(function (xhr) {
+            if (xhr.status == '418') {
+                YB.modal.closeAll();
+            } else {
+                $(event.target).html(oldHtml);
+            }
+        });
+    },
+    setChecked: function (postId) {
+        $.post('/scripts/mod/reports/setchecked', {'postId': postId}).done(function () {
+            toastr.success(messages.reportCleared);
+            YB.post.getElm(postId).remove();
+        });
+    }
+};
+
+// -------------------------------------------
+// LocalStorage wrappers
+// -------------------------------------------
+YB.localStorage = {
+    store: function (key, val) {
+        if (!this.isAvailable()) {
+            return false;
+        }
+
+        return localStorage.setItem(key, val);
+    },
+    get: function (key) {
+        if (!this.isAvailable()) {
+            return false;
+        }
+
+        return localStorage.getItem(key);
+    },
+    remove: function (key) {
+        if (!this.isAvailable()) {
+            return false;
+        }
+
+        return localStorage.removeItem(key);
+    },
+    isAvailable: function () {
+        if (typeof localStorage == 'undefined') {
+            toastr.warning(messages.oldBrowserWarning);
+
+            return false;
+        }
+
+        return true;
+    }
+};
 
 // -------------------------------------------
 // Post moderation
 // -------------------------------------------
-function openModMenu(elm, postId) {
-
-}
 $('.mod-menu').tooltipster({
-    content: loadingAnimation(),
+    content: YB.spinnerHtml(),
     side: 'bottom',
     animationDuration: 0,
     updateAnimation: null,
@@ -323,52 +637,6 @@ $('.mod-menu').tooltipster({
     }
 });
 
-function toggleThreadLock(id) {
-    var url, callback;
-    if ($t(id).find('h3 a .icon-lock').length == 0) {
-        url = '/scripts/threads/lock';
-        callback = function () {
-            $t(id).find('h3 a').prepend('<span class="icon-lock icon"></span>');
-            toastr.success(messages.threadLocked);
-        };
-    } else {
-        url = '/scripts/threads/unlock';
-        callback = function () {
-            $t(id).find('h3 a .icon-lock').remove();
-            toastr.success(messages.threadUnlocked);
-        };
-    }
-    updateThread(url, callback, id);
-}
-
-function toggleThreadSticky(id) {
-    var url, callback;
-    if ($t(id).find('h3 a .icon-pushpin').length == 0) {
-        url = '/scripts/threads/stick';
-        callback = function () {
-            $t(id).find('h3 a').prepend('<span class="icon-pushpin icon"></span>');
-            toastr.success(messages.threadStickied);
-        };
-    } else {
-        url = '/scripts/threads/unstick';
-        callback = function () {
-            $t(id).find('h3 a .icon-pushpin').remove();
-            toastr.success(messages.threadUnstickied);
-        };
-    }
-    updateThread(url, callback, id);
-}
-
-function updateThread(url, callback, id) {
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: {'thread_id': id}
-    }).done(function () {
-        callback();
-    });
-}
-
 function addBan(e) {
     e.preventDefault();
 
@@ -380,7 +648,7 @@ function addBan(e) {
     var fd = new FormData(e.target);
 
     var oldHtml = $(e.target).html();
-    $(e.target).html(loadingAnimation());
+    $(e.target).html(YB.spinnerHtml());
 
     $.ajax({
         url: e.target.getAttribute('target'),
@@ -396,96 +664,46 @@ function addBan(e) {
     });
 }
 
-function setReportChecked(postId)
-{
-    $.ajax({
-        url: '/scripts/mod/reports/setchecked',
-        type: "POST",
-        data: {'post_id': postId}
-    }).done(function () {
-        toastr.success(messages.reportCleared);
-        $p(postId).remove();
-    });
-}
-
 // -------------------------------------------
 // Notifications
 // -------------------------------------------
-function getNotifications() {
-    openModal('/scripts/notifications/get', false, false, function () {
-        updateUnreadNotificationCount($('.notifications-list .not-read').length);
-    });
-}
-
-function markNotificationRead(id, e) {
-    if (typeof e != 'undefined') {
-        e.preventDefault();
-    }
-
-    $('#n-' + id).removeClass('not-read').addClass('is-read');
-    $.ajax({
-        url: '/scripts/notifications/markread',
-        type: "POST",
-        data: {'id': id}
-    }).done(function() {
-        if (typeof e != 'undefined') {
-            window.location = e.target.getAttribute('href');
-        }
-    });
-
-    updateUnreadNotificationCount($('.notification.not-read').length);
-}
-
-function markAllNotificationsRead() {
-    $.ajax({
-        url: '/scripts/notifications/markallread',
-        type: "POST"
-    });
-
-    updateUnreadNotificationCount(0);
-}
-
-function updateUnreadNotificationCount(count) {
-    var elm = $('.unread-notifications');
-    elm.html(parseInt(count));
-
-    if (count == 0) {
-        elm.addClass('none');
-    } else {
-        elm.removeClass('none');
-    }
-}
-
-// -------------------------------------------
-// Thread inline expansion
-// -------------------------------------------
-function getMoreReplies(threadId) {
-    var thread = $t(threadId);
-    if (!thread.hasClass('expanded')) {
-        // Expand
-        thread.addClass('expanded', true);
-
-        var fromId = thread.find('.reply:first').attr('id').replace('post-', '');
-
-        $.ajax({
-            url: '/scripts/threads/getreplies',
-            type: "POST",
-            data: {
-                'thread_id': threadId,
-                'from_id': fromId
+YB.notifications = {
+    get: function () {
+        YB.modal.open('/scripts/notifications/get', {
+            'onAjaxComplete': function () {
+                this.updateUnreadCount($('.notifications-list .not-read').length);
             }
-        }).done(function (data) {
-            // Update timestamps
-            data = $(data);
-            data.find('.datetime').localizeTimestamp(this);
-
-            $t(threadId).find('.more-replies-container').html(data);
         });
-    } else {
-        // Contract
-        $t(threadId).removeClass('expanded').find('.more-replies-container').html('');
+    },
+    markRead: function (id, e) {
+        if (typeof e != 'undefined') {
+            e.preventDefault();
+        }
+
+        $('#n-' + id).removeClass('not-read').addClass('is-read');
+        $.post('/scripts/notifications/markread', {'id': id}).done(function () {
+            if (typeof e != 'undefined') {
+                window.location = e.target.getAttribute('href');
+            }
+        });
+
+        this.updateUnreadCount($('.notification.not-read').length);
+    },
+    markAllRead: function () {
+        $.post('/scripts/notifications/markallread');
+        this.updateUnreadCount(0);
+    },
+    updateUnreadCount: function (count) {
+        var elm = $('.unread-notifications');
+        elm.html(parseInt(count));
+
+        if (count == 0) {
+            elm.addClass('none');
+        } else {
+            elm.removeClass('none');
+        }
     }
-}
+};
 
 // -------------------------------------------
 // Thread ajax reply update
@@ -515,7 +733,7 @@ function getNewReplies(threadId, manual) {
         }
     }
 
-    var thread = $t(threadId);
+    var thread = YB.thread(threadId);
     var fromId = thread.find('.reply:last').attr('id');
     if (typeof fromId == 'undefined') {
         fromId = 0;
@@ -859,12 +1077,6 @@ $('#post-files').on('change', function (e) {
     });
 });
 
-function renderCaptcha() {
-    grecaptcha.render('post-form-captcha', {
-        'sitekey': config.reCaptchaPublicKey
-    });
-}
-
 var submitInProgress;
 function submitPost(e) {
     if (typeof e != 'undefined') {
@@ -915,7 +1127,7 @@ function submitPost(e) {
             toastr.success(messages.postSent);
             getNewReplies(thread, true);
         } else if (data.length == 0) {
-            pageReload();
+            YB.pageReload();
         } else {
             data = JSON.parse(data);
             if (typeof data.message == 'undefined') {
@@ -931,10 +1143,7 @@ function submitPost(e) {
         submitButton.removeAttr('disabled');
         submitInProgress = false;
 
-        // Reset captcha if present
-        if (typeof grecaptcha != 'undefined') {
-            grecaptcha.reset();
-        }
+        YB.captcha.reset();
     });
 }
 
@@ -953,112 +1162,6 @@ function updateProgressBar(elm, progress) {
 }
 
 // -------------------------------------------
-// Media player
-// -------------------------------------------
-function playMedia(elm, e) {
-    e.preventDefault();
-    stopAllMedia();
-
-    var link = $(elm);
-    var container = link.parent();
-    var post = container.parent('.message');
-    var img = link.find('img');
-
-    var fileId = container.data('id');
-
-    if (typeof link.data('loading') != 'undefined') {
-        return false;
-    }
-
-    link.data('loading', 'true');
-
-    var loading = setTimeout(function () {
-        img.after(loadingAnimation('overlay bottom left'));
-    }, 200);
-
-    $.ajax({
-        url: '/scripts/files/getmediaplayer',
-        type: "POST",
-        data: {'file_id': fileId}
-    }).done(function (xhr, textStatus, errorThrown) {
-
-        container.removeClass('thumbnail').addClass('media-player-container');
-        post.addClass('full');
-        container.prepend(xhr);
-
-        var volume = $.localStorage.get('videoVolume');
-        if (volume != null) {
-            container.find('video').prop('volume', volume);
-        }
-    }).always(function () {
-        clearTimeout(loading);
-        container.find('.loading').remove();
-        link.removeData('loading');
-    });
-}
-
-function stopAllMedia() {
-    $('.media-player-container').each(function () {
-        var self = $(this);
-        var mediaPlayer = self.find('.media-player');
-
-        mediaPlayer.find('video').trigger('pause');
-        mediaPlayer.remove();
-
-        self.removeClass('media-player-container').addClass('thumbnail');
-    });
-}
-
-// Volume save
-function saveVolume(elm) {
-    $.localStorage.store('videoVolume', $(elm).prop("volume"));
-}
-
-// -------------------------------------------
-// Expand images
-// -------------------------------------------
-function expandImage(elm, e) {
-    e.preventDefault();
-    var container = $(elm).parent();
-    var post = container.parent('.message');
-    var img = $(elm).find('img');
-
-    if (typeof img.data('expanding') != 'undefined') {
-        return true;
-    }
-
-    post.addClass('full');
-
-    if (typeof img.data('orig-src') == 'undefined') {
-        img.data('orig-src', img.attr('src'));
-        changeSrc(img, container.find('figcaption a').attr('href'));
-        container.removeClass('thumbnail');
-    } else {
-        changeSrc(img, img.data('orig-src'));
-        img.removeData('orig-src');
-        container.addClass('thumbnail');
-    }
-
-    // Scroll to top of image
-    var elmTop = container.offset().top;
-    if ($(document).scrollTop() > elmTop) {
-        $(document).scrollTop(elmTop);
-    }
-}
-
-function changeSrc(img, src) {
-    img.data('expanding', 'true');
-    var loading = setTimeout(function () {
-        img.after(loadingAnimation('overlay center'));
-    }, 200);
-    img.attr('src', src).on('load', function () {
-        img.removeData('expanding');
-        clearTimeout(loading);
-        img.parent().find('.loading').remove();
-    });
-}
-
-// -------------------------------------------
 // User profile related
 // -------------------------------------------
 function destroySession(sessionId) {
@@ -1070,102 +1173,6 @@ function destroySession(sessionId) {
         $('#' + sessionId).fadeOut();
     });
 }
-
-function changeUsername(e) {
-    e.preventDefault();
-
-    var form = $(e.target);
-    var newName = form.find('input[name="newname"]').val();
-    var password = form.find('input[name="password"]').val();
-
-    $.ajax({
-        url: form.attr('action'),
-        type: "POST",
-        data: {
-            'new_name': newName,
-            'password': password
-        }
-    }).done(function (xhr, textStatus, errorThrown) {
-        pageReload();
-    });
-}
-
-function changePassword(e) {
-    e.preventDefault();
-
-    var form = $(e.target);
-    var newPassword = form.find('input[name="newpass"]').val();
-    var newPasswordRe = form.find('input[name="newpassre"]').val();
-    var password = form.find('input[name="password"]').val();
-
-    if (newPassword != newPasswordRe) {
-        toastr.error(messages.passwordsDoNotMatch);
-        return false;
-    }
-
-    $.ajax({
-        url: form.attr('action'),
-        type: "POST",
-        data: {
-            'new_password': newPassword,
-            'password': password
-        }
-    }).done(function (xhr, textStatus, errorThrown) {
-        toastr.success(messages.passwordChanged);
-        e.target.reset();
-    });
-}
-
-// -------------------------------------------
-// Theme switcher
-// -------------------------------------------
-function switchThemeVariation() {
-    var css = $('.css:last');
-    var current = css.attr('href');
-    var variation = css.data('alt');
-
-    $('<link>').attr({
-        'rel': 'stylesheet',
-        'class': 'css',
-        'href': variation,
-        'data-alt': current
-    }).insertAfter(css);
-
-    var timeout = setTimeout(function () {
-        css.remove();
-    }, 2000);
-
-    $.ajax({
-        url: '/scripts/preferences/togglethemevariation',
-        type: "POST",
-    }).fail(function () {
-        clearTimeout(timeout);
-    });
-}
-function toggleHideSidebar() {
-    if ($('#hide-sidebar').is('*')) {
-        $('#hide-sidebar').remove();
-        $('#sidebar').removeClass('visible');
-    } else {
-        $('<link>').attr({
-            'rel': 'stylesheet',
-            'id': 'hide-sidebar',
-            'href': config.staticUrl + '/css/hide_sidebar.css',
-        }).appendTo('head');
-    }
-
-    $.ajax({
-        url: '/scripts/preferences/togglehidesidebar',
-        type: "POST"
-    });
-}
-
-// -------------------------------------------
-// Localize dates and numbers
-// -------------------------------------------
-$('.datetime').localizeTimestamp();
-$('.number').localizeNumber();
-$('.currency').localizeCurrency();
 
 // -------------------------------------------
 // Spoilers & reflinks
@@ -1187,9 +1194,9 @@ $('body:not(.board-catalog)')
         reflinkCreateTimeout = setTimeout(function () {
             e.preventDefault();
             var id = elm.data('id');
-            var content = loadingAnimation();
-            if ($p(id).is('*')) {
-                content = $p(id).html();
+            var content = YB.spinnerHtml();
+            if (YB.post(id).is('*')) {
+                content = YB.post(id).html();
             }
 
             elm.tooltipster({
@@ -1222,7 +1229,7 @@ $('body:not(.board-catalog)')
                         data.find('.datetime').localizeTimestamp(this);
 
                         instance.content(data);
-                    }).fail(function() {
+                    }).fail(function () {
                         instance.close();
                     });
                 }
@@ -1234,7 +1241,7 @@ $('body:not(.board-catalog)')
     })
     .on('click', ':not(.tooltipster-base) .reflink', function (e) {
         var id = $(this).data('id');
-        if ($p(id).is('*')) {
+        if (YB.post(id).is('*')) {
             e.preventDefault();
             window.location = window.location.href.split('#')[0] + '#post-' + id;
         }
@@ -1248,22 +1255,6 @@ $('.tooltip').tooltipster({
     animationDuration: 0,
     delay: 0,
     trigger: 'click'
-});
-
-// -------------------------------------------
-// Mobile menu
-// -------------------------------------------
-function toggleSidebar() {
-    $('#sidebar').toggleClass('visible');
-}
-$('#sidebar').click(function (e) {
-    if (e.offsetX > $('#sidebar').innerWidth()) {
-        toggleSidebar();
-    }
-});
-
-$('body >:not(#topbar):not(#sidebar)').on('click', function (e) {
-    $('#sidebar.visible').removeClass('visible');
 });
 
 // -------------------------------------------
@@ -1290,152 +1281,9 @@ function searchCatalog(word) {
 }
 
 // -------------------------------------------
-// Post higlighting
-// -------------------------------------------
-function highlightPost(id) {
-    $(id).addClass('highlighted');
-}
-function removeHighlights() {
-    $('.highlighted').removeClass('highlighted');
-}
-
-// -------------------------------------------
-// Window and body event bindings
-// -------------------------------------------
-$(window).on('beforeunload', function (e) {
-    return confirmUnload(e);
-}).on('hashchange load', function (e) {
-    if (e.type == 'hashchange') {
-        removeHighlights();
-    }
-    if (window.location.hash.length != 0) {
-        highlightPost(window.location.hash);
-        // Prevent posts going under the top bar
-        // FIXME: Hacky... Causes slight page jumping. Not good.
-        if ($('#topbar').is(':visible')) {
-            var post = $(window.location.hash);
-            $(window).scrollTop(post.offset().top - $('#topbar').height());
-        }
-    }
-}).on('keydown', function (e) {
-    // This brings down the server load quite a bit, as not everything is reloaded when pressing F5
-    if (e.which == 116 && !e.ctrlKey) { // F5
-        pageReload();
-        return false;
-    } else if (e.which == 82 && e.ctrlKey && !e.shiftKey) { // R
-        pageReload();
-        return false;
-    }
-});
-
-// -------------------------------------------
-// "Private" functions used by other functions
-// -------------------------------------------
-function pageReload() {
-    window.location = window.location.href.split('#')[0];
-}
-
-function returnToBoard() {
-    // Remove everything after the last slash and redirect
-    // Should work if we are in a thread, otherwise not really
-    var url = window.location.href;
-    url = url.substr(0, url.lastIndexOf('/') + 1);
-
-    window.location = url;
-}
-
-function ajaxError(xhr, textStatus, errorThrown) {
-    var errorMessage = getErrorMessage(xhr, errorThrown);
-
-    if (xhr.status == '418') {
-        toastr.info(errorMessage);
-    } else if (errorMessage.length != 0) {
-        toastr.error(errorMessage, messages.errorOccurred);
-    } else {
-        toastr.error(messages.errorOccurred);
-    }
-}
-
-function loadingAnimation(classes) {
-    if (typeof classes == 'undefined') {
-        classes = '';
-    } else {
-        classes += ' ';
-    }
-
-    return '<span class="' + classes + 'loading icon-loading spin"></span>';
-}
-
-function getSelectionText() {
-    var text = '';
-    if (window.getSelection) {
-        text = window.getSelection().toString();
-    } else if (document.selection && document.selection.type != "Control") {
-        text = document.selection.createRange().text;
-    }
-    return text;
-}
-
-function $t(id) {
-    return $('#thread-' + id);
-}
-
-function $p(id) {
-    return $('#post-' + id);
-}
-
-// -------------------------------------------
-// Confirm page exit when there's text in the post form
-// -------------------------------------------
-function confirmUnload() {
-    var textarea = $('#post-message');
-    if (!submitInProgress && textarea.is(':visible') && textarea.val().length != 0) {
-        return messages.confirmUnload;
-    } else {
-        e = null;
-    }
-}
-
-// -------------------------------------------
-// LocalStorage wrappers
-// -------------------------------------------
-$.localStorage = {
-    store: function(key, val) {
-        if (!this.isAvailable()) {
-            return false;
-        }
-
-        return localStorage.setItem(key, val);
-    },
-    get: function(key) {
-        if (!this.isAvailable()) {
-            return false;
-        }
-
-        return localStorage.getItem(key);
-    },
-    remove: function(key) {
-        if (!this.isAvailable()) {
-            return false;
-        }
-
-        return localStorage.removeItem(key);
-    },
-    isAvailable: function() {
-        if (typeof localStorage == 'undefined') {
-            toastr.warning(messages.oldBrowserWarning);
-
-            return false;
-        }
-
-        return true;
-    }
-};
-
-// -------------------------------------------
 // Modals
 // -------------------------------------------
-$.modal = {
+YB.modal = {
     open: function (url, options) {
         this.$body = $('body');
         this.$blocker = null;
@@ -1461,12 +1309,12 @@ $.modal = {
         // Bind close event
         $(document).off('keydown.modal').on('keydown.modal', function (e) {
             if (e.which == 27) {
-                $.modal.close();
+                YB.modal.close();
             }
         });
         this.$blocker.click(function (e) {
             if (e.target == this) {
-                $.modal.close();
+                YB.modal.close();
             }
         });
 
@@ -1474,7 +1322,7 @@ $.modal = {
         this.$blocker.append(this.$container);
         this.$elm = $('<div class="modal-content"></div>');
         this.$container.append(this.$elm);
-        this.$elm.html('<div class="modal-loading">' + loadingAnimation() + '</div>');
+        this.$elm.html('<div class="modal-loading">' + YB.spinnerHtml() + '</div>');
 
         var current = this.$elm;
         $.ajax({
@@ -1484,7 +1332,7 @@ $.modal = {
         }).done(function (html) {
             current.html(html);
         }).fail(function () {
-            $.modal.close();
+            YB.modal.close();
         });
     },
     close: function () {
@@ -1501,6 +1349,75 @@ $.modal = {
     }
 };
 
-$('body').on('click', '.modal-close', function() {
-    $.modal.close();
-});
+// -------------------------------------------
+// Window and body event bindings
+// -------------------------------------------
+$(window)
+
+// Confirm page exit when there's text in the post form
+// -------------------------------------------
+    .on('beforeunload', function (e) {
+        var textarea = $('#post-message');
+        if (!submitInProgress && textarea.is(':visible') && textarea.val().length != 0) {
+            return messages.confirmUnload;
+        } else {
+            e = null;
+        }
+    })
+
+    // Remove highlighted posts when hash is changed
+    // -------------------------------------------
+    .on('hashchange', function () {
+        YB.post.removeHighlights();
+    })
+
+    // Make F5 function like clicking links and thus not reloading everything
+    // -------------------------------------------
+    .on('keydown', function (e) {
+        if (e.which == 116 && !e.ctrlKey || e.which == 82 && e.ctrlKey && !e.shiftKey) { // F5 || CTRL + R
+            YB.pageReload();
+            return false;
+        }
+    });
+
+$('body')
+
+// Modal close
+// -------------------------------------------
+    .on('click', '.modal-close', function () {
+        YB.modal.close();
+    })
+
+    // Mobile menu
+    // -------------------------------------------
+    .on('click', '#sidebar', function (e) {
+        if (e.offsetX > $('#sidebar').innerWidth()) {
+            $('#sidebar').toggleClass('visible');
+        }
+    })
+    .on('click', '.sidebar-toggle', function () {
+        $('#sidebar').toggleClass('visible');
+    })
+    .on('click', '>:not(#topbar):not(#sidebar)', function () {
+        $('#sidebar.visible').removeClass('visible');
+    })
+
+    // Theme switcher
+    // -------------------------------------------
+    .on('click', '.switch-theme', function () {
+        YB.theme.switchVariation();
+    })
+
+    // AJAX forms
+    // -------------------------------------------
+    .on('submit', 'form.ajax', function (event) {
+        YB.submitForm(event);
+    })
+
+    // Sidebar signup
+    // -------------------------------------------
+    .on('click', '#login .signup', function (event) {
+        YB.signup(this, event);
+    });
+
+

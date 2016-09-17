@@ -19,7 +19,7 @@ return [
     '#^/preferences$#' => ['Preferences', 'index'],
     '#^/scripts/preferences/save$#' => ['Preferences', 'save'],
     '#^/scripts/preferences/togglethemevariation$#' => ['Preferences', 'toggleThemeVariation'],
-    '#^/scripts/preferences/togglehidesidebar$#' => ['Preferences', 'toggleHideSidebar'],
+    '#^/scripts/preferences/togglesidebar$#' => ['Preferences', 'toggleSidebar'],
 
     // User account related
     '#^/profile/(.+)?$#' => ['User', 'profile'],

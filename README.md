@@ -12,13 +12,11 @@ Requirements:
 ### Howto
 1. Clone the repository
    * PhpStorm can create a project automatically with VCS -> Checkout from Version Control
-2. Oh, but le fug! DB Schema is still missing from the project! You should figure it out now and place into schema.sql. Will be added later.
-3. Copy YBoard/Config/Database.sample.php to YBoard/Config/Database.php and edit as required
-4. Copy YBoard/Config/YBoard.sample.php to YBoard/Config/YBoard.php and edit as required
-5. Open a command prompt in the project root folder and run `vagrant up`
-6. After the (maybe lengthy) vagrant initialization, you can now `vagrant ssh`
-7. You can now open http://localhost:9001/ in your browser.
-    * But before that you should add some data to the database. Like boards.
+2. Copy YBoard/Config/Database.sample.php to YBoard/Config/Database.php and edit as required
+3. Copy YBoard/Config/YBoard.sample.php to YBoard/Config/YBoard.php and edit as required
+4. Open a command prompt in the project root folder and run `vagrant up`
+5. After the (maybe lengthy) vagrant initialization, you can now `vagrant ssh`
+6. You can now open http://localhost:9001/ in your browser.
 
 ### Usernames, passwords, paths, urls, etc.
 * Server username: root

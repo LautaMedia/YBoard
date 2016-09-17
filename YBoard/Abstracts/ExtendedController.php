@@ -301,8 +301,7 @@ abstract class ExtendedController extends Controller
 
     protected function ajaxCsrfValidationFail()
     {
-        HttpResponse::setStatusCode(401);
-        $this->jsonMessage(_('Your session has expired. Please refresh this page and try again.'), true);
+        $this->throwJsonError(401, _('Your session has expired. Please refresh this page and try again.'));
         $this->stopExecution();
     }
 }

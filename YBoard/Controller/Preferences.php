@@ -32,7 +32,7 @@ class Preferences extends ExtendedController
         $this->user->preferences->set('themeAlt', !$this->user->preferences->themeAlt);
     }
 
-    public function toggleHideSidebar()
+    public function toggleSidebar()
     {
         $this->validateAjaxCsrfToken();
         $this->user->preferences->set('hideSidebar', !$this->user->preferences->hideSidebar);

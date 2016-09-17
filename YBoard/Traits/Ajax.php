@@ -12,20 +12,33 @@ trait Ajax
         $this->stopExecution();
     }
 
-    protected function jsonMessage($str, $error = false)
+    protected function jsonPageReload(string $url = null)
     {
-        echo json_encode(['error' => $error, 'message' => $str]);
+        echo json_encode(['reload' => true, 'url' => $url]);
     }
 
-    protected function throwJsonError($statusCode, $message = false)
+    protected function jsonMessage(string $message, string $title = null, bool $reload = false, string $url = null)
     {
+        $args = [
+            'title' => $title,
+            'message' => $message,
+            'reload' => $reload,
+            'url' => $url,
+        ];
+
+        echo json_encode($args);
+    }
+
+    protected function throwJsonError(int $statusCode, string $message = null, string $title = null)
+    {
+        HttpResponse::setStatusCode($statusCode);
+
         if ($message) {
-            $this->jsonMessage($message, true);
+            $this->jsonMessage($message, $title);
         }
 
-        HttpResponse::setStatusCode($statusCode);
         $this->stopExecution();
     }
-    
+
     protected abstract function stopExecution();
 }

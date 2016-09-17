@@ -51,20 +51,20 @@ class User extends ExtendedController
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['new_name']) || empty($_POST['password'])) {
-            $this->throwJsonError(400);
+        if (empty($_POST['newName']) || empty($_POST['password'])) {
+            $this->throwJsonError(400, _('Please fill all of the required fields'));
         }
 
-        if (mb_strlen($_POST['new_name']) > $this->config['view']['usernameMaxLength']) {
+        if (mb_strlen($_POST['newName']) > $this->config['view']['usernameMaxLength']) {
             $this->throwJsonError(400, _('Username is too long'));
         }
 
-        if ($this->user->username == $_POST['new_name']) {
+        if ($this->user->username == $_POST['newName']) {
             $this->throwJsonError(400, _('This is your current username'));
         }
 
         $users = new Users($this->db);
-        if (!$users->usernameIsFree($_POST['new_name'])) {
+        if (!$users->usernameIsFree($_POST['newName'])) {
             $this->throwJsonError(400, _('This username is already taken, please choose another one'));
         }
 
@@ -72,33 +72,41 @@ class User extends ExtendedController
             $this->throwJsonError(401, _('Invalid password'));
         }
 
-        $this->user->setUsername($_POST['new_name']);
+        $this->user->setUsername($_POST['newName']);
+
+        $this->jsonPageReload();
     }
 
     public function changePassword()
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['new_password']) || empty($_POST['password'])) {
-            $this->throwJsonError(400);
+        if (empty($_POST['newPassword']) || empty($_POST['newPasswordAgain']) || empty($_POST['password'])) {
+            $this->throwJsonError(400, _('Please fill all of the required fields'));
+        }
+
+        if ($_POST['newPassword'] != $_POST['newPasswordAgain']) {
+            $this->throwJsonError(400, _('The two passwords do not match'));
         }
 
         if (!$this->user->validatePassword($_POST['password'])) {
             $this->throwJsonError(401, _('Invalid password'));
         }
 
-        $this->user->setPassword($_POST['new_password']);
+        $this->user->setPassword($_POST['newPassword']);
+
+        $this->jsonMessage(_('Password changed'));
     }
 
     public function destroySession()
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['session_id'])) {
+        if (empty($_POST['sessionId'])) {
             $this->throwJsonError(400);
         }
 
-        $sessionId = Text::filterHex($_POST['session_id']);
+        $sessionId = Text::filterHex($_POST['sessionId']);
 
         $userSessions = new UserSessions($this->db);
         $session = $userSessions->get($this->user->id, hex2bin($sessionId));
@@ -109,28 +117,28 @@ class User extends ExtendedController
 
     public function delete()
     {
-        $this->validatePostCsrfToken();
+        $this->validateAjaxCsrfToken();
 
         if (empty($_POST['password'])) {
-            $this->badRequest();
+            $this->throwJsonError(401, _('Please type your current password'));
+        }
+
+        if (empty($_POST['confirm'])) {
+            $this->throwJsonError(401, _('Please confirm the deletion'));
         }
 
         if (!$this->user->validatePassword($_POST['password'])) {
-            $this->unauthorized(_('User account not deleted'), _('Invalid password'));
+            $this->throwJsonError(401, _('Invalid password'));
         }
 
-        if (!empty($_POST['delete_posts'])) {
+        if (!empty($_POST['deletePosts'])) {
             $posts = new Posts($this->db);
             $posts->deleteByUser($this->user->id);
         }
 
-        try {
-            $this->user->delete();
-        } catch (UserException $e) {
-            $this->badRequest(_('User account not deleted'), $e->getMessage());
-        }
+        $this->user->delete();
 
         $this->deleteLoginCookie(false);
-        HttpResponse::redirectExit('/');
+        $this->jsonPageReload('/');
     }
 }

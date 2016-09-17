@@ -12,16 +12,16 @@ class Session extends ExtendedController
 {
     public function logIn()
     {
-        $this->validatePostCsrfToken();
+        $this->validateAjaxCsrfToken();
 
         if (empty($_POST['username']) || empty($_POST['password'])) {
-            $this->badRequest(_('Login failed'), _('Invalid username or password'));
+            $this->throwJsonError(401, _('Invalid username or password'), _('Login failed'));
         }
 
         $users = new Users($this->db);
         $newUser = $users->getByLogin($_POST['username'], $_POST['password']);
         if (!$newUser) {
-            $this->blockAccess(_('Login failed'), _('Invalid username or password'));
+            $this->throwJsonError(403, _('Invalid username or password'), _('Login failed'));
         }
 
         $this->user->session->destroy();
@@ -37,71 +37,61 @@ class Session extends ExtendedController
             $log->write(Log::ACTION_ID_MOD_LOGIN, $newUser->id);
         }
 
-        // Redirect
-        if (empty($_POST['redirto'])) {
-            HttpResponse::redirectExit('/');
-        } else {
-            HttpResponse::redirectExit(urldecode($_POST['redirto']));
-        }
+        $this->jsonPageReload();
     }
 
     public function logOut()
     {
-        $this->validatePostCsrfToken();
+        $this->validateAjaxCsrfToken();
 
         $destroySession = $this->user->session->destroy();
         if (!$destroySession) {
-            $this->dieWithError(_('What the!? Can\'t logout!?'));
+            $this->throwJsonError(500, _('What the!? Can\'t logout!?'));
         }
 
         $this->deleteLoginCookie();
-        HttpResponse::redirectExit('/');
+        $this->jsonPageReload();
     }
 
     public function signUp()
     {
-        $this->validatePostCsrfToken();
+        $this->validateAjaxCsrfToken();
 
         if ($this->user->loggedIn) {
-            $this->badRequest(_('Signup failed'), _('You are already logged in'));
+            $this->throwJsonError(400, _('You are already logged in'), _('Signup failed'));
         }
 
         if (empty($_POST['username']) || empty($_POST['password']) || empty($_POST['repassword'])) {
-            $this->badRequest(_('Signup failed'), _('Missing username or password'));
+            $this->throwJsonError(400, _('Missing username or password'), _('Signup failed'));
         }
 
         if ($_POST['password'] !== $_POST['repassword']) {
-            $this->badRequest(_('Signup failed'), _('The two passwords do not match'));
+            $this->throwJsonError(400, _('The two passwords do not match'), _('Signup failed'));
         }
 
         if ($this->user->requireCaptcha) {
             if (empty($_POST["g-recaptcha-response"])) {
-                $this->badRequest(_('Signup failed'), _('Please fill the CAPTCHA'));
+                $this->throwJsonError(400, _('Please fill the CAPTCHA'), _('Signup failed'));
             }
 
             $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['reCaptcha']['privateKey']);
             if (!$captchaOk) {
-                $this->badRequest(_('Signup failed'), _('Invalid CAPTCHA response, please try again'));
+                $this->throwJsonError(400, _('Invalid CAPTCHA response, please try again'), _('Signup failed'));
             }
         }
 
         if (mb_strlen($_POST['username']) > $this->config['view']['usernameMaxLength']) {
-            $this->badRequest(_('Signup failed'), _('Username is too long'));
+            $this->throwJsonError(400, _('Username is too long'), _('Signup failed'));
         }
 
         $users = new Users($this->db);
         if (!$users->usernameIsFree($_POST['username'])) {
-            $this->badRequest(_('Signup failed'), _('This username is already taken, please choose another one'));
+            $this->throwJsonError(400, _('This username is already taken, please choose another one'), _('Signup failed'));
         }
 
         $this->user->setUsername($_POST['username']);
         $this->user->setPassword($_POST['password']);
 
-        // Redirect
-        if (empty($_POST['redirto'])) {
-            HttpResponse::redirectExit('/');
-        } else {
-            HttpResponse::redirectExit(urldecode($_POST['redirto']));
-        }
+        $this->jsonPageReload();
     }
 }

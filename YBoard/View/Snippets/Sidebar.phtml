@@ -23,9 +23,7 @@
     <nav id="user">
         <?php if (!$user->loggedIn) : ?>
             <h3><?= _('Log in') ?></h3>
-            <form id="login" action="/scripts/session/login" data-signup="/scripts/session/signup" method="post">
-                <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
-                <input type="hidden" name="redirto" value="<?= htmlspecialchars(empty($redirTo)?$_SERVER['REQUEST_URI']:$redirTo) ?>">
+            <form id="login" class="ajax" action="/scripts/session/login" data-signup="/scripts/session/signup" method="post">
                 <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $usernameMaxLength ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
                 <div id="signup-form">
@@ -33,7 +31,7 @@
                     <div id="signup-captcha"></div>
                 </div>
                 <input type="submit" class="button primary" name="login" id="loginbutton" value="<?= _('Log_in') ?>">
-                <button onclick="signupForm(this, event)" class="button transparent" data-open="false"><?= _('Sign up') ?></button>
+                <button class="button transparent signup"><?= _('Sign up') ?></button>
             </form>
         <?php else : ?>
             <h3><?= htmlspecialchars($user->username) ?></h3>
@@ -59,10 +57,9 @@
             <?php endif ?>
             <a class="button square icon-user" href="/profile/" title="<?= _('Profile') ?>"></a>
             <a class="button square icon-cog" href="/preferences" title="<?= _('Preferences') ?>"></a>
-            <button class="button square icon-lamp" onclick="switchThemeVariation()" title="<?= _('Switch theme colors') ?>"></button>
+            <button class="button square icon-lamp switch-theme" title="<?= _('Switch theme colors') ?>"></button>
             <?php if ($user->loggedIn) : ?>
-                <form id="logout" action="/scripts/session/logout" method="post">
-                    <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                <form id="logout" class="ajax" action="/scripts/session/logout" method="post">
                     <button type="submit" class="button square icon-exit" title="<?= _('Log out') ?>"
                             onclick="if(!confirm(messages.logOutConfirm)){return false}"></button>
                 </form>

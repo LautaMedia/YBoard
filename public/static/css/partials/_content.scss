@@ -202,3 +202,31 @@ h4 {
         cursor: pointer;
     }
 }
+
+form.ajax {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+
+    .form-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        text-align: center;
+        background-color: rgba(0,0,0,0.5);
+
+        > div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            .loading {
+                font-size: 30px;
+                color: #fff;
+                vertical-align: top;
+            }
+        }
+    }
+}
