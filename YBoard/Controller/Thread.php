@@ -57,14 +57,14 @@ class Thread extends ExtendedController
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['thread_id']) || !isset($_POST['from_id'])) {
+        if (empty($_POST['threadId']) || !isset($_POST['fromId'])) {
             $this->throwJsonError(400);
         }
 
         $newest = empty($_POST['newest']) ? false : true;
 
         $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
+        $thread = $posts->getThread($_POST['threadId'], false);
         if ($thread === false) {
             $this->throwJsonError(404, _('Thread does not exist'));
         }
@@ -73,15 +73,15 @@ class Thread extends ExtendedController
 
         $view->thread = $thread;
         $view->board = $this->boards->getById($thread->boardId);
-        $view->replies = $thread->getReplies(null, $newest, $_POST['from_id']);
+        $view->replies = $thread->getReplies(null, $newest, $_POST['fromId']);
 
         $view->display('Ajax/ThreadExpand');
 
         // Clear unread count and update last seen reply
-        $followedThread = $this->user->threadFollow->get($_POST['thread_id']);
+        $followedThread = $this->user->threadFollow->get($_POST['threadId']);
         if ($followedThread !== false) {
             $followedThread->resetUnreadCount();
-            $followedThread->setLastSeenReply($_POST['from_id']);
+            $followedThread->setLastSeenReply($_POST['fromId']);
         }
     }
 
@@ -89,85 +89,77 @@ class Thread extends ExtendedController
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['thread_id'])) {
+        if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
+        $thread = $posts->getThread($_POST['threadId'], false);
         $thread->updateStats('hideCount');
 
-        $this->user->threadHide->add($_POST['thread_id']);
+        $this->user->threadHide->add($_POST['threadId']);
     }
 
     public function restore()
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['thread_id'])) {
+        if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
+        $thread = $posts->getThread($_POST['threadId'], false);
         $thread->updateStats('hideCount', -1);
 
-        $this->user->threadHide->remove($_POST['thread_id']);
+        $this->user->threadHide->remove($_POST['threadId']);
     }
 
     public function lock()
     {
-        $this->modOnly();
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['thread_id'])) {
-            $this->throwJsonError(400);
-        }
-
-        $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->setLocked(true);
+        $this->updateThread('lock', true);
     }
 
     public function unlock()
     {
-        $this->modOnly();
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['thread_id'])) {
-            $this->throwJsonError(400);
-        }
-
-        $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->setLocked(false);
+        $this->updateThread('lock', false);
     }
 
     public function stick()
     {
-        $this->modOnly();
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['thread_id'])) {
-            $this->throwJsonError(400);
-        }
-
-        $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->setSticky(true);
+        $this->updateThread('stick', true);
     }
 
     public function unstick()
     {
+        $this->updateThread('stick', false);
+    }
+
+    protected function updateThread(string $do, bool $bool)
+    {
         $this->modOnly();
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['thread_id'])) {
+        if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->setSticky(false);
+        $thread = $posts->getThread($_POST['threadId'], false);
+
+        if ($do == 'stick') {
+            if ($bool) {
+                $thread->setSticky(true);
+            } else {
+                $thread->setSticky(false);
+            }
+        } elseif ($do == 'lock') {
+
+            if ($bool) {
+                $thread->setLocked(true);
+            } else {
+                $thread->setLocked(false);
+            }
+        }
     }
 }

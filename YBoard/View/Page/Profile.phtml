@@ -66,7 +66,10 @@
                 <?php if ($session->id == $user->session->id) : ?>
                 <em><?= _('Current session') ?></em>
                 <?php else : ?>
-                <button class="button primary" onclick="destroySession('<?= bin2hex($session->id) ?>')"><?= _('Log out') ?></button>
+                <form action="/scripts/user/destroysession" class="sessiondestroy ajax" method="post">
+                    <input type="hidden" name="sessionId" value="<?= bin2hex($session->id) ?>">
+                    <button class="button primary"><?= _('Log out') ?></button>
+                </form>
                 <?php endif ?>
             </div>
         </div>
@@ -84,7 +87,7 @@
     </p>
     <p><strong><?= _('Please note that the deletion is permanent &mdash; all data associated with your account will be permanently lost and cannot be restored!') ?></strong></p>
 
-    <form action="/scripts/user/delete" method="post" class="ajax" onsubmit="if(!window.confirm('<?= _('Are you sure? You will lose everything. Everything!') ?>')){event.stopPropagation();return false;}">
+    <form action="/scripts/user/delete" method="post" class="ajax" onsubmit="if(!window.confirm('<?= _('Are you sure? You will lose everything. Everything!') ?>')){event.stopPropagation();return false}">
         <input type="password" name="password" placeholder="<?= _('Type your current password...') ?>" required>
         <label>
             <input type="checkbox" name="confirm" required>

@@ -113,6 +113,8 @@ class User extends ExtendedController
         if ($session !== false) {
             $session->destroy();
         }
+
+        $this->jsonMessage(_('Session destroyed'));
     }
 
     public function delete()

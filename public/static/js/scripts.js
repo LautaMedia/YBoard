@@ -285,7 +285,7 @@ YB.thread = {
             });
         } else {
             $.post('/scripts/threads/unlock', {'threadId': id}).done(function () {
-                YB.thread(id).find('h3 a .icon-lock').remove();
+                YB.thread.getElm(id).find('h3 a .icon-lock').remove();
                 toastr.success(messages.threadUnlocked);
             });
         }
@@ -708,143 +708,168 @@ YB.notifications = {
 // -------------------------------------------
 // Thread ajax reply update
 // -------------------------------------------
-// FIXME: PLEASE do this better. This sucks ass.
-var newReplies = 0;
-var lastUpdateNewReplies = 0;
-var updateCount = 0;
-var loadingReplies = false;
-var updateRunning = false;
-var nextUpdateTimeout = false;
-var documentTitle = document.title;
-function getNewReplies(threadId, manual) {
-    if (loadingReplies) {
-        return false;
-    }
+YB.thread.ajaxUpdate = {
+    threadId: false,
+    nextLoadDelay: 2000,
+    newReplies: 0,
+    lastUpdateNewReplies: 0,
+    runCount: 0,
+    nowLoading: false,
+    isActive: false,
+    nextRunTimeout: 0,
+    startDelayTimeout: 0,
+    originalDocTitle: document.title,
 
-    loadingReplies = true;
-    if (typeof manual == 'undefined') {
-        manual = false;
-    }
-    if (manual) {
-        updateCount = 0;
-        if (updateRunning) {
-            stopAutoUpdate();
-            startAutoUpdate();
+    run: function(manual) {
+        if (this.nowLoading) {
+            return false;
         }
-    }
 
-    var thread = YB.thread(threadId);
-    var fromId = thread.find('.reply:last').attr('id');
-    if (typeof fromId == 'undefined') {
-        fromId = 0;
-    } else {
-        fromId = fromId.replace('post-', '');
-    }
+        this.nextLoadDelay = this.nextLoadDelay * (this.runCount == 0 ? 1 : this.runCount);
+        if (this.nextLoadDelay > 30000) {
+            this.nextLoadDelay = 30000;
+        }
 
-    $.ajax({
-        url: '/scripts/threads/getreplies',
-        type: "POST",
-        data: {
-            'thread_id': threadId,
-            'from_id': fromId,
+        // Limit
+        if (this.runCount > 40) {
+            this.stop();
+        }
+
+        if (manual) {
+            this.runCount = 0;
+            if (this.isActive) {
+                this.restart();
+            }
+        }
+
+        var thread = YB.thread.getElm(this.threadId);
+        var fromId = thread.find('.reply:last').attr('id');
+        if (typeof fromId == 'undefined') {
+            fromId = 0;
+        } else {
+            fromId = fromId.replace('post-', '');
+        }
+
+        this.nowLoading = true;
+        var that = this;
+        $.post('/scripts/threads/getreplies', {
+            'threadId': this.threadId,
+            'fromId': fromId,
             'newest': true
-        }
-    }).done(function (data) {
-        if (manual && data.length == 0) {
-            toastr.info(messages.noNewReplies);
-        }
-        // Update timestamps
-        data = $(data);
-        data.find('.datetime').localizeTimestamp(this);
+        }).done(function (data) {
+            if (manual && data.length == 0) {
+                toastr.info(messages.noNewReplies);
+            }
+            // Update timestamps
+            data = $(data);
+            data.find('.datetime').localizeTimestamp(this);
 
-        lastUpdateNewReplies = data.find('.message').length;
-        newReplies += lastUpdateNewReplies;
+            that.lastUpdateNewReplies = data.find('.message').length;
+            that.newReplies += that.lastUpdateNewReplies;
 
-        data.appendTo(thread.find('.replies'));
-    }).fail(function () {
-        stopAutoUpdate();
-    }).always(function () {
-        setTimeout('loadingReplies = false', 100);
-        updateAutoUpdateVars();
-    });
-}
+            if (that.lastUpdateNewReplies == 0) {
+                ++that.runCount;
+            } else {
+                that.runCount = 0;
+            }
+
+            data.appendTo(thread.find('.replies'));
+
+            // Run again
+            if (!manual) {
+                that.nextRunTimeout = setTimeout(function () {
+                    that.start();
+                }, that.nextLoadDelay);
+            }
+        }).fail(function () {
+            that.stop();
+        }).always(function () {
+            that.nowLoading = false;
+
+            // Notify about new posts on title
+            if (!document.hasFocus() && that.newReplies > 0 && $('body').hasClass('thread-page')) {
+                document.title = '(' + that.newReplies + ') ' + that.originalDocTitle;
+                var replies = $('.replies');
+                replies.find('hr').remove();
+                replies.find('.reply:eq(-' + that.newReplies + ')').before('<hr>');
+            } else if (self.newReplies != 0) {
+                that.newReplies = 0;
+            }
+        });
+    },
+    runOnce: function(thread) {
+        this.threadId = thread;
+        this.run(true);
+    },
+    start: function() {
+        this.isActive = true;
+        if (this.startDelayTimeout) {
+            clearTimeout(this.startDelayTimeout);
+        }
+
+        var that = this;
+        this.threadId = $('.thread:first').data('id');
+        this.startDelayTimeout = setTimeout(function() {
+            that.run(false);
+        }, 1000);
+
+        return true;
+    },
+    stop: function() {
+        if (!this.isActive) {
+            return true;
+        }
+
+        if (this.startDelayTimeout) {
+            clearTimeout(this.startDelayTimeout);
+        }
+        this.isActive = false;
+
+        this.reset();
+        return true;
+    },
+    restart: function() {
+        this.stop();
+        this.start();
+    },
+    reset: function() {
+        this.nowLoading = false;
+        this.newReplies = 0;
+        this.runCount = 0;
+        if (document.title != this.originalDocTitle) {
+            document.title = this.originalDocTitle;
+        }
+
+        if (this.nextRunTimeout) {
+            clearTimeout(this.nextRunTimeout);
+        }
+    }
+};
 
 if ($('body').hasClass('thread-page')) {
-    var thread = $('.thread:first').data('id');
     $(window)
         .on('scroll', function () {
             var windowBottom = $(window).height() + $(window).scrollTop();
             var repliesBottom = $('.replies').offset().top + $('.replies').height();
             if (windowBottom > repliesBottom) {
-                if (!updateRunning && !$('#post-message').is(':focus')) {
-                    updateRunning = true;
-                    startAutoUpdate();
+                if (!$('#post-message').is(':focus')) {
+                    YB.thread.ajaxUpdate.start();
                 }
             } else {
-                if (updateRunning) {
-                    stopAutoUpdate();
-                    updateRunning = false;
-                }
+                YB.thread.ajaxUpdate.stop();
             }
         })
         .on('focus', function () {
-            newReplies = 0;
-            updateCount = 0;
-            if (document.title != documentTitle) {
-                document.title = documentTitle;
-            }
+            YB.thread.ajaxUpdate.reset();
         });
-    var startTimeout;
-    $('#post-message')
-        .on('focus', function () {
-            clearTimeout(startTimeout);
-            stopAutoUpdate();
+    // Stop when post form is focused
+    $('body')
+        .on('focus', '#post-message', function () {
+            YB.thread.ajaxUpdate.stop();
         })
-        .on('blur', function () {
-            startTimeout = setTimeout('startAutoUpdate()', 500);
+        .on('blur', '#post-message', function () {
+            YB.thread.ajaxUpdate.start();
         });
-}
-
-function updateAutoUpdateVars() {
-    if (lastUpdateNewReplies == 0) {
-        ++updateCount;
-    } else {
-        updateCount = 0;
-    }
-
-    // Notify about new posts on title
-    if (!document.hasFocus() && newReplies > 0 && $('body').hasClass('thread-page')) {
-        document.title = '(' + newReplies + ') ' + documentTitle;
-        var replies = $('.replies');
-        replies.find('hr').remove();
-        replies.find('.reply:eq(-' + newReplies + ')').before('<hr>');
-    } else if (newReplies != 0) {
-        newReplies = 0;
-    }
-}
-
-function startAutoUpdate() {
-    getNewReplies(thread);
-
-    var timeout = 2000;
-    timeout = timeout * (updateCount == 0 ? 1 : updateCount);
-    if (timeout > 30000) {
-        timeout = 30000;
-    }
-
-    // Limit
-    if (updateCount > 40) {
-        return false;
-    }
-
-    // Run again
-    nextUpdateTimeout = setTimeout(function () {
-        startAutoUpdate();
-    }, timeout);
-}
-
-function stopAutoUpdate() {
-    clearTimeout(nextUpdateTimeout);
 }
 
 // -------------------------------------------
@@ -1162,19 +1187,6 @@ function updateProgressBar(elm, progress) {
 }
 
 // -------------------------------------------
-// User profile related
-// -------------------------------------------
-function destroySession(sessionId) {
-    $.ajax({
-        url: '/scripts/user/destroysession',
-        type: "POST",
-        data: {'session_id': sessionId}
-    }).done(function (xhr, textStatus, errorThrown) {
-        $('#' + sessionId).fadeOut();
-    });
-}
-
-// -------------------------------------------
 // Spoilers & reflinks
 // -------------------------------------------
 var reflinkCreateTimeout;
@@ -1219,11 +1231,7 @@ $('body:not(.board-catalog)')
                 },
                 functionInit: function (instance, helper) {
                     var id = $(helper.origin).data('id');
-                    $.ajax({
-                        url: '/scripts/posts/get',
-                        type: "POST",
-                        data: {'post_id': id}
-                    }).done(function (data) {
+                    $.post('/scripts/posts/get', {'postId': id}).done(function (data) {
                         // Update timestamps
                         data = $(data);
                         data.find('.datetime').localizeTimestamp(this);
@@ -1353,9 +1361,8 @@ YB.modal = {
 // Window and body event bindings
 // -------------------------------------------
 $(window)
-
-// Confirm page exit when there's text in the post form
-// -------------------------------------------
+    // Confirm page exit when there's text in the post form
+    // -------------------------------------------
     .on('beforeunload', function (e) {
         var textarea = $('#post-message');
         if (!submitInProgress && textarea.is(':visible') && textarea.val().length != 0) {
@@ -1381,9 +1388,8 @@ $(window)
     });
 
 $('body')
-
-// Modal close
-// -------------------------------------------
+    // Modal close
+    // -------------------------------------------
     .on('click', '.modal-close', function () {
         YB.modal.close();
     })
@@ -1414,10 +1420,31 @@ $('body')
         YB.submitForm(event);
     })
 
-    // Sidebar signup
+    // Sidebar signup & hide
     // -------------------------------------------
     .on('click', '#login .signup', function (event) {
         YB.signup(this, event);
+    })
+    .on('click', '#sidebar-hide-button', function () {
+        YB.theme.toggleSidebar();
+    })
+
+    // Session management
+    // -------------------------------------------
+    .on('submit', 'form.sessiondestroy', function (event) {
+        var sessionId = $(event.target).find('input').val();
+        $('#' + sessionId).fadeOut();
+    })
+
+    // Notifications
+    // -------------------------------------------
+    .on('click', '.open-notifications', function () {
+        YB.notifications.get();
+    })
+
+    // Autoupdate
+    // -------------------------------------------
+    .on('click', '.get-replies', function () {
+        var threadId = $(this).closest('.thread').data('id');
+        YB.thread.ajaxUpdate.runOnce(threadId);
     });
-
-

@@ -1,5 +1,5 @@
 <div id="sidebar">
-    <button id="sidebar-hide-button" onclick="toggleHideSidebar()"></button>
+    <button id="sidebar-hide-button"></button>
     <nav id="main">
         <a href="/" id="logo">
             <img src="<?= $staticUrl ?>/img/norppa_ylilauta.svg" alt="<?= htmlspecialchars($siteName) ?>">
@@ -37,7 +37,7 @@
             <h3><?= htmlspecialchars($user->username) ?></h3>
         <?php endif ?>
         <div class="buttons">
-            <button onclick="getNotifications()" class="button square icon-alarm" title="<?= _('Notifications') ?>"
+            <button class="button square icon-alarm open-notifications" title="<?= _('Notifications') ?>"
             ><span class="unread-notifications unread-count red<?= ($user->notifications->unreadCount==0?' none':'') ?>"
                 ><?= $user->notifications->unreadCount ?></span></button>
             <a href="/followedthreads/" class="button square icon-bookmark2" title="<?= _('Followed threads') ?>"><?php
