@@ -17,7 +17,7 @@
             <button class="button square icon-bookmark-remove followbutton" onclick="unfollowThread(<?= $post->id ?>)" title="<?= _('Unfollow') ?>"></button>
         <?php endif ?>
     <?php endif ?>
-    <button class="button square icon-flag2" onclick="reportPost(this, <?= $post->id?>)" title="<?= _('Report') ?>"></button>
+    <button class="button square icon-flag2" onclick="reportPost(<?= $post->id?>)" title="<?= _('Report') ?>"></button>
 
     <?php if ($user->isMod) : ?>
         <button class="mod-menu button square icon-wrench" data-ip="<?= $post->ip ?>" data-uid="<?= $post->userId ?>"
@@ -32,7 +32,7 @@
             <button onclick="deletePost(<?= $post->id ?>)" class="button square icon-trash2" title="<?= _('Delete post') ?>"></button>
             <button onclick="toggleThreadSticky(<?= $post->id ?>)" class="button square icon-pushpin" title="<?= _('Toggle sticky') ?>"></button>
             <button onclick="toggleThreadLock(<?= $post->id ?>)" class="button square icon-lock" title="<?= _('Toggle lock') ?>"></button>
-            <button onclick="banForm(<?= $post->id ?>)" class="button square icon-prohibited" title="<?= _('Ban user') ?>"></button>
+            <button onclick="$.modal.open('/scripts/mod/banform', {postData: {postId: <?= $post->id ?>}})" class="button square icon-prohibited" title="<?= _('Ban user') ?>"></button>
         </div>
     <?php else : ?>
         <?php if ($post->userId != $user->id) : ?>

@@ -226,18 +226,20 @@ abstract class ExtendedController extends Controller
         if (!array_key_exists($this->user->preferences->theme, $this->config['view']['themes'])) {
             $this->user->preferences->reset('theme');
         }
-        if (!array_key_exists($this->user->preferences->themeVariation,
-            $this->config['view']['themes'][$this->user->preferences->theme]['css'])
-        ) {
-            $this->user->preferences->reset('themeVariation');
+        if ($this->user->preferences->themeAlt && !$this->config['view']['themes'][$this->user->preferences->theme]['altCss']) {
+            $this->user->preferences->reset('themeAlt');
         }
 
-        $stylesheet = $this->config['view']['themes'][$this->user->preferences->theme]['css'][$this->user->preferences->themeVariation];
-        $altStylesheets = json_encode($this->config['view']['themes'][$this->user->preferences->theme]['css']);
+        if ($this->user->preferences->themeAlt) {
+            $theme = $this->config['view']['themes'][$this->user->preferences->theme]['altCss'];
+            $altTheme = $this->config['view']['themes'][$this->user->preferences->theme]['css'];
+        } else {
+            $theme = $this->config['view']['themes'][$this->user->preferences->theme]['css'];
+            $altTheme = $this->config['view']['themes'][$this->user->preferences->theme]['altCss'];
+        }
 
-        $templateEngine->stylesheet = $stylesheet;
-        $templateEngine->stylesheetVariation = $this->user->preferences->themeVariation;
-        $templateEngine->altStylesheets = $altStylesheets;
+        $templateEngine->stylesheet = $theme;
+        $templateEngine->altStylesheet = $altTheme;
 
         $templateEngine->csrfToken = $this->user->session->csrfToken;
         $templateEngine->reCaptchaPublicKey = $this->config['reCaptcha']['publicKey'];

@@ -13,7 +13,7 @@
     <base href="<?= $baseUrl ?>">
 
     <link rel="stylesheet" class="css" href="<?= $staticUrl ?>/css/<?= $stylesheet ?>.css?<?=time()?>"
-        data-cur-alt="<?= $stylesheetVariation ?>" data-alt='<?= $altStylesheets ?>'>
+          data-alt="<?= $staticUrl ?>/css/<?= $altStylesheet ?>.css?<?=time()?>">
     <?php if ($user->preferences->hideSidebar) : ?>
     <link rel="stylesheet" id="hide-sidebar" href="<?= $staticUrl ?>/css/hide_sidebar.css">
     <?php endif ?>
@@ -23,7 +23,7 @@
     <script src="<?= $staticUrl ?>/js/jquery.min.js" defer></script>
     <script src="<?= $staticUrl ?>/js/toastr.min.js" defer></script>
     <script src="<?= $staticUrl ?>/js/tooltipster.min.js" defer></script>
-    <script src="<?= $staticUrl ?>/js/scripts.min.js?<?=time()?>" defer></script>
+    <script src="<?= $staticUrl ?>/js/scripts.js?<?=time()?>" defer></script>
 
     <script>
         <?php // TODO: Move to external file? (Pros: can cache, Cons: requires loading everything twice) ?>

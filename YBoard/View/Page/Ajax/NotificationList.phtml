@@ -1,39 +1,35 @@
-<div class="modal-content has-buttons">
-    <div class="notifications-list">
-        <h3><?= _('Notifications') ?></h3>
-        <?php if (empty($notifications)) : ?>
-        <p><?= _('You don\'t have any notifications...') ?></p>
-        <?php else : ?>
-        <?php foreach ($notifications as $notification) : ?>
-        <div class="notification <?= (!$notification->isRead?'not-read':'is-read') ?>" id="n-<?= $notification->id ?>">
-            <?php if (!empty($notification->postId)) : ?>
-                <a href="/scripts/posts/redirect/<?= $notification->postId ?>"
-                    <?php if (!$notification->isRead) :
-                        ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
-                    endif ?>>
-                    <?= htmlspecialchars(sprintf($notification->text, $notification->count)) ?>
-                </a>
-            <?php else : ?>
+<div class="notifications-list">
+    <h3><?= _('Notifications') ?></h3>
+    <?php if (empty($notifications)) : ?>
+    <p><?= _('You don\'t have any notifications...') ?></p>
+    <?php else : ?>
+    <?php foreach ($notifications as $notification) : ?>
+    <div class="notification <?= (!$notification->isRead?'not-read':'is-read') ?>" id="n-<?= $notification->id ?>">
+        <?php if (!empty($notification->postId)) : ?>
+            <a href="/scripts/posts/redirect/<?= $notification->postId ?>"
+                <?php if (!$notification->isRead) :
+                    ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
+                endif ?>>
                 <?= htmlspecialchars(sprintf($notification->text, $notification->count)) ?>
-            <?php endif ?>
-            <div class="notification-meta">
-                <span class="datetime"><?= $notification->time ?></span>
-                <?php if (!empty($notification->postId)) : ?>
-                    <a href="/scripts/posts/redirect/<?= $notification->postId ?>" class="reflink"
-                       <?php if (!$notification->isRead) :
-                           ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
-                        endif ?>
-                       data-id="<?= $notification->postId ?>">&gt;&gt;<?= $notification->postId ?></a>
-                <?php endif ?>
-            </div>
-            <?php if (!$notification->isRead) : ?>
-            <button class="mark-read icon-checkmark-circle" onclick="markNotificationRead(<?= $notification->id ?>)"></button>
+            </a>
+        <?php else : ?>
+            <?= htmlspecialchars(sprintf($notification->text, $notification->count)) ?>
+        <?php endif ?>
+        <div class="notification-meta">
+            <span class="datetime"><?= $notification->time ?></span>
+            <?php if (!empty($notification->postId)) : ?>
+                <a href="/scripts/posts/redirect/<?= $notification->postId ?>" class="reflink"
+                   <?php if (!$notification->isRead) :
+                       ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
+                    endif ?>
+                   data-id="<?= $notification->postId ?>">&gt;&gt;<?= $notification->postId ?></a>
             <?php endif ?>
         </div>
-        <?php endforeach ?>
+        <?php if (!$notification->isRead) : ?>
+        <button class="mark-read icon-checkmark-circle" onclick="markNotificationRead(<?= $notification->id ?>)"></button>
         <?php endif ?>
     </div>
-    <div class="modal-buttons">
-        <button class="button primary right close-modal" onclick="markAllNotificationsRead()"><?= _('Mark all as read') ?></button>
-    </div>
+    <?php endforeach ?>
+    <?php endif ?>
 </div>
+<button class="button primary right close-modal" onclick="markAllNotificationsRead()"><?= _('Mark all as read') ?></button>

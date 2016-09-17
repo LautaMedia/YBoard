@@ -3,7 +3,7 @@
 <?php if (!empty($reports)) : ?>
 <div class="catalog">
 <?php foreach ($reports as $report) : ?>
-<div class="thread-box report" id="post-<?= $report->postId ?>">
+<div class="thread-box report" data-id="<?= $report->postId ?>" id="post-<?= $report->postId ?>">
     <h4><?= htmlspecialchars($report->getReasonText()) ?></h4>
     <p class="additional-info"><?= htmlspecialchars($report->additionalInfo) ?></p>
     <div class="report-info">
@@ -17,8 +17,8 @@
     </div>
     <div class="buttons"
         ><button class="button primary" onclick="setReportChecked(<?= $report->postId ?>)"><?= _('Checked') ?></button
-        ><button class="button" onclick="deletePost(<?= $report->postId ?>)"><?= _('Delete post') ?></button
-        ><button class="button" onclick="banForm(<?= $report->postId ?>, true)"><?= _('Ban') ?></button
+        ><button class="button" class="delete-button" onclick="deletePost(<?= $report->postId ?>)"><?= _('Delete post') ?></button
+        ><button class="button" class="ban-button"><?= _('Ban') ?></button
     ></div>
 </div>
 <?php endforeach ?>
@@ -28,3 +28,15 @@
     <h3><?= _('No unchecked reports') ?></h3>
 </div>
 <?php endif ?>
+
+<script>
+$('.ban-button').on('click', function() {
+    var postId = this.closest('.report').data('id');
+    openModal('/scripts/mod/banform', {
+        'postData': {id: postId},
+        'onAjaxComplete': function() {
+            $p(postId).remove();
+        }
+    });
+});
+</script>

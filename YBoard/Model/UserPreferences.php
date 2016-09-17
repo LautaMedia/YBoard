@@ -7,7 +7,7 @@ use YBoard\Library\Database;
 class UserPreferences extends UserSubModel
 {
     public $theme = 'default';
-    public $themeVariation = 0;
+    public $themeAlt = false;
     public $locale = false;
     public $hideSidebar = false;
     public $threadsPerPage = 10;
@@ -25,7 +25,7 @@ class UserPreferences extends UserSubModel
 
     protected $keyToName = [
         1 => 'theme',
-        2 => 'themeVariation',
+        2 => 'themeAlt',
         3 => 'locale',
         4 => 'hideSidebar',
         5 => 'threadsPerPage',
@@ -69,6 +69,7 @@ class UserPreferences extends UserSubModel
 
         // Verify and filter values if needed
         switch ($key) {
+            case 2:
             case 4:
                 $value = (int)$value;
                 break;
@@ -137,12 +138,12 @@ class UserPreferences extends UserSubModel
             $value = $row->preferences_value;
 
             switch ($row->preferences_key) {
-                case 2:
                 case 5:
                 case 6:
                 case 7:
                     $value = (int)$value;
                     break;
+                case 2:
                 case 4:
                     $value = (bool)$value;
                     break;

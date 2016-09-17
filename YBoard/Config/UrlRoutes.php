@@ -18,7 +18,7 @@ return [
     // Preferences
     '#^/preferences$#' => ['Preferences', 'index'],
     '#^/scripts/preferences/save$#' => ['Preferences', 'save'],
-    '#^/scripts/preferences/setthemevariation$#' => ['Preferences', 'setThemeVariation'],
+    '#^/scripts/preferences/togglethemevariation$#' => ['Preferences', 'toggleThemeVariation'],
     '#^/scripts/preferences/togglehidesidebar$#' => ['Preferences', 'toggleHideSidebar'],
 
     // User account related

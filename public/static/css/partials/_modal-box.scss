@@ -1,124 +1,78 @@
-.modal-box {
-    $margin: 40px;
+.modal-container {
     position: fixed;
-    background-color: $contentBgColor;
-    overflow: hidden;
-    left: $margin !important;
-    top: $margin !important;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    z-index: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
 
-    &.full-modal {
-        $margin: 80px;
-        left: $margin !important;
-        top: $margin !important;
-        right: $margin;
-        bottom: $margin;
-        width: auto !important;
-        height: auto !important;
-        box-shadow: 0 0 0 $margin rgba(0, 0, 0, 0.4);
+    &.current {
+        background-color: rgba(0, 0, 0, 0.25);
     }
 
-    h3 {
-        margin-bottom: 10px;
-    }
-
-    .modal-content.has-buttons {
-        margin-bottom: 20px;
-    }
-
-    .close-modal-button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 30px;
-        height: 30px;
-        font-size: 10px;
-        border: 0;
-        color: $textColor;
-        padding: 0;
-        text-align: center;
-        $bg: darken($bgColor, 5%);
-        @if (lightness($bgColor) < 50) {
-            $bg: lighten($bgColor, 5%);
-        }
-        background-color: $bg;
-        cursor: pointer;
-
-        &:hover {
-            background-color: $red;
-            color: #ffffff;
-        }
-    }
-
-    .modal-content {
-        width: 100%;
+    &:before {
+        content: "";
+        display: inline-block;
         height: 100%;
+        vertical-align: middle;
+        margin-right: -0.05em;
     }
-
-    .modal-buttons {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 10px;
-        background-color: $contentBgColor;
-        overflow: hidden;
-
-        .right {
-            float: right;
-        }
-    }
-
-    @media (max-width: $mobileMaxWidth) {
-        min-width: 0;
-        max-height: none;
-        width: auto !important;
-        height: auto !important;
-        left: 0 !important;
-        top: $topMenuHeight !important;
-        right: 0 !important;
-        bottom: 0 !important;
+    &.behind {
+        background-color: transparent;
     }
 }
 
-.modal-form {
-    p {
-        margin: 0;
+.modal {
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    box-sizing: border-box;
+    width: 90%;
+    min-height: 150px;
+    background: #ffffff;
+    padding: 15px 30px;
+    box-shadow: 0 0 20px -5px black;
+    border: 1px solid $red;
+    text-align: left;
+
+    .modal-loading {
+        text-align: center;
+        .loading {
+            font-size: 32px;
+            margin: 10px auto;
+            display: inline-block;
+            text-align: center;
+        }
     }
 
-    label {
+    .modal-close {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        right: 0;
         display: block;
-        margin: 5px 0;
-    }
-
-    h4 {
-        margin-bottom: 5px;
-        &:not(:first-of-type) {
-            margin-top: 10px;
+        width: 40px;
+        height: 26px;
+        border: 0;
+        background: none;
+        &:focus {
+            outline: 0;
         }
-    }
-
-    select,
-    input[type="text"],
-    input[type="number"] {
-        width: 100%;
-        margin: 5px 0;
-        box-sizing: border-box;
-        padding: 5px;
-        $backgroundColor: #ffffff;
-        $borderColor: #cccccc;
-        @if (lightness($contentBgColor) < 50) {
-            $backgroundColor: #000000;
-            $borderColor: #333333;
+        &:hover {
+            color: #fff;
+            background-color: $red;
         }
-        background-color: $backgroundColor;
-        @include input-shadow($borderColor);
-    }
-
-    #report-extra-info {
-        margin: 10px 0;
-    }
-
-    #report-captcha {
-        min-height: 78px;
+        &:active {
+            color: #fff;
+            background-color: lighten($red, 10%);
+        }
     }
 }

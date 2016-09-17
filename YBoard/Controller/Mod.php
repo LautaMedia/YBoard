@@ -16,14 +16,14 @@ class Mod extends ExtendedController
         $this->modOnly();
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['post_id'])) {
+        if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
         $boards = new Boards($this->db);
 
-        $post = $posts->get($_POST['post_id'], false);
+        $post = $posts->get($_POST['postId'], false);
         if (!$post->threadId) {
             $thread = $post;
         } else {

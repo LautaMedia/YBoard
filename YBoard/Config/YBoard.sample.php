@@ -4,8 +4,8 @@ return [
     'view' => [
         'siteName' => 'YBoard devel',
         'siteMotto' => 'Ylis taas vauhdis',
-        'baseUrl' => '//example.com',
-        'staticUrl' => '//static.example.com',
+        'baseUrl' => '//localhost:9001',
+        'staticUrl' => '//localhost:9001/static',
         'uploadMaxSize' => 10485760,
         'maxPages' => 100,
         'maxCatalogPages' => 10,
