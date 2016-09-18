@@ -8,7 +8,7 @@ trait Ajax
     protected function invalidAjaxData()
     {
         HttpResponse::setStatusCode(400);
-        $this->jsonMessage(_('Invalid request'), true);
+        $this->jsonMessage(_('Invalid request'));
         $this->stopExecution();
     }
 

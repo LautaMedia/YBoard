@@ -203,15 +203,15 @@ var YB = {
 // -------------------------------------------
 YB.captcha = {
     render: function (elm, options) {
-        options = $.extend({
+        options = yQuery.extend({
             'sitekey': config.reCaptchaPublicKey
         }, options);
 
-        if (typeof grecaptcha == 'undefined' || !$('#' + elm).is('*')) {
+        if (typeof grecaptcha == 'undefined' || !document.getElementById(elm)) {
             return false;
         }
 
-        if ($('#' + elm).html().length != 0) {
+        if (!!document.getElementById(elm).innerHTML) {
             return true;
         }
         grecaptcha.render(elm, options);
@@ -392,7 +392,7 @@ YB.thread.follow = {
 // -------------------------------------------
 YB.post = {
     getElm: function (id) {
-        return $('#post-' + id);
+        return document.getElementById('post-' + id);
     },
     delete: function (id) {
         if (!confirm(messages.confirmDeletePost)) {
@@ -413,13 +413,17 @@ YB.post = {
                 toastr.success(messages.postDeleted);
             }
         });
-    }, // Post higlighting
+    },
+    // Post higlighting
     // -------------------------------------------
     highlight: function (id) {
-        this.getElm(id).addClass('highlighted');
+        this.getElm(id).classList.add('highlighted');
     },
     removeHighlights: function () {
-        $('.highlighted').removeClass('highlighted');
+        var elems = document.getElementsByClassName('highlighted');
+        while (elems.length) {
+            elems[0].classList.remove('highlighted');
+        }
     }
 };
 // File functions
@@ -434,32 +438,26 @@ YB.post.file = {
             this.getElm(id).find('figure').remove();
             toastr.success(messages.fileDeleted);
         });
-    }, // Expand images
+    },
+
+    // Expand images
     // -------------------------------------------
-    expandImage: function (elm, e) {
-        e.preventDefault();
-        var container = $(elm).parent();
-        var post = container.parent('.message');
+    expand: function (elm) {
+        var img = $(elm).find('img');
+        elm.parent('.message').addClass('full');
+
+        img.data('orig-src', img.attr('src'));
+        this.changeSrc(img, elm.find('figcaption a').attr('href'));
+        elm.removeClass('thumbnail');
+    },
+    restoreThumbnail: function (elm) {
         var img = $(elm).find('img');
 
-        if (typeof img.data('expanding') != 'undefined') {
-            return true;
-        }
-
-        post.addClass('full');
-
-        if (typeof img.data('orig-src') == 'undefined') {
-            img.data('orig-src', img.attr('src'));
-            this.changeSrc(img, container.find('figcaption a').attr('href'));
-            container.removeClass('thumbnail');
-        } else {
-            this.changeSrc(img, img.data('orig-src'));
-            img.removeData('orig-src');
-            container.addClass('thumbnail');
-        }
+        this.changeSrc(img, img.data('orig-src'));
+        elm.addClass('thumbnail');
 
         // Scroll to top of image
-        var elmTop = container.offset().top;
+        var elmTop = elm.offset().top;
         if ($(document).scrollTop() > elmTop) {
             $(document).scrollTop(elmTop);
         }
@@ -467,51 +465,48 @@ YB.post.file = {
     changeSrc: function (img, src) {
         img.data('expanding', 'true');
         var loading = setTimeout(function () {
-            img.after(YB.spinnerHtml('overlay center'));
+            img.after('<div class="overlay center">' + YB.spinnerHtml() + '</div>');
         }, 200);
         img.attr('src', src).on('load', function () {
             img.removeData('expanding');
             clearTimeout(loading);
-            img.parent().find('.loading').remove();
+            img.next('div.overlay').remove();
         });
     },
 
     // Media player
     // -------------------------------------------
-    playMedia: function (elm, e) {
-        e.preventDefault();
+    playMedia: function (elm) {
         this.stopAllMedia();
 
-        var link = $(elm);
-        var container = link.parent();
-        var post = container.parent('.message');
-        var img = link.find('img');
+        var post = elm.parent('.message');
+        var img = elm.find('img');
 
-        var fileId = container.data('id');
+        var fileId = elm.data('id');
 
-        if (typeof link.data('loading') != 'undefined') {
+        if (typeof elm.data('loading') != 'undefined') {
             return false;
         }
 
-        link.data('loading', 'true');
+        elm.data('loading', 'true');
 
         var loading = setTimeout(function () {
-            img.after(YB.spinnerHtml('overlay bottom left'));
+            img.after('<div class="overlay bottom left">' + YB.spinnerHtml() + '</div>');
         }, 200);
 
         $.post('/scripts/files/getmediaplayer', {'fileId': fileId}).done(function (data) {
-            container.removeClass('thumbnail').addClass('media-player-container');
+            elm.removeClass('thumbnail').addClass('media-player-container');
             post.addClass('full');
-            container.prepend(data);
+            elm.prepend(data);
 
             var volume = YB.localStorage.get('videoVolume');
             if (volume != null) {
-                container.find('video').prop('volume', volume);
+                elm.find('video').prop('volume', volume);
             }
         }).always(function () {
             clearTimeout(loading);
-            container.find('.loading').remove();
-            link.removeData('loading');
+            elm.find('div.overlay').remove();
+            elm.removeData('loading');
         });
     },
     stopAllMedia: function () {
@@ -961,7 +956,7 @@ YB.postForm = {
         this.msgElm.insertAtCaret('[' + code + ']', '[/' + code + ']');
     },
     toggleBbColorBar: function () {
-        this.elm.find('#color-buttons').toggle();
+        this.elm.getElementById('color-buttons').toggle();
         this.msgElm.focus();
     },
     uploadFile: function () {
@@ -1196,8 +1191,8 @@ $('body:not(.board-catalog)')
             e.preventDefault();
             var id = elm.data('id');
             var content = YB.spinnerHtml();
-            if (YB.post(id).is('*')) {
-                content = YB.post(id).html();
+            if (YB.post.getElm(id) != null) {
+                content = YB.post.getElm(id).innerHTML;
             }
 
             elm.tooltipster({
@@ -1238,7 +1233,7 @@ $('body:not(.board-catalog)')
     })
     .on('click', ':not(.tooltipster-base) .reflink', function (e) {
         var id = $(this).data('id');
-        if (YB.post(id).is('*')) {
+        if (YB.post.getElm(id) != null) {
             e.preventDefault();
             window.location = window.location.href.split('#')[0] + '#post-' + id;
         }
@@ -1346,134 +1341,333 @@ YB.modal = {
     }
 };
 
+var yQuery = {
+    on: function (eventName, target, fn) {
+        document.addEventListener(eventName, function(event) {
+            if (!target || event.target.matches(target)) {
+                fn(event);
+            }
+        });
+
+        return this;
+    },
+    extend: function () {
+        for (var i = 1; i < arguments.length; i++) {
+            for (var key in arguments[i]) {
+                if (arguments[i].hasOwnProperty(key)) {
+                    arguments[0][key] = arguments[i][key];
+                }
+            }
+        }
+        return arguments[0];
+    },
+    get: function (url, options) {
+        options = this.extend({
+            'method': 'GET',
+            'url': url
+        }, options);
+
+        return this.ajax(options);
+    },
+    post: function (url, data, options) {
+        options = this.extend({
+            'method': 'POST',
+            'url': url,
+            'data': data
+        }, options);
+
+        return this.ajax(options);
+    },
+    ajax: function(options) {
+        var that = this;
+
+        options = this.extend({
+            'method': 'GET',
+            'url': '',
+            'data': null,
+            'timeout': 3000,
+            'contentType': 'application/x-www-form-urlencoded'
+        }, options);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open(options.method, options.url);
+        xhr.timeout = options.timeout;
+
+        xhr.setRequestHeader('Cache-Control', 'no-cache');
+        if (options.contentType) {
+            xhr.setRequestHeader('Content-Type', options.contentType);
+        }
+        xhr.setRequestHeader('X-CSRF-Token', config.csrfToken);
+
+        // Event handlers
+        this.done = function(fn) {
+            xhr.addEventListener('load', function() {
+                if (xhr.status == 200) {
+                    fn(xhr.statusCode, xhr.responseText);
+                }
+            });
+
+            return that;
+        };
+        this.error = function(fn) {
+            xhr.addEventListener('loadend', function() {
+                if (xhr.status != 200) {
+                    fn(xhr.statusCode, xhr);
+                }
+            });
+
+            return that;
+        };
+        this.always = function(fn) {
+            xhr.addEventListener('loadend', function() {
+                fn(xhr.statusCode, xhr);
+            });
+
+            return that;
+        };
+
+        xhr.addEventListener('timeout', function () {
+            toastr.error(messages.timeoutWarning, messages.errorOccurred);
+        });
+
+        xhr.send(options.data);
+
+        return this;
+    }
+};
+
 // -------------------------------------------
 // Window and body event bindings
 // -------------------------------------------
-$(window)
+yQuery
+
 // Confirm page exit when there's text in the post form
 // -------------------------------------------
-    .on('beforeunload', function (e) {
-        var textarea = $('#post-message');
-        if (!YB.postForm.submitInProgress && textarea.is(':visible') && textarea.val().length != 0) {
-            return messages.confirmUnload;
-        } else {
-            e = null;
-        }
-    })
+.on('beforeunload', false, function (e) {
+    var textarea = $('#post-message');
+    if (!YB.postForm.submitInProgress && textarea.is(':visible') && textarea.val().length != 0) {
+        return messages.confirmUnload;
+    } else {
+        e = null;
+    }
+})
 
-    // Remove highlighted posts when hash is changed
-    // -------------------------------------------
-    .on('hashchange', function () {
-        YB.post.removeHighlights();
-    })
+// Remove highlighted posts when hash is changed
+// -------------------------------------------
+.on('hashchange', false, function () {
+    YB.post.removeHighlights();
+})
 
-    // Make F5 function like clicking links and thus not reloading everything
-    // -------------------------------------------
-    .on('keydown', function (e) {
-        if (!e.ctrlKey && !e.shiftKey && e.which == 116 || e.ctrlKey && !e.shiftKey && e.which == 82) { // F5 || CTRL + R
-            YB.pageReload();
-            return false;
-        }
-        if (e.ctrlKey && e.which == 13) {
-            YB.postForm.submit(e);
-        }
-    });
+// Make F5 function like clicking links and thus not reloading everything
+// -------------------------------------------
+.on('keydown', false, function (e) {
+    if (!e.ctrlKey && !e.shiftKey && e.which == 116 || e.ctrlKey && !e.shiftKey && e.which == 82) { // F5 || CTRL + R
+        YB.pageReload();
+        return false;
+    }
+    if (e.ctrlKey && e.which == 13) {
+        YB.postForm.submit(e);
+    }
+})
 
-$('body')
+.on('click', '#post-form .bb-code', function () {
+    YB.postForm.insertBbCode(event.target.dataset.code);
+})
 // Modal close
 // -------------------------------------------
-    .on('click', '.modal-close', function () {
-        YB.modal.close();
-    })
+.on('click', '.modal-close', function () {
+    YB.modal.close();
+})
 
-    // Mobile menu
-    // -------------------------------------------
-    .on('click', '#sidebar', function (e) {
-        if (e.offsetX > $('#sidebar').innerWidth()) {
-            $('#sidebar').toggleClass('visible');
+// Mobile menu
+// -------------------------------------------
+.on('click', '#sidebar', function (e) {
+    if (e.offsetX > document.getElementById('sidebar').clientWidth) {
+        document.getElementById('sidebar').classList.toggle('visible');
+    }
+})
+.on('click', '.sidebar-toggle', function () {
+    document.getElementById('sidebar').classList.toggle('visible');
+})
+.on('click', 'body >:not(#topbar):not(#sidebar)', function () {
+    document.getElementById('sidebar').classList.remove('visible');
+})
+
+// Theme switcher
+// -------------------------------------------
+.on('click', '.switch-theme', function () {
+    YB.theme.switchVariation();
+})
+
+// AJAX forms
+// -------------------------------------------
+.on('submit', 'form.ajax', function (event) {
+    YB.submitForm(event);
+})
+
+// Sidebar signup & hide
+// -------------------------------------------
+.on('click', '#login .signup', function (event) {
+    YB.signup(this, event);
+})
+.on('click', '#sidebar-hide-button', function () {
+    YB.theme.toggleSidebar();
+})
+
+// Session management
+// -------------------------------------------
+.on('submit', 'form.sessiondestroy', function (event) {
+    var sessionId = $(event.target).find('input').val();
+    document.getElementById(sessionId).remove();
+})
+
+// Notifications
+// -------------------------------------------
+.on('click', '.open-notifications', function () {
+    YB.notifications.get();
+})
+
+// Autoupdate
+// -------------------------------------------
+.on('click', '.get-replies', function () {
+    var threadId = $(this).closest('.thread').data('id');
+    YB.thread.ajaxUpdate.runOnce(threadId);
+})
+
+// Post files
+// -------------------------------------------
+.on('click', '.post figure.thumbnail .image', function (event) {
+    if (event.ctrlKey || event.altKey) {
+        return true;
+    }
+    event.preventDefault();
+    YB.post.file.expand($(this).parent('figure'));
+})
+.on('click', '.post figure:not(.thumbnail) .image', function (event) {
+    if (event.ctrlKey || event.altKey) {
+        return true;
+    }
+    event.preventDefault();
+    YB.post.file.restoreThumbnail($(this).parent('figure'));
+})
+
+.on('click', '.post figure.thumbnail .media', function (event) {
+    if (event.ctrlKey || event.altKey) {
+        return true;
+    }
+    event.preventDefault();
+    YB.post.file.playMedia($(this).parent('figure'));
+})
+.on('click', '.stop-media', function (event) {
+    event.preventDefault();
+    YB.post.file.stopAllMedia();
+})
+
+// The post form
+// -------------------------------------------
+.on('click', '.add-post-reply', function (event) {
+    event.preventDefault();
+    YB.postForm.postReply(event.target.closest('.post').dataset.id);
+    document.getElementById('post-message').focus();
+})
+.on('click', '.create-thread', function () {
+    YB.postForm.show();
+})
+.on('click', '.add-reply', function (event) {
+    YB.postForm.threadReply(event.target.closest('.thread').dataset.id);
+})
+.on('change', '#post-form #post-files', function () {
+    YB.postForm.uploadFile();
+})
+.on('click', '#post-form #remove-file', function () {
+    YB.postForm.removeFile();
+})
+.on('click', '#post-form .bb-color-bar', function () {
+    YB.postForm.toggleBbColorBar();
+})
+.on('click', '#post-form .toggle-options', function (event) {
+    event.preventDefault();
+    document.getElementById('post-options').toggle();
+})
+.on('click', '#post-form #reset-button', function (event) {
+    event.preventDefault();
+    YB.postForm.reset();
+})
+.on('submit', '#post-form', function (event) {
+    YB.postForm.submit(event);
+});
+
+Element.prototype.toggle = function() {
+    if (window.getComputedStyle(this).display == 'block') {
+        this.style.display = 'none';
+    } else {
+        this.style.display = 'block';
+    }
+};
+Element.prototype.remove = function() {
+    this.parentElement.removeChild(this);
+};
+
+NodeList.prototype.forEach = Array.prototype.forEach;
+
+/*
+
+ error: function (xhr, textStatus, errorThrown) {
+ var errorMessage = errorThrown;
+ var errorTitle = messages.errorOccurred;
+ if (errorThrown.length == 0 && xhr.readyState == 0 && xhr.status == 0) {
+ errorMessage = messages.networkError;
+ } else if (errorThrown == 'timeout') {
+ errorMessage = messages.timeoutWarning;
+ } else {
+ try {
+ var text = JSON.parse(xhr.responseText);
+ errorMessage = text.message;
+ if (typeof text.title != 'undefined' && text.title != null && text.title.length != 0) {
+ errorTitle = text.title;
+ }
+ } catch (e) {
+ errorMessage = xhr.status + ' ' + errorThrown;
+ }
+ }
+
+ if (xhr.status == '418') {
+ toastr.info(errorMessage);
+ } else {
+ toastr.error(errorMessage, errorTitle);
+ }
+ }
+ */
+
+// -------------------------------------------
+// Polyfills
+// -------------------------------------------
+if (typeof Element.prototype.matches !== 'function') {
+    Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || function matches(selector) {
+        var element = this;
+        var elements = (element.document || element.ownerDocument).querySelectorAll(selector);
+        var index = 0;
+
+        while (elements[index] && elements[index] !== element) {
+            ++index;
         }
-    })
-    .on('click', '.sidebar-toggle', function () {
-        $('#sidebar').toggleClass('visible');
-    })
-    .on('click', '>:not(#topbar):not(#sidebar)', function () {
-        $('#sidebar.visible').removeClass('visible');
-    })
 
-    // Theme switcher
-    // -------------------------------------------
-    .on('click', '.switch-theme', function () {
-        YB.theme.switchVariation();
-    })
+        return Boolean(elements[index]);
+    };
+}
 
-    // AJAX forms
-    // -------------------------------------------
-    .on('submit', 'form.ajax', function (event) {
-        YB.submitForm(event);
-    })
+if (typeof Element.prototype.closest !== 'function') {
+    Element.prototype.closest = function closest(selector) {
+        var element = this;
 
-    // Sidebar signup & hide
-    // -------------------------------------------
-    .on('click', '#login .signup', function (event) {
-        YB.signup(this, event);
-    })
-    .on('click', '#sidebar-hide-button', function () {
-        YB.theme.toggleSidebar();
-    })
+        while (element && element.nodeType === 1) {
+            if (element.matches(selector)) {
+                return element;
+            }
 
-    // Session management
-    // -------------------------------------------
-    .on('submit', 'form.sessiondestroy', function (event) {
-        var sessionId = $(event.target).find('input').val();
-        $('#' + sessionId).fadeOut();
-    })
+            element = element.parentNode;
+        }
 
-    // Notifications
-    // -------------------------------------------
-    .on('click', '.open-notifications', function () {
-        YB.notifications.get();
-    })
-
-    // Autoupdate
-    // -------------------------------------------
-    .on('click', '.get-replies', function () {
-        var threadId = $(this).closest('.thread').data('id');
-        YB.thread.ajaxUpdate.runOnce(threadId);
-    })
-
-    // The post form
-    // -------------------------------------------
-    .on('click', '.add-post-reply', function (event) {
-        event.preventDefault();
-        YB.postForm.postReply($(this).closest('.post').data('id'));
-        $('#post-message').focus();
-    })
-    .on('click', '.create-thread', function () {
-        YB.postForm.show();
-    })
-    .on('click', '.add-reply', function () {
-        YB.postForm.threadReply($(this).closest('.thread').data('id'));
-    })
-    .on('change', '#post-form #post-files', function () {
-        YB.postForm.uploadFile();
-    })
-    .on('click', '#post-form #remove-file', function () {
-        YB.postForm.removeFile();
-    })
-    .on('click', '#post-form .bb-code', function () {
-        YB.postForm.insertBbCode($(this).data('code'));
-    })
-    .on('click', '#post-form .bb-color-bar', function () {
-        YB.postForm.toggleBbColorBar();
-    })
-    .on('click', '#post-form .toggle-options', function (event) {
-        event.preventDefault();
-        $('#post-options').toggle();
-    })
-    .on('click', '#post-form #reset-button', function (event) {
-        event.preventDefault();
-        YB.postForm.reset();
-    })
-    .on('submit', '#post-form', function (event) {
-        YB.postForm.submit(event);
-    });
+        return null;
+    };
+}

@@ -43,12 +43,12 @@ class File Extends ExtendedController
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['file_id'])) {
+        if (empty($_POST['fileId'])) {
             $this->invalidAjaxData();
         }
 
         $files = new Files($this->db);
-        $file = $files->get($_POST['file_id']);
+        $file = $files->get($_POST['fileId']);
 
         if ($file === false) {
             $this->throwJsonError(404);

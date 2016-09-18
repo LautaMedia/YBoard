@@ -22,7 +22,7 @@
     <?php $fileUrl = $staticUrl . '/files/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
     <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>">
         <?php if (in_array($post->file->extension, ['m4a', 'mp4'])) : ?>
-            <a href="<?= $fileUrl ?>" onclick="playMedia(this, event)">
+            <a href="<?= $fileUrl ?>" class="media" target="_blank">
                 <?php if ($post->file->hasThumbnail) : ?>
                 <img src="<?= $staticUrl ?>/files/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
                 <?php else : ?>
@@ -39,9 +39,9 @@
                     <?php endif ?>
                 <?php endif ?>
             </a>
-            <button class="button primary stop-media" onclick="stopAllMedia()"><?= _('Hide media') ?></button>
+            <button class="button primary stop-media"><?= _('Hide media') ?></button>
         <?php else : ?>
-            <a href="<?= $fileUrl ?>" onclick="expandImage(this, event)">
+            <a href="<?= $fileUrl ?>" class="image" target="_blank">
                 <img src="<?= $staticUrl ?>/files/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
             </a>
         <?php endif ?>
