@@ -24,12 +24,12 @@ class Post extends ExtendedController
     {
         $this->validateAjaxCsrfToken();
 
-        if (empty($_POST['post_id'])) {
+        if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
-        $post = $posts->get($_POST['post_id']);
+        $post = $posts->get($_POST['postId']);
         if ($post === false) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
@@ -330,12 +330,12 @@ class Post extends ExtendedController
     public function delete()
     {
         $this->validateAjaxCsrfToken();
-        if (empty($_POST['post_id'])) {
+        if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
 
         $posts = new Posts($this->db);
-        $post = $posts->get($_POST['post_id'], false);
+        $post = $posts->get($_POST['postId'], false);
         if ($post === false) {
             $this->throwJsonError(404, _('Post does not exist'));
         }

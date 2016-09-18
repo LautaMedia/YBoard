@@ -1,6 +1,6 @@
 <div class="post-buttons">
     <?php if (!$thread->locked || $user->isMod) : ?>
-        <button class="button square icon-bubbles" onclick="replyToPost(<?= $post->id ?>)" title="<?= _('Reply') ?>"></button>
+        <button class="button square icon-bubbles add-post-reply" title="<?= _('Reply') ?>"></button>
     <?php endif ?>
     <!--
     <a href="#"><?= _('Donate gold') ?></a>

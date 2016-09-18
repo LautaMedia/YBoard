@@ -399,8 +399,9 @@ YB.post = {
             return false;
         }
 
+        var that = this;
         $.post('/scripts/posts/delete', {'postId': id}).done(function () {
-            this.getElm(id).remove();
+            that.getElm(id).remove();
             if ($('body').hasClass('thread-page')) {
                 if (YB.thread.getElm(id).is('*')) {
                     // We're in the thread we just deleted
@@ -1369,9 +1370,12 @@ $(window)
     // Make F5 function like clicking links and thus not reloading everything
     // -------------------------------------------
     .on('keydown', function (e) {
-        if (e.which == 116 && !e.ctrlKey || e.which == 82 && e.ctrlKey && !e.shiftKey) { // F5 || CTRL + R
+        if (!e.ctrlKey && !e.shiftKey && e.which == 116 || e.ctrlKey && !e.shiftKey && e.which == 82) { // F5 || CTRL + R
             YB.pageReload();
             return false;
+        }
+        if (e.ctrlKey && e.which == 13) {
+            YB.postForm.submit(e);
         }
     });
 
@@ -1439,16 +1443,16 @@ $('body')
 
     // The post form
     // -------------------------------------------
-    .on('click', '.post-id', function () {
-        var postId = $(this).closest('.post').data('id');
-        YB.postForm.postReply(postId);
+    .on('click', '.add-post-reply', function (event) {
+        event.preventDefault();
+        YB.postForm.postReply($(this).closest('.post').data('id'));
         $('#post-message').focus();
     })
-    .on('click', '.create-thread, .add-reply', function () {
+    .on('click', '.create-thread', function () {
         YB.postForm.show();
     })
     .on('click', '.add-reply', function () {
-        YB.postForm.setDestination(true, $(this).data('thread'));
+        YB.postForm.threadReply($(this).closest('.thread').data('id'));
     })
     .on('change', '#post-form #post-files', function () {
         YB.postForm.uploadFile();
