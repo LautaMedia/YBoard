@@ -1,4 +1,4 @@
-<form class="content-box" id="post-form" action="/scripts/posts/submit" method="post" onsubmit="submitPost(event)">
+<form class="content-box" id="post-form" action="/scripts/posts/submit" method="post">
     <fieldset>
         <input type="hidden" id="file-id" name="file_id">
 <?php if (!empty($thread->id)) : ?>
@@ -36,36 +36,36 @@
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">
-        <button type="button" onclick="removePostFile()" class="button gray icon-cross2"></button>
+        <button type="button" id="remove-file" class="button gray icon-cross2"></button>
     </div>
     <div class="file-progress progressbar"><div></div></div>
 
     <div id="message-input">
         <div id="format-toolbar">
-            <a class="icon-bold" title="<?= _('Bold') ?>" onclick="addBbCode('b')"></a>
-            <a class="icon-italic" title="<?= _('Italic') ?>" onclick="addBbCode('em')"></a>
-            <a class="icon-strikethrough" title="<?= _('Strikethrough') ?>" onclick="addBbCode('s')"></a>
-            <a class="icon-underline" title="<?= _('Underline') ?>" onclick="addBbCode('u')"></a>
-            <a class="icon-spoiler" title="<?= _('Spoiler') ?>" onclick="addBbCode('spoiler')"></a>
-            <a class="icon-font-small" title="<?= _('Small text') ?>" onclick="addBbCode('small')"></a>
-            <a class="icon-font-big" title="<?= _('Big text') ?>" onclick="addBbCode('big')"></a>
-            <a class="icon-bubble-quote" title="<?= _('Quote') ?>" onclick="addBbCode('quote')"></a>
-            <a class="icon-code" title="<?= _('Code') ?>" onclick="addBbCode('code')"></a>
-            <a class="icon-superscript" title="<?= _('Superscript') ?>" onclick="addBbCode('sup')"></a>
-            <a class="icon-subscript" title="<?= _('Subscript') ?>" onclick="addBbCode('sub')"></a>
-            <a class="icon-palette" title="<?= _('Colors') ?>" onclick="toggleBbColorBar()"></a>
+            <a class="icon-bold bb-code" title="<?= _('Bold') ?>" data-code="b"></a>
+            <a class="icon-italic bb-code" title="<?= _('Italic') ?>" data-code="em"></a>
+            <a class="icon-strikethrough bb-code" title="<?= _('Strikethrough') ?>" data-code="s"></a>
+            <a class="icon-underline bb-code" title="<?= _('Underline') ?>" data-code="u"></a>
+            <a class="icon-spoiler bb-code" title="<?= _('Spoiler') ?>" data-code="spoiler"></a>
+            <a class="icon-font-small bb-code" title="<?= _('Small text') ?>" data-code="small"></a>
+            <a class="icon-font-big bb-code" title="<?= _('Big text') ?>" data-code="big"></a>
+            <a class="icon-bubble-quote bb-code" title="<?= _('Quote') ?>" data-code="quote"></a>
+            <a class="icon-code bb-code" title="<?= _('Code') ?>" data-code="code"></a>
+            <a class="icon-superscript bb-code" title="<?= _('Superscript') ?>" data-code="sup"></a>
+            <a class="icon-subscript bb-code" title="<?= _('Subscript') ?>" data-code="sub"></a>
+            <a class="icon-palette bb-color-bar" title="<?= _('Colors') ?>"></a>
             <div id="color-buttons" style="display:none">
-                <a class="icon-palette black" title="<?= _('Black') ?>" onclick="addBbCode('black')"></a>
-                <a class="icon-palette gray" title="<?= _('Gray') ?>" onclick="addBbCode('gray')"></a>
-                <a class="icon-palette white" title="<?= _('White') ?>" onclick="addBbCode('white')"></a>
-                <a class="icon-palette brown" title="<?= _('Brown') ?>" onclick="addBbCode('brown')"></a>
-                <a class="icon-palette red" title="<?= _('Red') ?>" onclick="addBbCode('red')"></a>
-                <a class="icon-palette orange" title="<?= _('Orange') ?>" onclick="addBbCode('orange')"></a>
-                <a class="icon-palette yellow" title="<?= _('Yellow') ?>" onclick="addBbCode('yellow')"></a>
-                <a class="icon-palette green" title="<?= _('Green') ?>" onclick="addBbCode('green')"></a>
-                <a class="icon-palette blue" title="<?= _('Blue') ?>" onclick="addBbCode('blue')"></a>
-                <a class="icon-palette purple" title="<?= _('Purple') ?>" onclick="addBbCode('purple')"></a>
-                <a class="icon-palette pink" title="<?= _('Pink') ?>" onclick="addBbCode('pink')"></a>
+                <a class="icon-palette black bb-code" title="<?= _('Black') ?>" data-code="black"></a>
+                <a class="icon-palette gray bb-code" title="<?= _('Gray') ?>" data-code="gray"></a>
+                <a class="icon-palette white bb-code" title="<?= _('White') ?>" data-code="white"></a>
+                <a class="icon-palette brown bb-code" title="<?= _('Brown') ?>" data-code="brown"></a>
+                <a class="icon-palette red bb-code" title="<?= _('Red') ?>" data-code="red"></a>
+                <a class="icon-palette orange bb-code" title="<?= _('Orange') ?>" data-code="orange"></a>
+                <a class="icon-palette yellow bb-code" title="<?= _('Yellow') ?>" data-code="yellow"></a>
+                <a class="icon-palette green bb-code" title="<?= _('Green') ?>" data-code="green"></a>
+                <a class="icon-palette blue bb-code" title="<?= _('Blue') ?>" data-code="blue"></a>
+                <a class="icon-palette purple bb-code" title="<?= _('Purple') ?>" data-code="purple"></a>
+                <a class="icon-palette pink bb-code" title="<?= _('Pink') ?>" data-code="pink"></a>
             </div>
         </div>
         <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $messageMaxLength ?>"></textarea>
@@ -74,8 +74,8 @@
     <?php if ($user->requireCaptcha) : ?>
     <div id="post-form-captcha"></div>
     <?php endif ?>
-    <button type="button" onclick="$('#post-options').toggle();return false" class="button gray"><?= _('Options') ?></button>
-    <button type="button" id="reset-button" onclick="resetPostForm();return false" class="button gray"><?= _('Cancel') ?></button>
+    <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
+    <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
     <input type="submit" class="button primary" value="<?= _('Submit') ?>">
     <div id="post-options">
         <h4><?= _('Functions') ?></h4>
