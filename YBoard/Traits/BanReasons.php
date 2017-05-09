@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Traits;
 
-use YBoard\Model\Bans;
+use YBoard\Models\Bans;
 
 trait BanReasons
 {

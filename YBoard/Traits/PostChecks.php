@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Traits;
 
-use YBoard\Library\HttpResponse;
+use YFW\Library\HttpResponse;
 
 trait PostChecks
 {
@@ -21,6 +21,6 @@ trait PostChecks
 
         return false;
     }
-    
+
     abstract protected function stopExecution();
 }

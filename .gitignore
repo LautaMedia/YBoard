@@ -1,5 +1,5 @@
 .idea
 .vagrant
 sqlupdate.sql
-/YBoard/Config/Database.php
-/YBoard/Config/YBoard.php
+Config/Database.php
+Config/App.php

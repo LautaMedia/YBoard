@@ -1,0 +1,44 @@
+<?php include($viewFilesPath . '/Snippets/BoardHeader.phtml') ?>
+<?php include($viewFilesPath . '/Snippets/BoardNavigation.phtml') ?>
+
+<?php include($viewFilesPath . '/Snippets/PostForm.phtml') ?>
+
+<?php if (!empty($threads)) : ?>
+<div class="board-additional-functions">
+    <input type="text" onkeyup="searchCatalog(this.value)" placeholder="<?= _('Search threads...') ?>">
+</div>
+<div class="catalog">
+    <?php foreach($threads as $thread) : ?>
+        <div class="thread-box" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
+            <?php include($viewFilesPath . '/Snippets/ThreadSubject.phtml') ?>
+            <div class="thread-content">
+                <div class="op-post" id="post-<?= $thread->id ?>">
+                    <?php $post = $thread ?>
+                    <?php include($viewFilesPath . '/Snippets/PostButtons.phtml') ?>
+
+                    <blockquote class="post">
+                        <figure class="post-file thumbnail">
+                            <a href="/<?= $board->url ?>/<?= $thread->id ?>">
+                                <?php if (!empty($post->file)) : ?>
+                                    <?php $src = $staticUrl . '/files/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
+                                <?php else : ?>
+                                    <?php $src = $staticUrl . '/img/norppa_ylilauta.svg' ?>
+                                <?php endif ?>
+                                <img src="<?= $src ?>" alt="">
+                            </a>
+                        </figure>
+                        <?= \YFW\Library\Text::formatMessage($post->message) ?>
+                    </blockquote>
+                </div>
+                <?php include($viewFilesPath . '/Snippets/ThreadMeta.phtml') ?>
+            </div>
+        </div>
+    <?php endforeach; unset($thread); ?>
+</div>
+<?php else : ?>
+<div class="content-box">
+    <h3><?= _('There are no threads here...') ?></h3>
+</div>
+<?php endif ?>
+
+<?php include($viewFilesPath . '/Snippets/BoardNavigation.phtml') ?>

@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Traits;
 
-use YBoard\Library\HttpResponse;
+use YFW\Library\HttpResponse;
 
 trait Cookies
 {

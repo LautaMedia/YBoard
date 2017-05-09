@@ -5,8 +5,6 @@ DBPASSWD=vagrant
 # Change apt server and update
 sed -i -e 's=//us.archive.ubuntu=//archive.ubuntu=g' /etc/apt/sources.list
 apt update
-apt dist-upgrade -y
-apt autoremove --purge -y
 
 # Install PHP7, Nginx, MySQL, PNGCrush, JpegOptim, ImageMagick
 debconf-set-selections <<< "mysql-server mysql-server/root_password password ${DBPASSWD}"
