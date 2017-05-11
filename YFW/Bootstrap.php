@@ -49,7 +49,7 @@ class Bootstrap
     public function run(string $appName)
     {
 
-        $routes = require(ROOT_PATH . '/Config/UrlRoutes.php');
+        $routes = require(ROOT_PATH . '/' . $appName . '/Config/UrlRoutes.php');
 
         $router = new Router();
         $router->setAppName($appName);

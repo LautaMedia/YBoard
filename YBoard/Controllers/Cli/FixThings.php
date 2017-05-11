@@ -1,5 +1,5 @@
 <?php
-namespace YBoard\Controllers\CLI;
+namespace YBoard\Controllers\Cli;
 
 use YBoard\Abstracts\AbstractCliDatabase;
 use YBoard\Models\Files;

@@ -1,5 +1,9 @@
 .idea
 .vagrant
 sqlupdate.sql
-Config/Database.php
-Config/App.php
+YBoard/Config/Database.php
+YBoard/Config/App.php
+node_modules
+static/js/*.js.map
+Logs/*
+static/files/*

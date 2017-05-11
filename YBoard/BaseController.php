@@ -31,14 +31,15 @@ abstract class BaseController extends Controller
     protected $boards;
     protected $user;
     protected $locale;
+    protected $localeDomain;
 
     public function __construct()
     {
         // Load config
-        $this->config = require(ROOT_PATH . '/Config/App.php');
+        $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
 
         // Get a database connection
-        $this->db = new Database(require(ROOT_PATH . '/Config/Database.php'));
+        $this->db = new Database(require(ROOT_PATH . '/YBoard/Config/Database.php'));
 
         // Load some data that are required on almost every page, like the list of boards and user data
         $this->boards = new Boards($this->db);
@@ -55,6 +56,7 @@ abstract class BaseController extends Controller
             // Fallback
             $this->locale = $this->config['i18n']['defaultLocale'];
         }
+        $this->localeDomain = 'default'; // TODO: Add support for custom domains
 
         // Set locale
         $this->i18n->loadLocale($this->locale);
@@ -242,6 +244,8 @@ abstract class BaseController extends Controller
         $templateEngine->stylesheet = $theme;
         $templateEngine->altStylesheet = $altTheme;
 
+        $templateEngine->locale = $this->locale;
+        $templateEngine->localeDomain = $this->localeDomain;
         $templateEngine->csrfToken = $this->user->session->csrfToken;
         $templateEngine->reCaptchaPublicKey = $this->config['reCaptcha']['publicKey'];
         $templateEngine->user = $this->user;

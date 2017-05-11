@@ -1,5 +1,5 @@
 <?php
-namespace YBoard\CliController;
+namespace YBoard\Controllers\Cli;
 
 use YFW\Library\CliLogger;
 use YFW\Library\Database;

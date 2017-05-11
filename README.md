@@ -39,6 +39,35 @@ For example http://localhost:9001/?XDEBUG_PROFILE
 Profiler output files (cachegrind.out.xxx) are stored in logs/.  
 They can be opened for example with PhpStorm (Tools -> Analyze Xdebug Profiler Snapshot...).
 
+### Set up development tools (PhpStorm)
+1. Install Node.js
+2. `cd YBoard/Frontend/Js`
+3. `npm install`
+4. Set up project config in PhpStorm
+    * Open PhpStorm Settings (File -> Settings)
+    1. Editor -> Code Style -> PHP -> Set from... -> Predefined Style -> PSR1/PSR2
+    2. Languages & Frameworks
+        1. JavaScript -> JavaScript language version: ECMAScript 6
+        2. PHP -> PHP language level: 7
+    3. Tools -> File Watchers
+        1. Add new: SCSS
+            * Name: SCSS
+            * File type: SCSS
+            * Scope: Project Files
+            * Program: /path/to/project/Frontend/Js/node_modules/.bin/node-sass(.cmd if windows)
+            * Arguments: --output-style compressed $FileDirRelativeToProjectRoot$/$FileName$ static/css/$FileNameWithoutExtension$.css
+            * Output paths to refresh: $ProjectFileDir$/static/css/$FileNameWithoutExtension.css
+            * Working directory: $ProjectFileDir$
+        2. Add new: Custom
+            * Name: Webpack
+            * File Type: JavaScript
+            * Scope: Create custom (three dots) and Include Recursively YBoard/Frontend/Js
+            * Program: /path/to/project/Frontend/Js/node_modules/.bin/webpack(.cmd if windows)
+            * Arguments: -p
+            * Output paths to refresh: $ProjectFileDir$/static/js/yboard.js
+            * Working directory: $ProjectFileDir$/Frontend/Js
+
+
 ## Manual/production setup
 ### Requirements
 * **Linux/Unix server**

@@ -13,12 +13,35 @@ class i18n
         $this->localeFilesPath = $localeFilesPath;
     }
 
+    public function listLocales(): array
+    {
+        $locales = [];
+
+        // Find locales
+        $dirs = glob($this->localeFilesPath . '/*.UTF-8', GLOB_ONLYDIR);
+        foreach ($dirs as $dir) {
+            $dir = array_reverse(explode('/', $dir))[0];
+            $locales[$dir] = [];
+        }
+
+        // Find domains for locales
+        foreach ($locales as $locale => &$domains) {
+            foreach (glob($this->localeFilesPath . '/' . $locale . '/LC_MESSAGES/*.mo') as $domain) {
+                $domain = array_reverse(explode('/', $domain))[0];
+                $domains[] = preg_replace('/\.mo$/i', '', $domain);
+            }
+        }
+
+        return $locales;
+    }
+
     public function loadLocale($locale, $domain = 'default')
     {
         $locale = addslashes($locale);
         $domain = addslashes($domain);
 
         // Load localization
+        putenv("LANGUAGE=");
         setlocale(LC_ALL, $locale);
         bindtextdomain($domain, $this->localeFilesPath);
         bind_textdomain_codeset($domain, 'UTF-8');

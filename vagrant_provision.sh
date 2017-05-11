@@ -86,6 +86,10 @@ server {
 
     root /vagrant/public;
 
+    location /static/ {
+        root /vagrant;
+    }
+
     index index.php;
     try_files \$uri /index.php?\$args;
 
