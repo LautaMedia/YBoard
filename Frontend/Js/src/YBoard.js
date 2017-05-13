@@ -1,17 +1,31 @@
 import YQuery from './YQuery';
 import Captcha from './YBoard/Captcha';
 import Theme from './YBoard/Theme';
+import Toast from './YBoard/Toast';
+import Catalog from './YBoard/Catalog';
+import Thread from './YBoard/Thread';
+import Post from './YBoard/Post';
+import PostForm from './YBoard/PostForm';
 
-class YBoard {
-    constructor() {
-        this.theme = Theme;
+class YBoard
+{
+    constructor()
+    {
+        this.Catalog = new Catalog();
+        this.Captcha = new Captcha();
+        this.Theme = new Theme();
+        this.Toast = new Toast();
+        this.Thread = new Thread();
+        this.Post = new Post();
+        this.PostForm = new PostForm();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
         }
     }
 
-    isBadBrowser() {
+    isBadBrowser()
+    {
         if (typeof FormData !== 'function') {
             return true;
         }
@@ -23,7 +37,8 @@ class YBoard {
         return false;
     }
 
-    browserWarning() {
+    browserWarning()
+    {
         let browserWarning = document.createElement('div');
         browserWarning.classList.add('old-browser-warning');
         browserWarning.innerHTML = '<p>' + messages.oldBrowserWarning + '</p>';
@@ -31,11 +46,13 @@ class YBoard {
         document.body.appendChild(browserWarning);
     }
 
-    static pageReload() {
+    static pageReload()
+    {
         window.location = window.location.href.split('#')[0];
     }
 
-    static returnToBoard() {
+    static returnToBoard()
+    {
         // Remove everything after the last slash and redirect
         // Should work if we are in a thread, otherwise not really
         let url = window.location.href;
@@ -44,23 +61,18 @@ class YBoard {
         window.location = url;
     }
 
-    spinnerHtml(classes) {
-        if (typeof classes === 'undefined') {
-            classes = '';
-        } else {
+    spinnerHtml(classes = '')
+    {
+        if (classes !== '') {
             classes += ' ';
         }
 
         return '<span class="' + classes + 'loading icon-loading spin"></span>';
     }
 
-    submitForm(e) {
+    submitForm(e)
+    {
         e.preventDefault();
-
-        if (!('FormData' in window)) {
-            toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
-            return false;
-        }
 
         let form = $(e.target);
         let fd = new FormData(e.target);
@@ -68,11 +80,7 @@ class YBoard {
         let overlay = $('<div class="form-overlay"><div>' + this.spinnerHtml() + '</div></div>');
         form.append(overlay);
 
-        $.ajax({
-            url: form.attr('action'),
-            type: "POST",
-            data: fd
-        }).done(function (data) {
+        YQuery.post(form.getAttribute('action'), fd).done(function(data) {
             if (data.reload) {
                 if (data.url) {
                     window.location = data.url;
@@ -81,22 +89,24 @@ class YBoard {
                 }
             } else {
                 overlay.remove();
-                toastr.success(data.message);
+                this.Toast.success(data.message);
                 form.reset();
             }
-        }).fail(function () {
+        }).fail(function()
+        {
             overlay.remove();
         });
     }
 
-    signup(elm, e) {
+    signup(elm, e)
+    {
         // Signup form in sidebar
         e.preventDefault();
         elm = $(elm);
 
-        Captcha.render('signup-captcha', {
+        this.Captcha.render('signup-captcha', {
             'size': 'invisible',
-            'theme': 'dark'
+            'theme': 'dark',
         });
 
         let form = $('#login');

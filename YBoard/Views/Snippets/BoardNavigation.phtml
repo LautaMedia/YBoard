@@ -1,6 +1,6 @@
 <div class="board-navigation">
     <div class="breadcrumb">
-        <a href="/"><?= htmlspecialchars($config['siteName']) ?></a>
+        <a href="/"><?= htmlspecialchars($config->app->name) ?></a>
         <div class="sep">&raquo;</div>
         <a href="/<?= $board->url ?>/"><?= htmlspecialchars($board->name) ?></a>
         <?php if(!empty($thread->id)): ?>

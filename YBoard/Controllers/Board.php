@@ -10,7 +10,7 @@ class Board extends BaseController
     public function index($boardUrl, $pageNum = 1)
     {
         $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config['view']['maxPages']);
+        $this->limitPages($pageNum, $this->config->view->maxPages);
 
         $posts = new Posts($this->db);
         $posts->setHiddenThreads($this->user->threadHide->getAll());
@@ -27,17 +27,16 @@ class Board extends BaseController
         $view->setVar('bodyClass', 'board-page');
         $view->setVar('threads', $threads);
 
-        $this->initializePagination($view, $pageNum, $this->config['view']['maxPages'], $isLastPage);
+        $this->initializePagination($view, $pageNum, $this->config->view->maxPages, $isLastPage);
 
         $view->setVar('board', $board);
-        $view->setVar('pageNum', $pageNum);
         $view->display('Board');
     }
 
     public function catalog($boardUrl, $pageNum = 1)
     {
         $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config['view']['maxCatalogPages']);
+        $this->limitPages($pageNum, $this->config->view->maxCatalogPages);
 
         $posts = new Posts($this->db);
         $posts->setHiddenThreads($this->user->threadHide->getAll());
@@ -49,14 +48,13 @@ class Board extends BaseController
 
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = $board->name;
-        $view->bodyClass = 'board-catalog';
+        $view->setVar('pageTitle', $board->name);
+        $view->setVar('bodyClass', 'board-catalog');
 
-        $this->initializePagination($view, $pageNum, $this->config['view']['maxCatalogPages'], $isLastPage, '/catalog');
+        $this->initializePagination($view, $pageNum, $this->config->view->maxCatalogPages, $isLastPage, '/catalog');
 
-        $view->board = $board;
-        $view->threads = $threads;
-        $view->pageNum = $pageNum;
+        $view->setVar('board', $board);
+        $view->setVar('threads', $threads);
         $view->display('BoardCatalog');
     }
 

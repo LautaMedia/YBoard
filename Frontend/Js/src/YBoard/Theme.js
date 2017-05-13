@@ -1,4 +1,5 @@
 import YQuery from '../YQuery';
+import YBoard from '../YBoard';
 
 class Theme
 {
@@ -49,8 +50,13 @@ class Theme
 
         YQuery.post('/api/user/preferences/set', {
             'themeVariation': 'true',
+            'errorFunction': function()
+            {
+                clearTimeout(timeout);
+                YBoard.Toast.error(messages.errorOccurred);
+            },
         });
     }
 }
 
-export default new Theme();
+export default Theme;

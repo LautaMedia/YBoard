@@ -1,31 +1,34 @@
 <!doctype html>
 <html>
 <head>
-    <title><?= htmlspecialchars($this->getTitle($config['siteName'])) ?></title>
+    <title><?= htmlspecialchars($this->getTitle($config->app->name)) ?></title>
 
     <meta charset="UTF-8">
 
     <meta name="robots" content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#117743">
+    <meta name="theme-color" content="<?= $stylesheet['color'] ?>">
 
-    <base href="<?= $config['baseUrl'] ?>">
+    <base href="<?= $config->app->url ?>">
 
-    <link rel="stylesheet" class="css" href="<?= $config['staticUrl'] ?>/css/<?= $stylesheet['name'] ?>.css?<?=time()?>"
-          data-alt="<?= $config['staticUrl'] ?>/css/<?= $stylesheet['alt'] ?>.css?<?=time()?>">
+    <link rel="stylesheet" class="css" href="<?= $config->app->staticUrl . $stylesheet['active'] ?>?<?=time()?>"
+          data-light="<?= $config->app->staticUrl . $stylesheet['light'] ?>?<?=time()?>"
+          data-dark="<?= $config->app->staticUrl . $stylesheet['dark'] ?>?<?=time()?>"
+          data-darkTheme="<?= $stylesheet['darkTheme'] ?>">
     <?php if ($user->preferences->hideSidebar): ?>
-    <link rel="stylesheet" id="hide-sidebar" href="<?= $config['staticUrl'] ?>/css/hide_sidebar.css">
+    <link rel="stylesheet" id="hide-sidebar" href="<?= $config->app->staticUrl ?>/css/hide_sidebar.css">
     <?php endif ?>
 
-    <link rel="icon" sizes="192x192" href="<?= $config['staticUrl'] ?>/img/norppa_icon.png">
+    <link rel="icon" sizes="192x192" href="<?= $config->app->staticUrl . $config->app->logoUrl ?>">
 
-    <script src="<?= $config['staticUrl'] ?>/js/locales/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
-    <script src="<?= $config['staticUrl'] ?>/js/yboard.js?<?=time()?>" defer></script>
+    <script src="<?= $config->app->staticUrl ?>/js/locales/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
+    <script src="<?= $config->app->staticUrl ?>/js/config.js" defer></script>
+    <script src="<?= $config->app->staticUrl ?>/js/yboard.js?<?=time()?>" defer></script>
 
     <script>let csrfToken='<?= $user->session->csrfToken ?>';</script>
 
-    <?php if ($config->reCaptcha->enabled && $user->requireCaptcha): ?>
-    <script src="https://www.google.com/recaptcha/api.js?onload=renderCaptcha&render=explicit" async defer></script>
+    <?php if ($config->captcha->enabled && $user->requireCaptcha): ?>
+    <script src="https://www.google.com/recaptcha/api.js?onload=YBoard.Captcha.render&render=explicit" async defer></script>
     <?php endif ?>
 </head>
 <body<?= (!empty($bodyClass)?' class="' . $bodyClass . '"':'') ?>>
@@ -33,16 +36,16 @@
 <div id="topbar">
     <button class="sidebar-toggle"><span class="icon-menu"></span><?= _('Menu') ?></button>
     <div class="buttons"
-        ><button id="notifications-button" onclick="getNotifications()" class="icon-alarm" title="<?= _('Notifications') ?>"
+        ><button id="notifications-button" class="icon-alarm" title="<?= _('Notifications') ?>"
             ><span class="unread-notifications unread-count red<?= ($user->notifications->unreadCount==0?' none':'') ?>"
             ><?= $user->notifications->unreadCount ?></span></button
         ><a href="/followedthreads/" class="icon-bookmark2" title="<?= _('Followed threads') ?>"><?php
             if($user->threadFollow->unreadCount != 0) :
                 ?><span class="unread-count green"><?= $user->threadFollow->unreadCount ?></span><?php
             endif ?></a
-        ><button onclick="$(document).scrollTop($('body').height())" class="icon-enter-down2" title="<?= _('Go to bottom') ?>"></button
-        ><button onclick="$(document).scrollTop(0)" class="icon-enter-up2" title="<?= _('Back to top') ?>"></button
-        ><button onclick="pageReload()" class="icon-sync" title="<?= _('Refresh page') ?>"></button
+        ><button id="scroll-to-bottom" class="icon-enter-down2" title="<?= _('Go to bottom') ?>"></button
+        ><button id="scroll-to-top" class="icon-enter-up2" title="<?= _('Back to top') ?>"></button
+        ><button id="reload-page" class="icon-sync" title="<?= _('Refresh page') ?>"></button
     ></div>
 </div>
 

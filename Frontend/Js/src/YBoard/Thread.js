@@ -1,9 +1,20 @@
+import AutoUpdate from './Thread/AutoUpdate';
+import Hide from './Thread/Hide';
+import Follow from './Thread/Follow';
+
 class Thread {
-    getElm: function(id)
+    constructor() {
+        this.AutoUpdate = new AutoUpdate();
+        this.Hide = new Hide();
+        this.Follow = new Follow();
+    }
+
+    getElm(id)
     {
         return $('#thread-' + id);
-    },
-    toggleLock: function(id)
+    }
+
+    toggleLock(id)
     {
         if (this.getElm(id).find('h3 a .icon-lock').length == 0) {
             $.post('/scripts/threads/lock', {'threadId': id}).done(function()
@@ -18,8 +29,9 @@ class Thread {
                 toastr.success(messages.threadUnlocked);
             });
         }
-    },
-    toggleSticky: function(id)
+    }
+
+    toggleSticky(id)
     {
         if (this.getElm(id).find('h3 a .icon-lock').length == 0) {
             $.post('/scripts/threads/stick', {'threadId': id}).done(function()
@@ -34,8 +46,9 @@ class Thread {
                 toastr.success(messages.threadUnstickied);
             });
         }
-    },
-    expand: function(threadId)
+    }
+
+    expand(threadId)
     {
         // Thread inline expansion
         var thread = this.getElm(threadId);
@@ -60,71 +73,7 @@ class Thread {
             // Contract
             thread.removeClass('expanded').find('.more-replies-container').html('');
         }
-    },
-    hide: {
-        add: function(id)
-        {
-            YB.thread.getElm(id).fadeToggle();
-            $.post('/scripts/threads/hide', {'threadId': id}).done(function()
-            {
-                toastr.success(
-                    messages.threadHidden + '<button class="link thread-restore" data-id="' + id + '">' + messages.undo + '</button>');
-            }).fail(function()
-            {
-                YB.thread.getElm(id).stop().show();
-            });
-        },
-        remove: function(id)
-        {
-            YB.thread.getElm(id).fadeToggle();
-            $.post('/scripts/threads/restore', {'threadId': id}).done(function()
-            {
-                toastr.success(
-                    messages.threadRestored + '<button class="link thread-hide" data-id="' + id + '">' + messages.undo + '</button>');
-            }).fail(function()
-            {
-                YB.thread.getElm(id).stop().show();
-            });
-        },
-    },
-    follow: {
-        add: function(id)
-        {
-            this.doAjax(id, '/scripts/follow/add');
-        },
-        remove: function(id)
-        {
-            this.doAjax(id, '/scripts/follow/remove');
-        },
-        markAllRead: function()
-        {
-            $('.icon-bookmark2 .unread-count').hide();
-            $('h3 .notification-count').hide();
-            $.post('/scripts/follow/markallread').fail(function()
-            {
-                $('.icon-bookmark2 .unread-count').show();
-                $('h3 .notification-count').show();
-            });
-        },
-        toggleButton: function(id)
-        {
-            var button = YB.thread.getElm(id).find('.followbutton');
+    }
+}
 
-            if (button.hasClass('add')) {
-                button.removeClass('icon-bookmark-add add').addClass('icon-bookmark-remove remove');
-            } else {
-                button.removeClass('icon-bookmark-remove remove').addClass('icon-bookmark-add add');
-            }
-        },
-        doAjax: function(id, url)
-        {
-            this.toggleButton(id);
-            $.post(url, {'threadId': id}).fail(function()
-            {
-                YB.thread.follow.toggleButton(id);
-            });
-        },
-    },
-};
-
-export default new Thread();
+export default Thread;

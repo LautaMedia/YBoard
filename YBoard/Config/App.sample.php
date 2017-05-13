@@ -12,6 +12,7 @@ return (object)[
         'maxPages' => 100,
         'maxCatalogPages' => 10,
         'previewPosts' => 3,
+        'defaultTheme' => 'ylilauta',
     ],
     'themes' => (object)[
         'default' => (object)[

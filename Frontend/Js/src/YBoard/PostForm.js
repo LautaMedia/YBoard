@@ -1,14 +1,19 @@
-export default {
-    elm: document.getElementById('post-form'),
-    location: document.getElementById('post-form').parentNode,
-    msgElm: document.getElementById('post-message'),
-    fileUploadInProgress: false,
-    fileUploadXhr: null,
-    submitAfterFileUpload: false,
-    submitInProgress: false,
-    origDestName: false,
-    origDestValue: false,
-    show: function(isReply)
+class PostForm
+{
+    constructor()
+    {
+        this.elm = document.getElementById('post-form');
+        this.location = document.getElementById('post-form').parentNode;
+        this.msgElm = document.getElementById('post-message');
+        this.fileUploadInProgress = false;
+        this.fileUploadXhr = null;
+        this.submitAfterFileUpload = false;
+        this.submitInProgress = false;
+        this.origDestName = false;
+        this.origDestValue = false;
+    }
+
+    show(isReply)
     {
         if (!isReply) {
             // Reset if we click the "Create thread" -button
@@ -19,12 +24,14 @@ export default {
         if (this.msgElm.offsetParent !== null) {
             this.msgElm.focus();
         }
-    },
-    hide: function()
+    }
+
+    hide()
     {
         this.elm.classList.remove('visible');
-    },
-    reset: function()
+    }
+
+    reset()
     {
         this.elm.reset();
         this.location.appendChild(this.elm);
@@ -32,12 +39,14 @@ export default {
         this.removeFile();
         this.resetDestination();
         this.hide();
-    },
-    focus: function()
+    }
+
+    focus()
     {
         this.msgElm.focus();
-    },
-    setDestination: function(isReply, destination)
+    }
+
+    setDestination(isReply, destination)
     {
         this.storeDestination();
         var name = 'board';
@@ -45,8 +54,9 @@ export default {
             name = 'thread';
         }
         this.elm.find('#post-destination').attr('name', name).val(destination);
-    },
-    storeDestination: function()
+    }
+
+    storeDestination()
     {
         var destElm = this.elm.find('#post-destination');
         var boardSelector = this.elm.find('#label-board');
@@ -65,8 +75,9 @@ export default {
         this.origDestValue = destElm.val();
 
         return true;
-    },
-    resetDestination: function()
+    }
+
+    resetDestination()
     {
         var destElm = this.elm.querySelector('#post-destination');
         var boardSelector = this.elm.querySelector('#label-board');
@@ -87,17 +98,20 @@ export default {
         this.origDestValue = false;
 
         return true;
-    },
-    insertBbCode: function(code)
+    }
+
+    insertBbCode(code)
     {
         this.msgElm.insertAtCaret('[' + code + ']', '[/' + code + ']');
-    },
-    toggleBbColorBar: function()
+    }
+
+    toggleBbColorBar()
     {
         this.elm.getElementById('color-buttons').toggle();
         this.msgElm.focus();
-    },
-    uploadFile: function()
+    }
+
+    uploadFile()
     {
         if (!('FormData' in window)) {
             toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
@@ -189,8 +203,9 @@ export default {
         {
             that.updateFileProgressBar(0);
         });
-    },
-    removeFile: function()
+    }
+
+    removeFile()
     {
         this.elm.querySelector('#post-files').value = '';
         this.elm.querySelector('#file-id').value = '';
@@ -201,8 +216,9 @@ export default {
         if (this.fileUploadXhr !== null) {
             this.fileUploadXhr.abort();
         }
-    },
-    updateFileProgressBar: function(progress)
+    }
+
+    updateFileProgressBar(progress)
     {
         if (progress < 0) {
             progress = 0;
@@ -220,8 +236,9 @@ export default {
             bar.style.width = progress + '%';
             bar.classList.add('in-progress');
         }
-    },
-    threadReply: function(threadId)
+    }
+
+    threadReply(threadId)
     {
         this.elm.appendTo(YB.thread.getElm(threadId).find('.thread-content'));
         this.show(true);
@@ -229,8 +246,9 @@ export default {
         this.setDestination(true, threadId);
 
         this.msgElm.focus();
-    },
-    postReply: function(postId)
+    }
+
+    postReply(postId)
     {
         var selectedText = YB.getSelectionText();
 
@@ -256,8 +274,9 @@ export default {
         }
 
         this.msgElm.val(this.msgElm.val().trim() + append);
-    },
-    submit: function(e)
+    }
+
+    submit(e)
     {
         if (typeof e != 'undefined') {
             e.preventDefault();
@@ -288,13 +307,7 @@ export default {
         var fd = new FormData(this.elm);
 
         var that = this;
-        yQuery.ajax({
-            url: this.elm.getAttribute('action'),
-            type: 'POST',
-            processData: false,
-            contentType: false,
-            data: fd,
-        }).done(function(data)
+        YQuery.post(this.elm.getAttribute('action'), fd).done(function(data)
         {
             var dest = $('#post-destination');
             var thread;
@@ -329,5 +342,7 @@ export default {
 
             YB.captcha.reset();
         });
-    },
-};
+    }
+}
+
+export default PostForm;

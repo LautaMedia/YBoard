@@ -45,7 +45,7 @@ abstract class BaseController extends Controller
         $this->locale = $this->i18n->getPreferredLocale();
         if (!$this->locale) {
             // Fallback
-            $this->locale = $this->config['i18n']['defaultLocale'];
+            $this->locale = $this->config->i18n->defaultLocale;
         }
         $this->localeDomain = 'default'; // TODO: Add support for custom domains
 
@@ -205,7 +205,7 @@ abstract class BaseController extends Controller
     {
         $templateEngine = new TemplateEngine(ROOT_PATH . '/YBoard/Views/', $templateFile);
 
-        $templateEngine->setVar('config', $this->config['view']);
+        $templateEngine->setVar('config', $this->config);
 
         // Some things are only done when loading regular pages with the "Default" template
         if ($templateFile == 'Default') {
@@ -226,24 +226,22 @@ abstract class BaseController extends Controller
         }
 
         // Verify theme exists
-        if (!array_key_exists($this->user->preferences->theme, $this->config['view']['themes'])) {
+        if (!array_key_exists($this->user->preferences->theme, $this->config->themes)) {
             $this->user->preferences->reset('theme');
         }
-        if ($this->user->preferences->themeAlt && !$this->config['view']['themes'][$this->user->preferences->theme]['altCss']) {
-            $this->user->preferences->reset('themeAlt');
-        }
 
-        if ($this->user->preferences->themeAlt) {
-            $theme = $this->config['view']['themes'][$this->user->preferences->theme]['altCss'];
-            $altTheme = $this->config['view']['themes'][$this->user->preferences->theme]['css'];
+        if ($this->user->preferences->theme === null) {
+            $theme = $this->config->view->defaultTheme;
         } else {
-            $theme = $this->config['view']['themes'][$this->user->preferences->theme]['css'];
-            $altTheme = $this->config['view']['themes'][$this->user->preferences->theme]['altCss'];
+            $theme = $this->user->preferences->theme;
         }
 
         $templateEngine->setVar('stylesheet', [
-            'name' => $theme,
-            'alt' => $altTheme,
+            'active' => !$this->user->preferences->darkTheme ? $this->config->themes[$theme]->light : $this->config->themes[$theme]->dark,
+            'color' => $this->config->themes[$theme]->color,
+            'light' => $this->config->themes[$theme]->light,
+            'dark' => $this->config->themes[$theme]->dark,
+            'darkTheme' => $this->user->preferences->darkTheme ? 'true' : 'false',
         ]);
 
         $templateEngine->setVar('locale', [
@@ -434,7 +432,7 @@ abstract class BaseController extends Controller
 
     protected function imagePathToUrl($path)
     {
-        return $this->config['view']['staticUrl'] . str_replace(ROOT_PATH . '/static', '', $path);
+        return $this->config->app->staticUrl . str_replace(ROOT_PATH . '/static', '', $path);
     }
 
     protected function disallowNonPost()

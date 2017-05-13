@@ -6,8 +6,8 @@ use YFW\Library\Database;
 
 class UserPreferences extends AbstractUserModel
 {
-    public $theme = 'default';
-    public $themeAlt = false;
+    public $theme = null;
+    public $darkTheme = false;
     public $locale = false;
     public $hideSidebar = false;
     public $threadsPerPage = 10;

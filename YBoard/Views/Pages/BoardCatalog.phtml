@@ -5,7 +5,7 @@
 
 <?php if (!empty($threads)) : ?>
 <div class="board-additional-functions">
-    <input type="text" onkeyup="searchCatalog(this.value)" placeholder="<?= _('Search threads...') ?>">
+    <input type="text" id="search-catalog" placeholder="<?= _('Search threads...') ?>">
 </div>
 <div class="catalog">
     <?php foreach($threads as $thread) : ?>

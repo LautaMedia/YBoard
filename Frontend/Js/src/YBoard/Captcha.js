@@ -2,7 +2,7 @@
 
 class Captcha
 {
-    render(elm, options)
+    render(elm, options = {})
     {
         if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !document.getElementById(elm)) {
             // Captcha not enabled, grecaptcha -library not loaded or captcha element not found
@@ -38,4 +38,4 @@ class Captcha
     }
 }
 
-export default new Captcha();
+export default Captcha;
