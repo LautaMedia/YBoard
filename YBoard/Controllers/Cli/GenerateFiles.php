@@ -91,8 +91,11 @@ class GenerateFiles extends Controller
     {
         $config = [
             'staticUrl' => $this->config['view']['staticUrl'],
-            'reCaptchaPublicKey' => $this->config['reCaptcha']['publicKey'],
         ];
+
+        if ($this->config['reCaptcha']['enabled']) {
+            $config['reCaptchaPublicKey'] = $this->config['reCaptcha']['publicKey'];
+        }
 
         return 'let config=' . json_encode($config);
     }

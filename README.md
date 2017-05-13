@@ -1,7 +1,9 @@
 # YBoard
 The once to be board software for Ylilauta. Might not always be open source.
 
-Code style is PSR-1/PSR-2, please follow that.  
+PHP code style is PSR-1/PSR-2.  
+JavaScript code style is also mimicked from PSR.
+
 Sorry about the code completely lacking in comments.
 
 ## Automatic dev environment
@@ -46,7 +48,9 @@ They can be opened for example with PhpStorm (Tools -> Analyze Xdebug Profiler S
 3. `npm install`
 4. (If using PhpStorm) Set up project config in PhpStorm
     * Open PhpStorm Settings (File -> Settings)
-    1. Editor -> Code Style -> PHP -> Set from... -> Predefined Style -> PSR1/PSR2
+    1. Editor -> Code Style
+        1. PHP -> Set from... -> Predefined Style -> PSR1/PSR2
+        2. JavaScript -> Set from... -> Language -> PHP
     2. Languages & Frameworks
         1. JavaScript -> JavaScript language version: ECMAScript 6
         2. PHP -> PHP language level: 7

@@ -282,6 +282,9 @@ if (typeof Element.prototype.closest !== 'function') {
 "use strict";
 
 
+// These might not be a good idea. I'm just lazy.
+// Hopefully they will not completely break down if some browser implements these functions.
+
 Element.prototype.setAttributes = function (attributes) {
     for (var key in attributes) {
         if (!attributes.hasOwnProperty(key)) {
@@ -540,29 +543,59 @@ window.YBoard = _YBoard2.default;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 // reCAPTCHA
 
-exports.default = {
-    render: function render(elm, options) {
-        options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
-
-        if (typeof grecaptcha === 'undefined' || !document.getElementById(elm)) {
-            return false;
-        }
-
-        if (!!document.getElementById(elm).innerHTML) {
-            return true;
-        }
-        grecaptcha.render(elm, options);
-    },
-    reset: function reset() {
-        if (typeof grecaptcha === 'undefined') {
-            return true;
-        }
-
-        grecaptcha.reset();
+var Captcha = function () {
+    function Captcha() {
+        _classCallCheck(this, Captcha);
     }
-};
+
+    _createClass(Captcha, [{
+        key: 'render',
+        value: function render(elm, options) {
+            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !document.getElementById(elm)) {
+                // Captcha not enabled, grecaptcha -library not loaded or captcha element not found
+                return false;
+            }
+
+            if (!!document.getElementById(elm).innerHTML) {
+                // If the captcha is already rendered
+                return true;
+            }
+
+            options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
+            grecaptcha.render(elm, options);
+
+            return true;
+        }
+    }, {
+        key: 'reset',
+        value: function reset() {
+            if (!this.isEnabled() || typeof grecaptcha === 'undefined') {
+                // Captcha not enabled or grecaptcha -library not loaded
+                return false;
+            }
+
+            grecaptcha.reset();
+
+            return true;
+        }
+    }, {
+        key: 'isEnabled',
+        value: function isEnabled() {
+            return typeof config.reCaptchaPublicKey !== 'undefined';
+        }
+    }]);
+
+    return Captcha;
+}();
+
+exports.default = new Captcha();
 
 /***/ }),
 /* 6 */

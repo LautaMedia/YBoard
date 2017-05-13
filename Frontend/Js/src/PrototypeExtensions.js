@@ -1,3 +1,6 @@
+// These might not be a good idea. I'm just lazy.
+// Hopefully they will not completely break down if some browser implements these functions.
+
 Element.prototype.setAttributes = function (attributes) {
     for (let key in attributes) {
         if (!attributes.hasOwnProperty(key)) {

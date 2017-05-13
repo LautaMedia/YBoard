@@ -1,13 +1,15 @@
 import YQuery from '../YQuery';
 
-class Theme {
-    toggleSidebar() {
+class Theme
+{
+    toggleSidebar()
+    {
         if (document.getElementById('hide-sidebar') !== null) {
             document.getElementById('hide-sidebar').remove();
             document.getElementById('sidebar').classList.remove('visible');
 
             YQuery.post('/api/user/preferences/sidebar', {
-                'sidebarHidden': 'false'
+                'sidebarHidden': 'false',
             });
         } else {
             let hideSidebarCss = document.createElement('link');
@@ -17,13 +19,14 @@ class Theme {
             document.querySelector('head').appendChild(hideSidebarCss);
 
             YQuery.post('/api/user/preferences/set', {
-                'sidebarHidden': 'true'
+                'sidebarHidden': 'true',
             });
         }
 
     }
 
-    switchVariation() {
+    switchVariation()
+    {
         let css = document.querySelectorAll('head .css');
         css = css[css.length - 1];
 
@@ -35,16 +38,17 @@ class Theme {
             'rel': 'stylesheet',
             'class': 'css',
             'href': variation,
-            'data-alt': current
+            'data-alt': current,
         });
         newCss.appendAfter(css);
 
-        let timeout = setTimeout(function () {
+        let timeout = setTimeout(function()
+        {
             css.remove();
         }, 5000);
 
         YQuery.post('/api/user/preferences/set', {
-            'themeVariation': 'true'
+            'themeVariation': 'true',
         });
     }
 }

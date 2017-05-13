@@ -8,7 +8,8 @@ export default {
     submitInProgress: false,
     origDestName: false,
     origDestValue: false,
-    show: function (isReply) {
+    show: function(isReply)
+    {
         if (!isReply) {
             // Reset if we click the "Create thread" -button
             this.reset();
@@ -19,10 +20,12 @@ export default {
             this.msgElm.focus();
         }
     },
-    hide: function () {
+    hide: function()
+    {
         this.elm.classList.remove('visible');
     },
-    reset: function () {
+    reset: function()
+    {
         this.elm.reset();
         this.location.appendChild(this.elm);
 
@@ -30,10 +33,12 @@ export default {
         this.resetDestination();
         this.hide();
     },
-    focus: function () {
+    focus: function()
+    {
         this.msgElm.focus();
     },
-    setDestination: function (isReply, destination) {
+    setDestination: function(isReply, destination)
+    {
         this.storeDestination();
         var name = 'board';
         if (isReply) {
@@ -41,7 +46,8 @@ export default {
         }
         this.elm.find('#post-destination').attr('name', name).val(destination);
     },
-    storeDestination: function () {
+    storeDestination: function()
+    {
         var destElm = this.elm.find('#post-destination');
         var boardSelector = this.elm.find('#label-board');
 
@@ -60,7 +66,8 @@ export default {
 
         return true;
     },
-    resetDestination: function () {
+    resetDestination: function()
+    {
         var destElm = this.elm.querySelector('#post-destination');
         var boardSelector = this.elm.querySelector('#label-board');
 
@@ -81,14 +88,17 @@ export default {
 
         return true;
     },
-    insertBbCode: function (code) {
+    insertBbCode: function(code)
+    {
         this.msgElm.insertAtCaret('[' + code + ']', '[/' + code + ']');
     },
-    toggleBbColorBar: function () {
+    toggleBbColorBar: function()
+    {
         this.elm.getElementById('color-buttons').toggle();
         this.msgElm.focus();
     },
-    uploadFile: function () {
+    uploadFile: function()
+    {
         if (!('FormData' in window)) {
             toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
             return false;
@@ -132,31 +142,37 @@ export default {
         var that = this;
         this.fileUploadXhr = $.ajax({
             url: '/scripts/files/upload',
-            type: "POST",
+            type: 'POST',
             processData: false,
             contentType: false,
             data: fd,
-            xhr: function () {
+            xhr: function()
+            {
                 var xhr = $.ajaxSettings.xhr();
                 if (!xhr.upload) {
                     return xhr;
                 }
-                xhr.upload.addEventListener('progress', function (evt) {
+                xhr.upload.addEventListener('progress', function(evt)
+                {
                     if (evt.lengthComputable) {
                         var percent = Math.round((evt.loaded / evt.total) * 100);
                         if (percent < 1) {
                             percent = 1;
-                        } else if (percent > 95) {
-                            percent = 95;
+                        } else {
+                            if (percent > 95) {
+                                percent = 95;
+                            }
                         }
                         that.updateFileProgressBar(percent);
                     }
                 }, false);
                 return xhr;
-            }
-        }).always(function () {
+            },
+        }).always(function()
+        {
             that.fileUploadInProgress = false;
-        }).done(function (data) {
+        }).done(function(data)
+        {
             that.updateFileProgressBar(100);
             data = JSON.parse(data);
             if (data.message.length != 0) {
@@ -169,11 +185,13 @@ export default {
                 toastr.error(messages.errorOccurred);
                 that.updateFileProgressBar(0);
             }
-        }).fail(function () {
+        }).fail(function()
+        {
             that.updateFileProgressBar(0);
         });
     },
-    removeFile: function () {
+    removeFile: function()
+    {
         this.elm.querySelector('#post-files').value = '';
         this.elm.querySelector('#file-id').value = '';
         this.elm.querySelector('#file-name').value = '';
@@ -184,11 +202,14 @@ export default {
             this.fileUploadXhr.abort();
         }
     },
-    updateFileProgressBar: function (progress) {
+    updateFileProgressBar: function(progress)
+    {
         if (progress < 0) {
             progress = 0;
-        } else if (progress > 100) {
-            progress = 100;
+        } else {
+            if (progress > 100) {
+                progress = 100;
+            }
         }
 
         var bar = this.elm.querySelector('.file-progress div');
@@ -200,7 +221,8 @@ export default {
             bar.classList.add('in-progress');
         }
     },
-    threadReply: function (threadId) {
+    threadReply: function(threadId)
+    {
         this.elm.appendTo(YB.thread.getElm(threadId).find('.thread-content'));
         this.show(true);
 
@@ -208,7 +230,8 @@ export default {
 
         this.msgElm.focus();
     },
-    postReply: function (postId) {
+    postReply: function(postId)
+    {
         var selectedText = YB.getSelectionText();
 
         this.elm.appendTo(YB.post.getElm(postId));
@@ -220,8 +243,10 @@ export default {
         var append = '';
         if (this.msgElm.val().substr(-1) == '\n') {
             append += '\n';
-        } else if (this.msgElm.val().length != 0) {
-            append += '\n\n';
+        } else {
+            if (this.msgElm.val().length != 0) {
+                append += '\n\n';
+            }
         }
         append += '>>' + postId + '\n';
 
@@ -232,7 +257,8 @@ export default {
 
         this.msgElm.val(this.msgElm.val().trim() + append);
     },
-    submit: function (e) {
+    submit: function(e)
+    {
         if (typeof e != 'undefined') {
             e.preventDefault();
         }
@@ -264,11 +290,12 @@ export default {
         var that = this;
         yQuery.ajax({
             url: this.elm.getAttribute('action'),
-            type: "POST",
+            type: 'POST',
             processData: false,
             contentType: false,
-            data: fd
-        }).done(function (data) {
+            data: fd,
+        }).done(function(data)
+        {
             var dest = $('#post-destination');
             var thread;
             if (dest.setAttribute('name') != 'thread') {
@@ -280,24 +307,27 @@ export default {
             if (thread != null) {
                 toastr.success(messages.postSent);
                 YB.thread.ajaxUpdate.runOnce(thread);
-            } else if (data.length == 0) {
-                YB.pageReload();
             } else {
-                data = JSON.parse(data);
-                if (typeof data.message == 'undefined') {
-                    toastr.error(messages.errorOccurred);
+                if (data.length == 0) {
+                    YB.pageReload();
                 } else {
-                    window.location = '/' + that.elm.find('[name="board"]').val() + '/' + data.message;
+                    data = JSON.parse(data);
+                    if (typeof data.message == 'undefined') {
+                        toastr.error(messages.errorOccurred);
+                    } else {
+                        window.location = '/' + that.elm.find('[name="board"]').val() + '/' + data.message;
+                    }
                 }
             }
 
             // Reset post form
             that.reset();
-        }).always(function () {
+        }).always(function()
+        {
             submitButton.removeAttribute('disabled');
             that.submitInProgress = false;
 
             YB.captcha.reset();
         });
-    }
+    },
 };
