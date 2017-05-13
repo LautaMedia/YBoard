@@ -1,0 +1,1 @@
+let config={"staticUrl":"Ylilauta","reCaptchaPublicKey":"6LeeqyAUAAAAAPojHpZsIZ0X-pszyxYn4OSX9Z8S"}

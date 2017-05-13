@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Models;
 
-use YBoard\Traits\PostsQuery;
+use YBoard\Models\Traits\PostsQuery;
 use YFW\Library\Database;
 use YFW\Model;
 

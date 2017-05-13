@@ -1,4 +1,7 @@
+"use strict";
+
 import './Polyfills';
+import './PrototypeExtensions';
 
 import YQuery from './YQuery';
 import YBoard from './YBoard';
@@ -6,7 +9,7 @@ import YBoard from './YBoard';
 YQuery.ajaxSetup({
     'timeout': 10000,
     'headers': {
-        'X-AAA': '123'
+        'X-CSRF-Token': '123'
     },
     'errorFunction': function(xhr) {
         'use strict';
@@ -39,3 +42,5 @@ YQuery.ajaxSetup({
         alert(messages.timeoutWarning);
     }
 });
+
+window.YBoard = YBoard;

@@ -25,12 +25,12 @@ class TemplateEngine
         $this->templateFile = $templateFile;
     }
 
-    public function __get($name)
+    public function getVar($name)
     {
         return $this->variables[$name];
     }
 
-    public function __set($name, $content)
+    public function setVar($name, $content)
     {
         $this->variables[$name] = $content;
     }
@@ -54,13 +54,16 @@ class TemplateEngine
         // Needs output buffering to just get the executed content as a variable
         ob_start();
         require($viewFile);
+
+        // $output is used inside the template file
         $output = ob_get_clean();
 
         if ($returnAsString) {
             ob_start();
+        } else {
+            header('Content-Type: text/html; charset=utf-8');
         }
 
-        // $output is used inside the template file
         require($this->viewFilesPath . 'Templates/' . $this->templateFile . '.phtml');
 
         if ($returnAsString) {
@@ -70,13 +73,17 @@ class TemplateEngine
         return false;
     }
 
-    protected function getTitle()
+    protected function getTitle(string $siteName = ''): string
     {
         $title = '';
         if (!empty($this->variables['pageTitle'])) {
-            $title .= $this->variables['pageTitle'] . ' | ';
+            $title .= $this->variables['pageTitle'];
+
+            if (!empty($siteName)) {
+                $title .= ' | ';
+            }
         }
-        $title .= $this->variables['siteName'];
+        $title .= $siteName;
 
         return $title;
     }

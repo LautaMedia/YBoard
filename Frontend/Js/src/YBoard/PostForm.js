@@ -1,6 +1,4 @@
-
-
-module.exports = {
+export default {
     elm: document.getElementById('post-form'),
     location: document.getElementById('post-form').parentNode,
     msgElm: document.getElementById('post-message'),

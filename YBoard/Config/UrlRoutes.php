@@ -49,11 +49,12 @@ return [
     '#^/hiddenthreads/catalog-?([2-9]|[1-9][0-9]+)?/$#' => ['CustomBoard', 'hiddenThreadsCatalog'],
 
     // Post scripts
-    '#^/scripts/posts/get$#' => ['Post', 'get'],
     '#^/scripts/posts/redirect/([0-9]+)$#' => ['Post', 'redirect'],
-    '#^/scripts/posts/submit$#' => ['Post', 'submit'],
-    '#^/scripts/posts/delete$#' => ['Post', 'delete'],
-    '#^/scripts/posts/deletefile$#' => ['Post', 'deleteFile'],
+    '#^/api/posts/get$#' => ['Post', 'get'],
+    '#^/api/posts/submit$#' => ['Post', 'submit'],
+    '#^/api/posts/delete$#' => ['Post', 'delete'],
+    '#^/api/posts/deletefile$#' => ['Post', 'deleteFile'],
+    '#^/api/report/submit$#' => ['PostReport', 'submit'],
 
     // Mod
     '#^/scripts/mod/banform$#' => ['Mod', 'banForm'],
@@ -62,26 +63,25 @@ return [
     '#^/mod/reports$#' => ['PostReport', 'uncheckedReports'],
 
     // Thread scripts
-    '#^/scripts/threads/getreplies$#' => ['Thread', 'getReplies'],
-    '#^/scripts/threads/hide$#' => ['Thread', 'hide'],
-    '#^/scripts/threads/restore$#' => ['Thread', 'restore'],
-    '#^/scripts/threads/stick$#' => ['Thread', 'stick'],
-    '#^/scripts/threads/unstick$#' => ['Thread', 'unstick'],
-    '#^/scripts/threads/lock$#' => ['Thread', 'lock'],
-    '#^/scripts/threads/unlock$#' => ['Thread', 'unlock'],
+    '#^/api/threads/getreplies$#' => ['Thread', 'getReplies'],
+    '#^/api/threads/hide$#' => ['Thread', 'hide'],
+    '#^/api/threads/restore$#' => ['Thread', 'restore'],
+    '#^/api/threads/stick$#' => ['Thread', 'stick'],
+    '#^/api/threads/unstick$#' => ['Thread', 'unstick'],
+    '#^/api/threads/lock$#' => ['Thread', 'lock'],
+    '#^/api/threads/unlock$#' => ['Thread', 'unlock'],
 
     // Follow threads
-    '#^/scripts/follow/add$#' => ['ThreadFollow', 'add'],
-    '#^/scripts/follow/remove$#' => ['ThreadFollow', 'remove'],
-    '#^/scripts/follow/markallread$#' => ['ThreadFollow', 'markAllRead'],
+    '#^/api/follow/add$#' => ['ThreadFollow', 'add'],
+    '#^/api/follow/remove$#' => ['ThreadFollow', 'remove'],
+    '#^/api/follow/markallread$#' => ['ThreadFollow', 'markAllRead'],
 
     // File scripts
-    '#^/scripts/files/upload$#' => ['File', 'upload'],
+    '#^/api/files/upload$#' => ['File', 'upload'],
     '#^/scripts/files/getmediaplayer$#' => ['File', 'getMediaPlayer'],
 
     // Post reporting
     '#^/scripts/report/getform$#' => ['PostReport', 'getForm'],
-    '#^/scripts/report/submit$#' => ['PostReport', 'submit'],
 
     // Boards
     // Checked at the end so other rules override

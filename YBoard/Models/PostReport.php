@@ -1,11 +1,11 @@
 <?php
 namespace YBoard\Models;
 
+use YBoard\Models\Traits\BanReasons;
 use YFW\Library\Database;
-use YBoard\BaseModel;
-use YBoard\Trait\BanReasons;
+use YFW\Model;
 
-class PostReport extends BaseModel
+class PostReport extends Model
 {
     use BanReasons;
 
@@ -53,7 +53,7 @@ class PostReport extends BaseModel
         }
     }
 
-    public function setChecked(int $checkedBy) : bool
+    public function setChecked(int $checkedBy): bool
     {
         $q = $this->db->prepare("UPDATE posts_reports SET is_checked = 1, checked_by = :checked_by
             WHERE post_id = :post_id LIMIT 1");

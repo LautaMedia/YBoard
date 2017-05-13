@@ -23,14 +23,14 @@ class Board extends BaseController
 
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = $board->name;
-        $view->bodyClass = 'board-page';
-        $view->threads = $threads;
+        $view->setVar('pageTitle', $board->name);
+        $view->setVar('bodyClass', 'board-page');
+        $view->setVar('threads', $threads);
 
         $this->initializePagination($view, $pageNum, $this->config['view']['maxPages'], $isLastPage);
 
-        $view->board = $board;
-        $view->pageNum = $pageNum;
+        $view->setVar('board', $board);
+        $view->setVar('pageNum', $pageNum);
         $view->display('Board');
     }
 
@@ -60,7 +60,7 @@ class Board extends BaseController
         $view->display('BoardCatalog');
     }
 
-    public function redirect($boardUrl, $boardPage = 1, $catalog = '', $catalogPage = 1)
+    public function redirect(string $boardUrl, int $boardPage = 1, string $catalog = '', int $catalogPage = 1)
     {
         // Verify board exists
         $redirTo = false;

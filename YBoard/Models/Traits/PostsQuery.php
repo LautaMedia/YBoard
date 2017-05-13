@@ -1,5 +1,5 @@
 <?php
-namespace YBoard\Traits;
+namespace YBoard\Models\Traits;
 
 trait PostsQuery
 {

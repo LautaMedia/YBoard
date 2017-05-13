@@ -2,29 +2,20 @@
 
 namespace YBoard;
 
-use YFW\Controller;
-use YFW\Library\Database;
-use YFW\Library\HttpResponse;
-use YFW\Library\i18n;
-use YFW\Library\TemplateEngine;
 use YBoard\Models\Bans;
 use YBoard\Models\Boards;
 use YBoard\Models\PostReports;
 use YBoard\Models\Users;
 use YBoard\Models\UserSession;
 use YBoard\Models\UserSessions;
-use YBoard\Traits\Ajax;
-use YBoard\Traits\Cookies;
-use YBoard\Traits\ErrorPages;
-use YBoard\Traits\PostChecks;
+use YFW\Controller;
+use YFW\Library\Database;
+use YFW\Library\HttpResponse;
+use YFW\Library\i18n;
+use YFW\Library\TemplateEngine;
 
 abstract class BaseController extends Controller
 {
-    use ErrorPages;
-    use Cookies;
-    use PostChecks;
-    use Ajax;
-
     protected $config;
     protected $i18n;
     protected $db;
@@ -151,6 +142,9 @@ abstract class BaseController extends Controller
         if ($httpStatus && is_int($httpStatus)) {
             HttpResponse::setStatusCode($httpStatus);
         }
+
+        die($_SERVER['HTTP_X_REQUESTED_WITH']);
+
         $view = $this->loadTemplateEngine();
 
         $view->pageTitle = $view->errorTitle = $errorTitle;
@@ -173,7 +167,7 @@ abstract class BaseController extends Controller
         $this->stopExecution();
     }
 
-    protected function initializePagination($view, $pageNum, $maxPages, $isLastPage, $base = '')
+    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, string $base = '')
     {
         if ($isLastPage) {
             $maxPages = $pageNum;
@@ -181,17 +175,23 @@ abstract class BaseController extends Controller
 
         // Calculate the end and start pages of the pagination
         // We don't count the total number of pages to save some resources.
-        $view->paginationBase = $base;
-        $view->maxPages = $maxPages;
-        $view->paginationStartPage = $pageNum - 1;
-        if ($view->paginationStartPage < 2) {
-            $view->paginationStartPage = 2;
+        $startPage = $pageNum - 1;
+        if ($startPage < 2) {
+            $startPage = 2;
         }
 
-        $view->paginationEndPage = $pageNum + 2;
-        if ($view->paginationEndPage > $maxPages) {
-            $view->paginationEndPage = $maxPages;
+        $endPage = $pageNum + 2;
+        if ($endPage > $maxPages) {
+            $endPage = $maxPages;
         }
+
+        $view->setVar('pagination', [
+            'base' => $base,
+            'page' => $pageNum,
+            'maxPages' => $maxPages,
+            'startPage' => $startPage,
+            'endPage' => $endPage,
+        ]);
     }
 
     protected function limitPages($pageNum, $maxPages)
@@ -205,9 +205,7 @@ abstract class BaseController extends Controller
     {
         $templateEngine = new TemplateEngine(ROOT_PATH . '/YBoard/Views/', $templateFile);
 
-        foreach ($this->config['view'] as $var => $val) {
-            $templateEngine->$var = $val;
-        }
+        $templateEngine->setVar('config', $this->config['view']);
 
         // Some things are only done when loading regular pages with the "Default" template
         if ($templateFile == 'Default') {
@@ -217,11 +215,13 @@ abstract class BaseController extends Controller
             if ($this->user->isMod) {
                 // Get unchecked reports
                 $reports = new PostReports($this->db);
-                $templateEngine->uncheckedReports = $reports->getUncheckedCount();
 
                 // Get ban appeals
                 $bans = new Bans($this->db);
-                $templateEngine->uncheckedBanAppeals = $bans->getUncheckedAppealCount();
+                $templateEngine->setVar('moderation', [
+                    'uncheckedReports' => $reports->getUncheckedCount(),
+                    'uncheckedBanAppeals' => $bans->getUncheckedAppealCount()
+                ]);
             }
         }
 
@@ -241,15 +241,18 @@ abstract class BaseController extends Controller
             $altTheme = $this->config['view']['themes'][$this->user->preferences->theme]['altCss'];
         }
 
-        $templateEngine->stylesheet = $theme;
-        $templateEngine->altStylesheet = $altTheme;
+        $templateEngine->setVar('stylesheet', [
+            'name' => $theme,
+            'alt' => $altTheme,
+        ]);
 
-        $templateEngine->locale = $this->locale;
-        $templateEngine->localeDomain = $this->localeDomain;
-        $templateEngine->csrfToken = $this->user->session->csrfToken;
-        $templateEngine->reCaptchaPublicKey = $this->config['reCaptcha']['publicKey'];
-        $templateEngine->user = $this->user;
-        $templateEngine->boardList = $this->boards->getAll();
+        $templateEngine->setVar('locale', [
+            'name' => $this->locale,
+            'domain' => $this->localeDomain,
+        ]);
+
+        $templateEngine->setVar('user', $this->user);
+        $templateEngine->setVar('boardList', $this->boards->getAll());
 
         return $templateEngine;
     }
@@ -308,5 +311,146 @@ abstract class BaseController extends Controller
     {
         $this->throwJsonError(401, _('Your session has expired. Please refresh this page and try again.'));
         $this->stopExecution();
+    }
+
+    protected function invalidAjaxData()
+    {
+        HttpResponse::setStatusCode(400);
+        $this->jsonMessage(_('Invalid request'));
+        $this->stopExecution();
+    }
+
+    protected function jsonPageReload(string $url = null)
+    {
+        echo json_encode(['reload' => true, 'url' => $url]);
+    }
+
+    protected function jsonMessage(string $message, string $title = null, bool $reload = false, string $url = null)
+    {
+        $args = [
+            'title' => $title,
+            'message' => $message,
+            'reload' => $reload,
+            'url' => $url,
+        ];
+
+        echo json_encode($args);
+    }
+
+    protected function throwJsonError(int $statusCode, string $message = null, string $title = null)
+    {
+        HttpResponse::setStatusCode($statusCode);
+
+        if ($message) {
+            $this->jsonMessage($message, $title);
+        }
+
+        $this->stopExecution();
+    }
+
+    protected function getLoginCookie()
+    {
+        if (empty($_COOKIE['user'])) {
+            return false;
+        }
+
+        if (strlen($_COOKIE['user']) <= 65 || substr_count($_COOKIE['user'], '-') !== 1) {
+            return false;
+        }
+
+        list($userId, $sessionId) = explode('-', $_COOKIE['user']);
+
+        return ['userId' => (int)$userId, 'sessionId' => hex2bin($sessionId)];
+    }
+
+    protected function setLoginCookie(int $userId, $sessionId): bool
+    {
+        $sessionId = bin2hex($sessionId);
+        HttpResponse::setCookie('user', $userId . '-' . $sessionId);
+
+        return true;
+    }
+
+    protected function deleteLoginCookie(bool $reload = false): bool
+    {
+        HttpResponse::setCookie('user', '', false);
+        if ($reload) {
+            HttpResponse::redirectExit($_SERVER['REQUEST_URI']);
+        }
+
+        return true;
+    }
+
+    protected function badRequest($errorTitle = false, $errorMessage = false)
+    {
+        $errorTitle = empty($errorTitle) ? _('Bad request') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('Your request did not complete because it contained invalid information.') : $errorMessage;
+        $this->dieWithMessage($errorTitle, $errorMessage, 400);
+    }
+
+    protected function unauthorized($errorTitle = false, $errorMessage = false)
+    {
+        $errorTitle = empty($errorTitle) ? _('Unauthorized') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('You are not authorized to perform this operation') : $errorMessage;
+        $this->dieWithMessage($errorTitle, $errorMessage, 401);
+    }
+
+    protected function blockAccess($errorTitle = false, $errorMessage = false)
+    {
+        $errorTitle = empty($errorTitle) ? _('Forbidden') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('Thou shalt not access this resource!') : $errorMessage;
+        $this->dieWithMessage($errorTitle, $errorMessage, 403);
+    }
+
+    public function notFound($errorTitle = false, $errorMessage = false)
+    {
+        $errorTitle = empty($errorTitle) ? _('Page not found') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. Probably never did.') : $errorMessage;
+
+        $images = glob(ROOT_PATH . '/public/static/img/404/*.*');
+        if (!empty($images)) {
+            $image = $this->imagePathToUrl($images[array_rand($images)]);
+        } else {
+            $images = false;
+        }
+
+        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
+    }
+
+    protected function internalError($errorTitle = false, $errorMessage = false)
+    {
+        $errorTitle = empty($errorTitle) ? _('Oh noes!') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('We\'re terribly sorry. An internal error occurred when we tried to complete your request.') : $errorMessage;
+
+        $images = glob(ROOT_PATH . '/public/static/img/500/*.*');
+        if (!empty($images)) {
+            $image = $this->imagePathToUrl($images[array_rand($images)]);
+        } else {
+            $images = false;
+        }
+
+        $this->dieWithMessage($errorTitle, $errorMessage, 500, 'internalerror', $image);
+    }
+
+    protected function imagePathToUrl($path)
+    {
+        return $this->config['view']['staticUrl'] . str_replace(ROOT_PATH . '/static', '', $path);
+    }
+
+    protected function disallowNonPost()
+    {
+        if (!$this->isPostRequest()) {
+            HttpResponse::setStatusCode(405, ['Allowed' => 'POST']);
+            $this->stopExecution();
+        }
+    }
+
+    protected function isPostRequest()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            return true;
+        }
+
+        return false;
     }
 }

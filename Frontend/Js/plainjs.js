@@ -62,46 +62,6 @@ $('.currency').localizeCurrency();
 */
 
 // -------------------------------------------
-// Theme functions
-// -------------------------------------------
-YB.theme = {
-    toggleSidebar: function () {
-        if ($('#hide-sidebar').is('*')) {
-            $('#hide-sidebar').remove();
-            $('#sidebar').removeClass('visible');
-        } else {
-            $('<link>').attr({
-                'rel': 'stylesheet',
-                'id': 'hide-sidebar',
-                'href': config.staticUrl + '/css/hide_sidebar.css',
-            }).appendTo('head');
-        }
-
-        $.post('/scripts/preferences/togglesidebar');
-    },
-    switchVariation: function () {
-        var css = $('.css:last');
-        var current = css.attr('href');
-        var variation = css.data('alt');
-
-        $('<link>').attr({
-            'rel': 'stylesheet',
-            'class': 'css',
-            'href': variation,
-            'data-alt': current
-        }).insertAfter(css);
-
-        var timeout = setTimeout(function () {
-            css.remove();
-        }, 5000);
-
-        $.post('/scripts/preferences/togglethemevariation').fail(function () {
-            clearTimeout(timeout);
-        });
-    }
-};
-
-// -------------------------------------------
 // Post functions
 // -------------------------------------------
 YB.post = {

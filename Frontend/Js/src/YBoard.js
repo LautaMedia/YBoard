@@ -1,9 +1,11 @@
 import YQuery from './YQuery';
 import Captcha from './YBoard/Captcha';
+import Theme from './YBoard/Theme';
 
 class YBoard {
-
     constructor() {
+        this.theme = Theme;
+
         if (this.isBadBrowser()) {
             this.browserWarning();
         }

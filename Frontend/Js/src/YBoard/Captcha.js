@@ -1,11 +1,8 @@
 // reCAPTCHA
-import YQuery from '../YQuery';
 
 export default {
     render: function (elm, options) {
-        options = YQuery.extend({
-            'sitekey': config.reCaptchaPublicKey
-        }, options);
+        options = Object.assign({'sitekey': config.reCaptchaPublicKey}, options);
 
         if (typeof grecaptcha === 'undefined' || !document.getElementById(elm)) {
             return false;

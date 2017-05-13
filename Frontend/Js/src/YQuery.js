@@ -10,15 +10,10 @@ class YQuery {
             'errorFunction': null,
             'loadendFunction': null,
             'headers': {
-                'Cache-Control': 'no-cache, max-age=0'
-            }
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            'cache': false,
         };
-    }
-
-    ajaxSetup(options) {
-        'use strict';
-
-        this.ajaxOptions = this.extend(this.ajaxOptions, options);
     }
 
     on(eventName, target, fn) {
@@ -31,35 +26,30 @@ class YQuery {
         return this;
     }
 
-    extend(...args) {
-        for (let i = 1; i < args.length; i++) {
-            for (let key in args[i]) {
-                if (!args[i].hasOwnProperty(key)) {
-                    continue;
-                }
-
-                if (typeof args[i][key] === 'object') {
-                    args[i][key] = this.extend(args[0][key], args[i][key]);
-                }
-
-                args[0][key] = args[i][key];
-            }
-
+    toggle(element) {
+        if (window.getComputedStyle(element).display === 'block') {
+            element.style.display = 'none';
+        } else {
+            element.style.display = 'block';
         }
-
-        return arguments[0];
     }
 
-    get(url, options) {
-        options = this.extend({
+    // AJAX
+
+    ajaxSetup(options) {
+        this.ajaxOptions = Object.assign(this.ajaxOptions, options);
+    }
+
+    get(url, options = {}) {
+        options = Object.assign({
             'url': url
         }, options);
 
         return this.ajax(options);
     }
 
-    post(url, data, options) {
-        options = this.extend({
+    post(url, data, options = {}) {
+        options = Object.assign({
             'method': 'POST',
             'url': url,
             'data': data,
@@ -71,8 +61,15 @@ class YQuery {
         return this.ajax(options);
     }
 
-    ajax(options) {
-        options = this.extend(this.ajaxOptions, options);
+    ajax(options = {}) {
+        options = Object.assign(this.ajaxOptions, options);
+        console.log(options);
+
+        if (!options.cache) {
+            options.headers = Object.assign(options.headers, {
+                'Cache-Control': 'no-cache, max-age=0'
+            });
+        }
 
         let xhr = new XMLHttpRequest();
         xhr.timeout = options.timeout;
@@ -124,14 +121,6 @@ class YQuery {
         xhr.send(options.data);
 
         return xhr;
-    }
-
-    toggle(element) {
-        if (window.getComputedStyle(element).display === 'block') {
-            element.style.display = 'none';
-        } else {
-            element.style.display = 'block';
-        }
     }
 }
 

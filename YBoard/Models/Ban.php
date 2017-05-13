@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Models;
 
-use YBoard\Traits\BanReasons;
+use YBoard\Models\Traits\BanReasons;
 use YFW\Library\Database;
 use YFW\Model;
 

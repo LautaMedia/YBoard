@@ -25,14 +25,14 @@
     <div class="input-row" id="label-subject">
         <label>
             <span class="label"><?= _('Subject') ?></span>
-            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $subjectMaxLength ?>">
+            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $config['subjectMaxLength'] ?>">
         </label>
     </div>
 <?php endif ?>
     <div class="input-row">
         <label id="label-file">
-            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($uploadMaxSize) ?></span></span>
-            <input type="file" name="files" id="post-files" accept="<?= $acceptedFileTypes ?>" data-maxsize="<?= $uploadMaxSize ?>">
+            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config['uploadMaxSize']) ?></span></span>
+            <input type="file" name="files" id="post-files" accept="<?= $config['acceptedFileTypes'] ?>" data-maxsize="<?= $config['uploadMaxSize'] ?>">
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">
@@ -68,7 +68,7 @@
                 <a class="icon-palette pink bb-code" title="<?= _('Pink') ?>" data-code="pink"></a>
             </div>
         </div>
-        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $messageMaxLength ?>"></textarea>
+        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config['messageMaxLength'] ?>"></textarea>
     </div>
 
     <?php if ($user->requireCaptcha) : ?>
