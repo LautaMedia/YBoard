@@ -6,6 +6,7 @@ import Catalog from './YBoard/Catalog';
 import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
+import Modal from './YBoard/Modal';
 
 class YBoard
 {
@@ -18,10 +19,39 @@ class YBoard
         this.Thread = new Thread();
         this.Post = new Post();
         this.PostForm = new PostForm();
+        this.Modal = new Modal();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
         }
+
+        document.addEventListener('keydown', function(e)
+        {
+            if (!e.ctrlKey && !e.shiftKey && e.which === 116 || e.ctrlKey && !e.shiftKey && e.which === 82) {
+                // Make F5 || CTRL + R function like clicking links and thus not reloading everything
+                // Maybe we can remove this completely one day.
+                this.pageReload();
+                return false;
+            }
+            if (e.ctrlKey && e.which === 13) {
+                // Submit the post form with CTRL + Enter
+                this.PostForm.submit(e);
+            }
+        });
+    }
+
+    getSelectionText()
+    {
+        let text = '';
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else {
+            if (document.selection && document.selection.type !== 'Control') {
+                text = document.selection.createRange().text;
+            }
+        }
+
+        return text;
     }
 
     isBadBrowser()
@@ -46,12 +76,12 @@ class YBoard
         document.body.appendChild(browserWarning);
     }
 
-    static pageReload()
+    pageReload()
     {
         window.location = window.location.href.split('#')[0];
     }
 
-    static returnToBoard()
+    returnToBoard()
     {
         // Remove everything after the last slash and redirect
         // Should work if we are in a thread, otherwise not really
@@ -80,7 +110,8 @@ class YBoard
         let overlay = $('<div class="form-overlay"><div>' + this.spinnerHtml() + '</div></div>');
         form.append(overlay);
 
-        YQuery.post(form.getAttribute('action'), fd).done(function(data) {
+        YQuery.post(form.getAttribute('action'), fd).done(function(data)
+        {
             if (data.reload) {
                 if (data.url) {
                     window.location = data.url;

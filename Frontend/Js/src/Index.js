@@ -25,7 +25,7 @@ YQuery.ajaxSetup({
                         errorTitle = text.title;
                     }
                 } catch (e) {
-                    errorMessage = xhr.status + ' ' + xhr.responseText;
+                    errorMessage = xhr.responseText;
                 }
             }
         }

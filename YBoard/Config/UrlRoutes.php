@@ -78,7 +78,7 @@ return [
 
     // File scripts
     '#^/api/files/upload$#' => ['File', 'upload'],
-    '#^/scripts/files/getmediaplayer$#' => ['File', 'getMediaPlayer'],
+    '#^/api/files/getmediaplayer$#' => ['File', 'getMediaPlayer'],
 
     // Post reporting
     '#^/scripts/report/getform$#' => ['PostReport', 'getForm'],

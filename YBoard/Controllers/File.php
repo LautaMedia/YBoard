@@ -3,7 +3,7 @@ namespace YBoard\Controllers;
 
 use YBoard\BaseController;
 use YBoard\Models\Files;
-use YFW\Exception\FileUploadException;
+use YFW\Exceptions\FileUploadException;
 use YFW\Library\TemplateEngine;
 
 class File Extends BaseController
@@ -14,8 +14,13 @@ class File Extends BaseController
             $this->throwJsonError(400, _('No file uploaded'));
         }
 
+        if (!is_dir($this->config->files->savePath)) {
+            $this->throwJsonError(500, _('File uploads are temporarily disabled due to a configuration error'));
+        }
+
         // Check that we have enough free space for files
-        if (disk_free_space($this->config['files']['savePath']) <= $this->config['files']['diskMinFree']) {
+        if (disk_free_space($this->config->files->savePath) <= $this->config->files->diskMinFree) {
+            die(disk_free_space($this->config->files->savePath));
             $this->throwJsonError(403, _('File uploads are temporarily disabled'));
         }
 
@@ -23,20 +28,28 @@ class File Extends BaseController
         $files = new Files($this->db);
         $files->setConfig($this->config['files']);
 
-        if ($_FILES['file']['size'] >= $this->config['files']['maxSize']) {
-            $this->throwJsonError(400, _('Your files exceed the maximum upload size.'));
+        $ids = [];
+        foreach ($_FILES['file'] as $file) {
+            if ($_FILES['file']['size'] >= $this->config->files->maxSize) {
+                $this->throwJsonError(400, _('Your files exceed the maximum upload size'));
+            }
+
+            try {
+                $file = $files->processUpload($_FILES['file'], true);
+            } catch (FileUploadException $e) {
+                $this->throwJsonError(400, $e->getMessage());
+            }
+
+            $this->user->statistics->increment('uploadedFiles');
+            $this->user->statistics->increment('uploadedFilesTotalSize', $_FILES['file']['size']);
+
+            $ids[] = $file->id;
+
+            // Limit to one file per upload for now
+            break;
         }
 
-        try {
-            $file = $files->processUpload($_FILES['file'], true);
-        } catch (FileUploadException $e) {
-            $this->throwJsonError(400, $e->getMessage());
-        }
-
-        $this->user->statistics->increment('uploadedFiles');
-        $this->user->statistics->increment('uploadedFilesTotalSize', $_FILES['file']['size']);
-
-        $this->jsonMessage($file->id);
+        $this->jsonMessage(json_encode($ids));
     }
 
     public function getMediaPlayer()

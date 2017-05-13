@@ -22,7 +22,7 @@ class Toast
 
     _show(type, message, title)
     {
-        alert(type + ': ' + title + ' - ' + message);
+        alert(type + ': ' + title + "\n\n" + message);
     }
 }
 

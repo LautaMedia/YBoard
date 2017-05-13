@@ -89,11 +89,11 @@ var _Captcha = __webpack_require__(5);
 
 var _Captcha2 = _interopRequireDefault(_Captcha);
 
-var _Theme = __webpack_require__(10);
+var _Theme = __webpack_require__(11);
 
 var _Theme2 = _interopRequireDefault(_Theme);
 
-var _Toast = __webpack_require__(15);
+var _Toast = __webpack_require__(16);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -101,17 +101,21 @@ var _Catalog = __webpack_require__(6);
 
 var _Catalog2 = _interopRequireDefault(_Catalog);
 
-var _Thread = __webpack_require__(11);
+var _Thread = __webpack_require__(12);
 
 var _Thread2 = _interopRequireDefault(_Thread);
 
-var _Post = __webpack_require__(7);
+var _Post = __webpack_require__(8);
 
 var _Post2 = _interopRequireDefault(_Post);
 
-var _PostForm = __webpack_require__(8);
+var _PostForm = __webpack_require__(9);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
+
+var _Modal = __webpack_require__(7);
+
+var _Modal2 = _interopRequireDefault(_Modal);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -128,13 +132,41 @@ var YBoard = function () {
         this.Thread = new _Thread2.default();
         this.Post = new _Post2.default();
         this.PostForm = new _PostForm2.default();
+        this.Modal = new _Modal2.default();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
         }
+
+        document.addEventListener('keydown', function (e) {
+            if (!e.ctrlKey && !e.shiftKey && e.which === 116 || e.ctrlKey && !e.shiftKey && e.which === 82) {
+                // Make F5 || CTRL + R function like clicking links and thus not reloading everything
+                // Maybe we can remove this completely one day.
+                this.pageReload();
+                return false;
+            }
+            if (e.ctrlKey && e.which === 13) {
+                // Submit the post form with CTRL + Enter
+                this.PostForm.submit(e);
+            }
+        });
     }
 
     _createClass(YBoard, [{
+        key: 'getSelectionText',
+        value: function getSelectionText() {
+            var text = '';
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else {
+                if (document.selection && document.selection.type !== 'Control') {
+                    text = document.selection.createRange().text;
+                }
+            }
+
+            return text;
+        }
+    }, {
         key: 'isBadBrowser',
         value: function isBadBrowser() {
             if (typeof FormData !== 'function') {
@@ -155,6 +187,21 @@ var YBoard = function () {
             browserWarning.innerHTML = '<p>' + messages.oldBrowserWarning + '</p>';
 
             document.body.appendChild(browserWarning);
+        }
+    }, {
+        key: 'pageReload',
+        value: function pageReload() {
+            window.location = window.location.href.split('#')[0];
+        }
+    }, {
+        key: 'returnToBoard',
+        value: function returnToBoard() {
+            // Remove everything after the last slash and redirect
+            // Should work if we are in a thread, otherwise not really
+            var url = window.location.href;
+            url = url.substr(0, url.lastIndexOf('/') + 1);
+
+            window.location = url;
         }
     }, {
         key: 'spinnerHtml',
@@ -229,21 +276,6 @@ var YBoard = function () {
                 elm.data('open', false);
             }
         }
-    }], [{
-        key: 'pageReload',
-        value: function pageReload() {
-            window.location = window.location.href.split('#')[0];
-        }
-    }, {
-        key: 'returnToBoard',
-        value: function returnToBoard() {
-            // Remove everything after the last slash and redirect
-            // Should work if we are in a thread, otherwise not really
-            var url = window.location.href;
-            url = url.substr(0, url.lastIndexOf('/') + 1);
-
-            window.location = url;
-        }
     }]);
 
     return YBoard;
@@ -279,7 +311,9 @@ var YQuery = function () {
             'timeoutFunction': null,
             'errorFunction': null,
             'loadendFunction': null,
-            'cache': false
+            'cache': false,
+            'contentType': null,
+            'xhr': null
         };
         this.ajaxHeaders = {
             'X-Requested-With': 'XMLHttpRequest'
@@ -296,6 +330,15 @@ var YQuery = function () {
             });
 
             return this;
+        }
+    }, {
+        key: 'toggle',
+        value: function toggle(element) {
+            if (window.getComputedStyle(element).display === 'block') {
+                element.style.display = 'none';
+            } else {
+                element.style.display = 'block';
+            }
         }
 
         // AJAX
@@ -331,12 +374,17 @@ var YQuery = function () {
             options = Object.assign({
                 'method': 'POST',
                 'url': url,
-                'data': data
+                'data': data,
+                'contentType': 'application/x-www-form-urlencoded; charset=UTF-8'
             }, options);
 
-            headers = Object.assign(this.ajaxHeaders, {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }, headers);
+            if (options.contentType !== null) {
+                headers = Object.assign(headers, {
+                    'Content-Type': options.contentType
+                });
+            }
+
+            headers = Object.assign(this.ajaxHeaders, headers);
 
             return this.ajax(options, headers);
         }
@@ -375,6 +423,8 @@ var YQuery = function () {
 
                     fn(xhr);
                 });
+
+                return this;
             };
             if (typeof options.loadFunction === 'function') {
                 this.onLoad(options.loadFunction);
@@ -385,6 +435,8 @@ var YQuery = function () {
                 xhr.addEventListener('timeout', function () {
                     fn(xhr);
                 });
+
+                return this;
             };
             if (typeof options.timeoutFunction === 'function') {
                 this.onTimeout(options.timeoutFunction);
@@ -398,6 +450,8 @@ var YQuery = function () {
                     }
                     fn(xhr);
                 });
+
+                return this;
             };
             if (typeof options.errorFunction === 'function') {
                 this.onError(options.errorFunction);
@@ -408,11 +462,23 @@ var YQuery = function () {
                 xhr.addEventListener('loadend', function () {
                     fn(xhr);
                 });
+
+                return this;
             };
             if (typeof options.loadendFunction === 'function') {
-                onEnd(options.loadendFunction);
+                this.onEnd(options.loadendFunction);
             }
 
+            this.getXhrObject = function () {
+                return xhr;
+            };
+
+            // Customizable XHR-object
+            if (typeof options.xhr === 'function') {
+                xhr = options.xhr(xhr);
+            }
+
+            window.fd = options.data;
             xhr.send(options.data);
 
             return this;
@@ -602,7 +668,7 @@ _YQuery2.default.ajaxSetup({
                         errorTitle = text.title;
                     }
                 } catch (e) {
-                    errorMessage = xhr.status + ' ' + xhr.responseText;
+                    errorMessage = xhr.responseText;
                 }
             }
         }
@@ -771,6 +837,101 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Modal = function () {
+    function Modal() {
+        _classCallCheck(this, Modal);
+    }
+
+    _createClass(Modal, [{
+        key: 'open',
+        value: function open(url, options) {
+            this.$body = $('body');
+            this.$blocker = null;
+
+            // Default options
+            this.options = $.extend({
+                closeExisting: true,
+                postData: {},
+                onAjaxComplete: function onAjaxComplete() {}
+            }, options);
+
+            // Close any open modals.
+            if (this.options.closeExisting) {
+                $('.modal-container').remove();
+            }
+
+            // Open blocker
+            this.$body.css('overflow', 'hidden');
+            $('.modal-container.current').removeClass('current');
+            this.$blocker = $('<div class="modal-container current"></div>').appendTo(this.$body);
+
+            // Bind close event
+            $(document).off('keydown.modal').on('keydown.modal', function (e) {
+                if (e.which == 27) {
+                    this.close();
+                }
+            });
+            this.$blocker.click(function (e) {
+                if (e.target == this) {
+                    this.close();
+                }
+            });
+
+            this.$container = $('<div class="modal"><button class="modal-close"><span class="icon-cross2"></span></button></div>');
+            this.$blocker.append(this.$container);
+            this.$elm = $('<div class="modal-content"></div>');
+            this.$container.append(this.$elm);
+            this.$elm.html('<div class="modal-loading">' + YB.spinnerHtml() + '</div>');
+
+            var current = this.$elm;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: options.postData
+            }).done(function (html) {
+                current.html(html);
+            }).fail(function () {
+                YB.modal.close();
+            });
+        }
+    }, {
+        key: 'close',
+        value: function close() {
+            $('.modal-container:last').remove();
+            $('.modal-container:last').addClass('current');
+
+            if ($('.modal-container').length == 0) {
+                $('body').css('overflow', '');
+            }
+        }
+    }, {
+        key: 'closeAll',
+        value: function closeAll() {
+            $('.modal-container').remove();
+            $('body').css('overflow', '');
+        }
+    }]);
+
+    return Modal;
+}();
+
+exports.default = Modal;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _YQuery = __webpack_require__(1);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
@@ -779,7 +940,7 @@ var _YBoard = __webpack_require__(0);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _File = __webpack_require__(9);
+var _File = __webpack_require__(10);
 
 var _File2 = _interopRequireDefault(_File);
 
@@ -792,6 +953,11 @@ var Post = function () {
         _classCallCheck(this, Post);
 
         this.file = new _File2.default();
+
+        // Remove highlighted posts when the location hash is changed
+        document.addEventListener('hashchange', function () {
+            this.removeHighlights();
+        });
     }
 
     _createClass(Post, [{
@@ -843,7 +1009,7 @@ var Post = function () {
 exports.default = Post;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -855,21 +1021,99 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _YBoard = __webpack_require__(0);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var PostForm = function () {
     function PostForm() {
         _classCallCheck(this, PostForm);
 
+        var that = this;
         this.elm = document.getElementById('post-form');
-        this.location = document.getElementById('post-form').parentNode;
-        this.msgElm = document.getElementById('post-message');
+        this.locationParent = this.elm.parentNode;
+        this.location = this.elm.nextElementSibling;
+        this.msgElm = this.elm.querySelector('#post-message');
         this.fileUploadInProgress = false;
         this.fileUploadXhr = null;
         this.submitAfterFileUpload = false;
         this.submitInProgress = false;
         this.origDestName = false;
         this.origDestValue = false;
+
+        // BBCode buttons
+        this.elm.querySelectorAll('.bb-code').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                that.insertBbCode(e.target.dataset.code);
+            });
+        });
+        this.elm.querySelector('.bb-color-bar').addEventListener('click', function () {
+            that.toggleBbColorBar();
+        });
+
+        // Confirm page exit when there's text in the post form
+        document.addEventListener('beforeunload', function (e) {
+            if (!that.submitInProgress && that.msgElm.offsetParent !== null && that.msgElm.value.length !== 0) {
+                return messages.confirmUnload;
+            } else {
+                e = null;
+            }
+        });
+
+        // Reply to a post
+        document.querySelectorAll('.add-post-reply').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                e.preventDefault();
+                that.postReply(e.target.closest('.post').dataset.id);
+                that.msgElm.focus();
+            });
+        });
+
+        // Create thread
+        document.querySelectorAll('.create-thread').forEach(function (elm) {
+            elm.addEventListener('click', function () {
+                that.show();
+            });
+        });
+
+        // Reply to a thread
+        document.querySelectorAll('.add-reply').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                that.threadReply(e.target.closest('.thread').dataset.id);
+                that.msgElm.focus();
+            });
+        });
+
+        // Cancel post
+        this.elm.querySelector('#reset-button').addEventListener('click', function (e) {
+            e.preventDefault();
+            that.reset();
+        });
+
+        // Upload file after change
+        this.elm.querySelector('#post-files').addEventListener('change', function () {
+            that.uploadFile();
+        });
+
+        // Remove file -button
+        this.elm.querySelector('#remove-file').addEventListener('click', function () {
+            that.removeFile();
+        });
+
+        // Toggle post options
+        this.elm.querySelector('.toggle-options').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('post-options').toggle();
+        });
+
+        // Submit a post
+        this.elm.addEventListener('submit', function (e) {
+            that.submit(e);
+        });
     }
 
     _createClass(PostForm, [{
@@ -894,7 +1138,11 @@ var PostForm = function () {
         key: 'reset',
         value: function reset() {
             this.elm.reset();
-            this.location.appendChild(this.elm);
+            if (this.location !== null) {
+                this.locationParent.insertBefore(this.elm, this.location);
+            } else {
+                this.locationParent.appendChild(this.elm);
+            }
 
             this.removeFile();
             this.resetDestination();
@@ -908,22 +1156,27 @@ var PostForm = function () {
     }, {
         key: 'setDestination',
         value: function setDestination(isReply, destination) {
-            this.storeDestination();
+            this.saveDestination();
             var name = 'board';
+
             if (isReply) {
                 name = 'thread';
             }
-            this.elm.find('#post-destination').attr('name', name).val(destination);
+
+            var postDestination = this.elm.querySelector('#post-destination');
+            postDestination.setAttribute('name', name);
+            postDestination.value = destination;
         }
     }, {
-        key: 'storeDestination',
-        value: function storeDestination() {
-            var destElm = this.elm.find('#post-destination');
-            var boardSelector = this.elm.find('#label-board');
+        key: 'saveDestination',
+        value: function saveDestination() {
+            var destElm = this.elm.querySelector('#post-destination');
+            var boardSelector = this.elm.querySelector('#label-board');
 
             // Hide board selector
-            if (boardSelector.is('*')) {
-                boardSelector.hide().find('select').removeAttr('required');
+            if (boardSelector !== null) {
+                boardSelector.hide();
+                boardSelector.querySelector('select').required = false;
                 return true;
             }
 
@@ -931,8 +1184,8 @@ var PostForm = function () {
                 return true;
             }
 
-            this.origDestName = destElm.attr('name');
-            this.origDestValue = destElm.val();
+            this.origDestName = destElm.getAttribute('name');
+            this.origDestValue = destElm.value;
 
             return true;
         }
@@ -944,15 +1197,16 @@ var PostForm = function () {
 
             // Restore board selector
             if (boardSelector !== null) {
-                boardSelector.show().find('select').attr('required', true);
+                boardSelector.show();
+                boardSelector.querySelector('select').required = true;
             }
 
             if (!this.origDestName) {
                 return true;
             }
 
-            destElm.attr('name', this.origDestName);
-            destElm.val(this.origDestValue);
+            destElm.setAttribute('name', this.origDestName);
+            destElm.value = this.origDestValue;
 
             this.origDestName = false;
             this.origDestValue = false;
@@ -967,20 +1221,16 @@ var PostForm = function () {
     }, {
         key: 'toggleBbColorBar',
         value: function toggleBbColorBar() {
-            this.elm.getElementById('color-buttons').toggle();
+            this.elm.querySelector('#color-buttons').toggle();
             this.msgElm.focus();
         }
     }, {
         key: 'uploadFile',
         value: function uploadFile() {
-            if (!('FormData' in window)) {
-                toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
-                return false;
-            }
+            var fileInput = this.elm.querySelector('#post-files');
+            var fileNameElm = this.elm.querySelector('#file-name');
 
-            var fileInput = this.elm.find('#post-files');
-
-            $('#file-name').val('');
+            fileNameElm.value = '';
             this.submitAfterFileUpload = false;
 
             // Abort any ongoing uploads
@@ -991,41 +1241,39 @@ var PostForm = function () {
             this.updateFileProgressBar(1);
 
             // Calculate upload size and check it does not exceed the set maximum
-            var maxSize = fileInput.data('maxsize');
-            var fileList = fileInput[0].files;
+            var maxSize = fileInput.dataset.maxsize;
+            var fileList = fileInput.files;
             var fileSizeSum = 0;
             for (var i = 0, file; file = fileList[i]; i++) {
                 fileSizeSum += file.size;
             }
 
             if (fileSizeSum > maxSize) {
-                toastr.warning(messages.maxSizeExceeded);
+                _YBoard2.default.Toast.warning(messages.maxSizeExceeded);
                 this.updateFileProgressBar(0);
                 return false;
             }
 
             var fd = new FormData();
-            fd.append('file', fileInput[0].files[0]);
+            Array.from(fileList).forEach(function (file) {
+                fd.append('file', file);
+            });
 
             this.fileUploadInProgress = true;
 
-            var fileName = this.elm.find('#post-files').val().split('\\').pop().split('.');
+            var fileName = fileInput.value.split('\\').pop().split('.');
             fileName.pop();
-            this.elm.find('#file-name').val(fileName.join('.'));
+            fileNameElm.value = fileName.join('.');
 
             var that = this;
-            this.fileUploadXhr = $.ajax({
-                url: '/scripts/files/upload',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: fd,
-                xhr: function xhr() {
-                    var xhr = $.ajaxSettings.xhr();
-                    if (!xhr.upload) {
-                        return xhr;
+            var fileUpload = YQuery.post('/api/files/upload', fd, {
+                contentType: null,
+                xhr: function xhr(_xhr) {
+                    if (!_xhr.upload) {
+                        return _xhr;
                     }
-                    xhr.upload.addEventListener('progress', function (evt) {
+                    _xhr.upload.addEventListener('progress', function (evt) {
+                        console.log(evt);
                         if (evt.lengthComputable) {
                             var percent = Math.round(evt.loaded / evt.total * 100);
                             if (percent < 1) {
@@ -1038,26 +1286,29 @@ var PostForm = function () {
                             that.updateFileProgressBar(percent);
                         }
                     }, false);
-                    return xhr;
+
+                    return _xhr;
                 }
-            }).always(function () {
+            }).onEnd(function () {
                 that.fileUploadInProgress = false;
-            }).done(function (data) {
+            }).onLoad(function (data) {
                 that.updateFileProgressBar(100);
                 data = JSON.parse(data);
-                if (data.message.length != 0) {
-                    that.elm.find('#file-id').val(data.message);
+                if (data.message.length !== 0) {
+                    that.elm.querySelector('#file-id').value = data.message;
 
                     if (that.submitAfterFileUpload) {
                         this.submit();
                     }
                 } else {
-                    toastr.error(messages.errorOccurred);
+                    _YBoard2.default.Toast.error(messages.errorOccurred);
                     that.updateFileProgressBar(0);
                 }
-            }).fail(function () {
+            }).onError(function () {
                 that.updateFileProgressBar(0);
             });
+
+            this.fileUploadXhr = fileUpload.getXhrObject();
         }
     }, {
         key: 'removeFile',
@@ -1084,7 +1335,7 @@ var PostForm = function () {
             }
 
             var bar = this.elm.querySelector('.file-progress div');
-            if (progress == 0) {
+            if (progress === 0) {
                 bar.style.width = 0;
                 bar.classList.remove('in-progress');
             } else {
@@ -1105,9 +1356,9 @@ var PostForm = function () {
     }, {
         key: 'postReply',
         value: function postReply(postId) {
-            var selectedText = YB.getSelectionText();
+            var selectedText = _YBoard2.default.getSelectionText();
 
-            this.elm.appendTo(YB.post.getElm(postId));
+            this.elm.appendChild(_YBoard2.default.Post.getElm(postId));
             this.show(true);
 
             this.setDestination(true, this.elm.closest('.thread').data('id'));
@@ -1133,13 +1384,8 @@ var PostForm = function () {
     }, {
         key: 'submit',
         value: function submit(e) {
-            if (typeof e != 'undefined') {
+            if (typeof e !== 'undefined') {
                 e.preventDefault();
-            }
-
-            if (!('FormData' in window)) {
-                toastr.error(messages.oldBrowserWarning, messages.errorOccurred);
-                return false;
             }
 
             var submitButton = this.elm.querySelector('input[type="submit"].button');
@@ -1204,7 +1450,7 @@ var PostForm = function () {
 exports.default = PostForm;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1215,6 +1461,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _YQuery = __webpack_require__(1);
+
+var _YQuery2 = _interopRequireDefault(_YQuery);
+
+var _YBoard = __webpack_require__(0);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1235,11 +1491,11 @@ var File = function () {
                 return false;
             }
 
-            YQuery.post('/scripts/posts/deletefile', {
+            _YQuery2.default.post('/scripts/posts/deletefile', {
                 'post_id': id,
                 'loadFunction': function loadFunction() {
                     this.getElm(id).find('figure').remove();
-                    YBoard.Toast.success(messages.fileDeleted);
+                    _YBoard2.default.Toast.success(messages.fileDeleted);
                 }
             });
         }
@@ -1336,7 +1592,7 @@ var File = function () {
 exports.default = File;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1425,7 +1681,7 @@ var Theme = function () {
 exports.default = Theme;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1437,15 +1693,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _AutoUpdate = __webpack_require__(12);
+var _AutoUpdate = __webpack_require__(13);
 
 var _AutoUpdate2 = _interopRequireDefault(_AutoUpdate);
 
-var _Hide = __webpack_require__(14);
+var _Hide = __webpack_require__(15);
 
 var _Hide2 = _interopRequireDefault(_Hide);
 
-var _Follow = __webpack_require__(13);
+var _Follow = __webpack_require__(14);
 
 var _Follow2 = _interopRequireDefault(_Follow);
 
@@ -1531,7 +1787,7 @@ var Thread = function () {
 exports.default = Thread;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1707,7 +1963,7 @@ var AutoUpdate = function () {
 exports.default = AutoUpdate;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1783,7 +2039,7 @@ var Follow = function () {
 exports.default = Follow;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1832,7 +2088,7 @@ var Hide = function () {
 exports.default = Hide;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1882,7 +2138,7 @@ var Toast = function () {
     }, {
         key: '_show',
         value: function _show(type, message, title) {
-            alert(type + ': ' + title + ' - ' + message);
+            alert(type + ': ' + title + "\n\n" + message);
         }
     }]);
 

@@ -1,3 +1,6 @@
+import YQuery from '../../YQuery';
+import YBoard from '../../YBoard';
+
 class File
 {
     constructor()

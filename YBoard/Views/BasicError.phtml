@@ -1,4 +1,6 @@
-<?php header('Content-Type: text/html; charset=utf-8'); ?>
+<?php
+header('Content-Type: text/html; charset=utf-8');
+if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest') : ?>
 <!doctype html>
 <html>
 <head>
@@ -35,3 +37,8 @@
 
 </body>
 </html>
+<?php else: ?>
+Voihan pahus! - Oh noes!
+Sisäinen virhe: ES-norppa nukahti! Kokeilethan hetken päästä uudelleen...
+Internal error: The ES-seal fell asleep! Please try again in a moment...
+<?php endif ?>

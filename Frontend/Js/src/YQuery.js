@@ -12,10 +12,12 @@ class YQuery
             'errorFunction': null,
             'loadendFunction': null,
             'cache': false,
+            'contentType': null,
+            'xhr': null,
         };
         this.ajaxHeaders = {
             'X-Requested-With': 'XMLHttpRequest',
-        }
+        };
     }
 
     on(eventName, target, fn)
@@ -28,6 +30,15 @@ class YQuery
         });
 
         return this;
+    }
+
+    toggle(element)
+    {
+        if (window.getComputedStyle(element).display === 'block') {
+            element.style.display = 'none';
+        } else {
+            element.style.display = 'block';
+        }
     }
 
     // AJAX
@@ -55,11 +66,16 @@ class YQuery
             'method': 'POST',
             'url': url,
             'data': data,
+            'contentType': 'application/x-www-form-urlencoded; charset=UTF-8',
         }, options);
 
-        headers = Object.assign(this.ajaxHeaders, {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }, headers);
+        if (options.contentType !== null) {
+            headers = Object.assign(headers, {
+                'Content-Type': options.contentType
+            });
+        }
+
+        headers = Object.assign(this.ajaxHeaders, headers);
 
         return this.ajax(options, headers);
     }
@@ -97,6 +113,8 @@ class YQuery
 
                 fn(xhr);
             });
+
+            return this;
         };
         if (typeof options.loadFunction === 'function') {
             this.onLoad(options.loadFunction);
@@ -109,6 +127,8 @@ class YQuery
             {
                 fn(xhr);
             });
+
+            return this;
         };
         if (typeof options.timeoutFunction === 'function') {
             this.onTimeout(options.timeoutFunction);
@@ -124,6 +144,8 @@ class YQuery
                 }
                 fn(xhr);
             });
+
+            return this;
         };
         if (typeof options.errorFunction === 'function') {
             this.onError(options.errorFunction);
@@ -136,11 +158,24 @@ class YQuery
             {
                 fn(xhr);
             });
+
+            return this;
         };
         if (typeof options.loadendFunction === 'function') {
-                onEnd(options.loadendFunction);
+            this.onEnd(options.loadendFunction);
         }
 
+        this.getXhrObject = function()
+        {
+            return xhr;
+        };
+
+        // Customizable XHR-object
+        if (typeof options.xhr === 'function') {
+            xhr = options.xhr(xhr);
+        }
+
+        window.fd = options.data;
         xhr.send(options.data);
 
         return this;
