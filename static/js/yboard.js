@@ -912,6 +912,15 @@ var Modal = function () {
             $('.modal-container').remove();
             $('body').css('overflow', '');
         }
+    }, {
+        key: 'bindClose',
+        value: function bindClose() {
+            var that = this;
+            document.querySelectorAll('.modal-close').forEach(function (elm) {
+                elm.removeEventListener('click', that.close);
+                elm.addEventListener('click', that.close);
+            });
+        }
     }]);
 
     return Modal;

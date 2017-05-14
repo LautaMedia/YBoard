@@ -3,6 +3,7 @@ body {
     font: $fontSize $fontFamily;
     color: $textColor;
     word-wrap: break-word;
+    margin: auto;
 }
 
 img { max-width: 100% }

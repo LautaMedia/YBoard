@@ -129,8 +129,8 @@ innodb_log_file_size = 128M
 # Buffer pool should be larger than total data in databases for optimum
 # performance. Total size is size * instances.
 # Remember, the buffer pools are stored in RAM, do not oversize!
-#innodb_buffer_pool_size = 256M
-#innodb_buffer_pool_instances = 1
+innodb_buffer_pool_size = 256M
+innodb_buffer_pool_instances = 1
 
 # Flushing writes only once per 2 secs increases write performance quite a bit.
 # only downside is the possible loss of 2 seconds worth of data in case of a crash.
@@ -141,7 +141,7 @@ innodb_flush_method = O_DIRECT
 
 # Other InnoDB related
 #innodb_log_file_size = 256M
-#innodb_open_files = 500
+innodb_open_files = 500
 #innodb_read_io_threads = 64
 #innodb_write_io_threads = 64
 
@@ -149,6 +149,7 @@ innodb_flush_method = O_DIRECT
 slow_query_log = 1
 slow_query_log_file = /var/log/mysql/mysql-slow.log
 long_query_time = 0.03 # Yup. 0.03 seconds is slow for a query.
+log_queries_not_using_indexes = 1
 EOM
 
 # Install PHPMyAdmin

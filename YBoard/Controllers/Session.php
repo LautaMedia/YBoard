@@ -4,8 +4,8 @@ namespace YBoard\Controllers;
 use YBoard\BaseController;
 use YFW\Library\ReCaptcha;
 use YBoard\Models\LogModel;
-use YBoard\Models\Users;
-use YBoard\Models\UserSessions;
+use YBoard\Models\User;
+use YBoard\Models\UserSession;
 
 class Session extends BaseController
 {
@@ -17,7 +17,7 @@ class Session extends BaseController
             $this->throwJsonError(401, _('Invalid username or password'), _('Login failed'));
         }
 
-        $users = new Users($this->db);
+        $users = new User($this->db);
         $newUser = $users->getByLogin($_POST['username'], $_POST['password']);
         if (!$newUser) {
             $this->throwJsonError(403, _('Invalid username or password'), _('Login failed'));
@@ -25,7 +25,7 @@ class Session extends BaseController
 
         $this->user->session->destroy();
 
-        $userSessions = new UserSessions($this->db);
+        $userSessions = new UserSession($this->db);
         $newUser->session = $userSessions->create($newUser->id);
 
         $this->setLoginCookie($newUser->id, $newUser->session->id);
@@ -83,7 +83,7 @@ class Session extends BaseController
             $this->throwJsonError(400, _('Username is too long'), _('Signup failed'));
         }
 
-        $users = new Users($this->db);
+        $users = new User($this->db);
         if (!$users->usernameIsFree($_POST['username'])) {
             $this->throwJsonError(400, _('This username is already taken, please choose another one'), _('Signup failed'));
         }

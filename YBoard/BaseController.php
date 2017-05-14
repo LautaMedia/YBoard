@@ -2,16 +2,16 @@
 
 namespace YBoard;
 
-use YBoard\Models\Bans;
-use YBoard\Models\Boards;
-use YBoard\Models\PostReports;
-use YBoard\Models\Users;
+use YBoard\Models\Ban;
+use YBoard\Models\Board;
+use YBoard\Models\PostReport;
+use YBoard\Models\User;
 use YBoard\Models\UserSession;
-use YBoard\Models\UserSessions;
 use YFW\Controller;
 use YFW\Library\Database;
 use YFW\Library\HttpResponse;
 use YFW\Library\i18n;
+use YFW\Library\Profiler;
 use YFW\Library\TemplateEngine;
 
 abstract class BaseController extends Controller
@@ -33,7 +33,7 @@ abstract class BaseController extends Controller
         $this->db = new Database(require(ROOT_PATH . '/YBoard/Config/Database.php'));
 
         // Load some data that are required on almost every page, like the list of boards and user data
-        $this->boards = new Boards($this->db);
+        $this->boards = Board::getAll($this->db);
 
         // Load internalization
         $this->i18n = new i18n(ROOT_PATH . '/YBoard/Locales');
@@ -45,7 +45,7 @@ abstract class BaseController extends Controller
         $this->locale = $this->i18n->getPreferredLocale();
         if (!$this->locale) {
             // Fallback
-            $this->locale = $this->config->i18n->defaultLocale;
+            $this->locale = $this->config['i18n']['defaultLocale'];
         }
         $this->localeDomain = 'default'; // TODO: Add support for custom domains
 
@@ -57,8 +57,9 @@ abstract class BaseController extends Controller
     {
         $resourceUsage = round((microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000,
                 2) . ' ms ' . round(memory_get_usage() / 1024 / 1024, 2) . ' MB';
+
         // Only for non-ajax requests
-        if (!isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != 'XMLHttpRequest') {
             // Debug: Execution time and memory usage
             echo '<!-- ' . $resourceUsage . ' -->';
         } else {
@@ -71,15 +72,13 @@ abstract class BaseController extends Controller
         $cookie = $this->getLoginCookie();
         if ($cookie !== false) {
             // Load session
-            $userSessions = new UserSessions($this->db);
-            $session = $userSessions->get($cookie['userId'], $cookie['sessionId']);
+            $session = UserSession::get($this->db, $cookie['userId'], $cookie['sessionId']);
             if ($session === false) {
                 $this->deleteLoginCookie(true);
             }
 
             // Load user
-            $users = new Users($this->db);
-            $this->user = $users->getById($session->userId);
+            $this->user = User::getById($this->db, $session->userId);
             if ($this->user === false) {
                 $this->deleteLoginCookie(true);
             }
@@ -91,18 +90,15 @@ abstract class BaseController extends Controller
             $this->user->session->updateLastActive();
         } else {
             // Session does not exist
-            $users = new Users($this->db);
             if ($this->userMaybeBot()) {
-                $this->user = $users->createTemporary();
+                $this->user = User::createTemporary($this->db);
                 $this->user->session = new UserSession($this->db);
 
                 return false;
             }
 
-            $this->user = $users->create();
-
-            $userSessions = new UserSessions($this->db);
-            $this->user->session = $userSessions->create($this->user->id);
+            $this->user = User::create($this->db);
+            $this->user->session = UserSession::create($this->db, $this->user->id);
 
             $this->setLoginCookie($this->user->id, $this->user->session->id);
         }
@@ -143,24 +139,24 @@ abstract class BaseController extends Controller
             HttpResponse::setStatusCode($httpStatus);
         }
 
-        die($_SERVER['HTTP_X_REQUESTED_WITH']);
-
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = $view->errorTitle = $errorTitle;
-        $view->errorMessage = $errorMessage;
+        $view->setVar('pageTitle', $errorTitle);
+        $view->setVar('errorTitle', $errorTitle);
+        $view->setVar('errorMessage', $errorMessage);
 
         // Support for "state saving", for login etc.
         if (!empty($_POST['redirto'])) {
             $view->redirTo = $_POST['redirto'];
         }
 
-        $view->bodyClass = 'error';
+        $bc = 'error';
         if (!empty($bodyClass)) {
-            $view->bodyClass .= ' ' . $bodyClass;
+            $bc .= ' ' . $bodyClass;
         }
+        $view->setVar('bodyClass', $bc);
         if (!empty($image)) {
-            $view->errorImageSrc = $image;
+            $view->setVar('errorImageSrc', $image);
         }
 
         $view->display('Error');
@@ -214,10 +210,10 @@ abstract class BaseController extends Controller
             // Mod functions
             if ($this->user->isMod) {
                 // Get unchecked reports
-                $reports = new PostReports($this->db);
+                $reports = new PostReport($this->db);
 
                 // Get ban appeals
-                $bans = new Bans($this->db);
+                $bans = new Ban($this->db);
                 $templateEngine->setVar('moderation', [
                     'uncheckedReports' => $reports->getUncheckedCount(),
                     'uncheckedBanAppeals' => $bans->getUncheckedAppealCount()
@@ -226,21 +222,22 @@ abstract class BaseController extends Controller
         }
 
         // Verify theme exists
-        if (!array_key_exists($this->user->preferences->theme, $this->config->themes)) {
+        if (!array_key_exists($this->user->preferences->theme, $this->config['themes'])) {
             $this->user->preferences->reset('theme');
         }
 
         if ($this->user->preferences->theme === null) {
-            $theme = $this->config->view->defaultTheme;
+            $theme = $this->config['view']['defaultTheme'];
         } else {
             $theme = $this->user->preferences->theme;
         }
 
         $templateEngine->setVar('stylesheet', [
-            'active' => !$this->user->preferences->darkTheme ? $this->config->themes[$theme]->light : $this->config->themes[$theme]->dark,
-            'color' => $this->config->themes[$theme]->color,
-            'light' => $this->config->themes[$theme]->light,
-            'dark' => $this->config->themes[$theme]->dark,
+            'active' => !$this->user->preferences->darkTheme ? $this->config['themes'][$theme]['light']
+                : $this->config['themes'][$theme]['dark'],
+            'color' => $this->config['themes'][$theme]['color'],
+            'light' => $this->config['themes'][$theme]['light'],
+            'dark' => $this->config['themes'][$theme]['dark'],
             'darkTheme' => $this->user->preferences->darkTheme ? 'true' : 'false',
         ]);
 
@@ -250,7 +247,7 @@ abstract class BaseController extends Controller
         ]);
 
         $templateEngine->setVar('user', $this->user);
-        $templateEngine->setVar('boardList', $this->boards->getAll());
+        $templateEngine->setVar('boardList', $this->boards);
 
         return $templateEngine;
     }
@@ -432,7 +429,7 @@ abstract class BaseController extends Controller
 
     protected function imagePathToUrl($path)
     {
-        return $this->config->app->staticUrl . str_replace(ROOT_PATH . '/static', '', $path);
+        return $this->config['app']['staticUrl'] . str_replace(ROOT_PATH . '/static', '', $path);
     }
 
     protected function disallowNonPost()

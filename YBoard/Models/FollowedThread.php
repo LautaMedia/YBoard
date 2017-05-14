@@ -2,9 +2,9 @@
 namespace YBoard\Models;
 
 use YFW\Library\Database;
-use YBoard\BaseModel;
+use YFW\Model;
 
-class FollowedThread extends BaseModel
+class FollowedThread extends Model
 {
     public $id;
     public $threadId;

@@ -9,14 +9,7 @@ use YFW\Library\HttpResponse;
 use YFW\Library\MessageQueue;
 use YFW\Library\ReCaptcha;
 use YFW\Library\Text;
-use YBoard\Models\Files;
-use YBoard\Models\LogModel;
-use YBoard\Models\Notification;
-use YBoard\Models\Notifications;
-use YBoard\Models\Posts;
-use YBoard\Models\UserNotifications;
-use YBoard\Models\UserThreadFollow;
-use YBoard\Models\WordBlacklist;
+use YBoard\Models;
 
 class Post extends BaseController
 {
@@ -28,8 +21,7 @@ class Post extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
-        $post = $posts->get($_POST['postId']);
+        $post = Models\Post::get($this->db, $_POST['postId']);
         if ($post === false) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
@@ -52,7 +44,7 @@ class Post extends BaseController
 
     public function redirect($postId)
     {
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $post = $posts->get($postId, false);
 
         if ($post === false) {
@@ -96,7 +88,7 @@ class Post extends BaseController
             $this->throwJsonError(403, _('You are banned!'));
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
 
         // Is this a reply or a new thread?
         if (!empty($_POST['thread'])) {
@@ -124,7 +116,7 @@ class Post extends BaseController
 
         // Verify file
         if ($hasFile) {
-            $files = new Files($this->db);
+            $files = new File($this->db);
             $file = $files->get($_POST['file_id']);
             if ($file === false) {
                 $this->throwJsonError(400, _('Invalid file'));
@@ -133,7 +125,7 @@ class Post extends BaseController
 
         // Try getting a file by given name
         if (!$hasFile && !empty($fileName)) {
-            $files = new Files($this->db);
+            $files = new File($this->db);
             $file = $files->getByOrigName($fileName);
             if (!$file) {
                 $this->throwJsonError(404,
@@ -283,7 +275,7 @@ class Post extends BaseController
             if ($thread->userId != $this->user->id) {
                 // Notify OP
                 $messageQueue->send([
-                    Notifications::NOTIFICATION_TYPE_THREAD_REPLY,
+                    UserNotification::NOTIFICATION_TYPE_THREAD_REPLY,
                     $thread->id,
                     $notificationsSkipUsers,
                 ], MessageQueue::MSG_TYPE_ADD_POST_NOTIFICATION);
@@ -316,7 +308,7 @@ class Post extends BaseController
         if (!empty($postReplies)) {
             $notificationsSkipUsers[] = $this->user->id;
             $messageQueue->send([
-                Notifications::NOTIFICATION_TYPE_POST_REPLY,
+                UserNotification::NOTIFICATION_TYPE_POST_REPLY,
                 $postReplies,
                 $notificationsSkipUsers
             ], MessageQueue::MSG_TYPE_ADD_POST_NOTIFICATION);
@@ -334,7 +326,7 @@ class Post extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $post = $posts->get($_POST['postId'], false);
         if ($post === false) {
             $this->throwJsonError(404, _('Post does not exist'));
@@ -361,7 +353,7 @@ class Post extends BaseController
         $replied = $post->getRepliedPosts();
         if (!empty($replied)) {
             $messageQueue->send([
-                'types' => Notifications::NOTIFICATION_TYPE_POST_REPLY,
+                'types' => UserNotification::NOTIFICATION_TYPE_POST_REPLY,
                 'posts' => $replied,
             ], MessageQueue::MSG_TYPE_REMOVE_POST_NOTIFICATION);
         }
@@ -377,7 +369,7 @@ class Post extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $post = $posts->get($_POST['post_id'], false);
         if ($post === false) {
             $this->throwJsonError(404, _('Post does not exist'));

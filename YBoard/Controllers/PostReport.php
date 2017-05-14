@@ -2,10 +2,10 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Bans;
+use YBoard\Models\Ban;
 use YBoard\Models\LogModel;
-use YBoard\Models\PostReports;
-use YBoard\Models\Posts;
+use YBoard\Models\PostReport;
+use YBoard\Models\Post;
 
 class PostReport extends BaseController
 {
@@ -13,7 +13,7 @@ class PostReport extends BaseController
     {
         $this->modOnly();
 
-        $postReports = new PostReports($this->db);
+        $postReports = new PostReport($this->db);
         $view = $this->loadTemplateEngine();
         $view->pageTitle = _('Reports');
 
@@ -30,7 +30,7 @@ class PostReport extends BaseController
             $this->throwJsonError(400);
         }
 
-        $reports = new PostReports($this->db);
+        $reports = new PostReport($this->db);
         $report = $reports->get($_POST['post_id']);
         if ($report === false) {
             $this->throwJsonError(404, _('Report does not exist'));
@@ -45,7 +45,7 @@ class PostReport extends BaseController
     {
         $view = $this->loadTemplateEngine('Blank');
 
-        $view->reasons = Bans::getReasons();
+        $view->reasons = Ban::getReasons();
         $view->display('Ajax/ReportForm');
     }
 
@@ -61,12 +61,12 @@ class PostReport extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         if ($posts->get($_POST['post_id'], false) === false) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
 
-        $postReports = new PostReports($this->db);
+        $postReports = new PostReport($this->db);
 
         if ($postReports->isReported($_POST['post_id'])) {
             $this->throwJsonError(418, _('This message has already been reported and is waiting for a review'));

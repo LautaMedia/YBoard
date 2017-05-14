@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title><?= htmlspecialchars($this->getTitle($config->app->name)) ?></title>
+    <title><?= htmlspecialchars($this->getTitle($config['app']['name'])) ?></title>
 
     <meta charset="UTF-8">
 
@@ -9,25 +9,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="<?= $stylesheet['color'] ?>">
 
-    <base href="<?= $config->app->url ?>">
+    <base href="<?= $config['app']['url'] ?>">
 
-    <link rel="stylesheet" class="css" href="<?= $config->app->staticUrl . $stylesheet['active'] ?>?<?=time()?>"
-          data-light="<?= $config->app->staticUrl . $stylesheet['light'] ?>?<?=time()?>"
-          data-dark="<?= $config->app->staticUrl . $stylesheet['dark'] ?>?<?=time()?>"
+    <link rel="stylesheet" class="css" href="<?= $config['app']['staticUrl'] . $stylesheet['active'] ?>?<?=time()?>"
+          data-light="<?= $config['app']['staticUrl'] . $stylesheet['light'] ?>?<?=time()?>"
+          data-dark="<?= $config['app']['staticUrl'] . $stylesheet['dark'] ?>?<?=time()?>"
           data-darkTheme="<?= $stylesheet['darkTheme'] ?>">
     <?php if ($user->preferences->hideSidebar): ?>
-    <link rel="stylesheet" id="hide-sidebar" href="<?= $config->app->staticUrl ?>/css/hide_sidebar.css">
+    <link rel="stylesheet" id="hide-sidebar" href="<?= $config['app']['staticUrl'] ?>/css/hide_sidebar.css">
     <?php endif ?>
 
-    <link rel="icon" sizes="192x192" href="<?= $config->app->staticUrl . $config->app->logoUrl ?>">
+    <link rel="icon" sizes="192x192" href="<?= $config['app']['staticUrl'] . $config['app']['logoUrl'] ?>">
 
-    <script src="<?= $config->app->staticUrl ?>/js/locales/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
-    <script src="<?= $config->app->staticUrl ?>/js/config.js" defer></script>
-    <script src="<?= $config->app->staticUrl ?>/js/yboard.js?<?=time()?>" defer></script>
+    <script src="<?= $config['app']['staticUrl'] ?>/js/locales/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
+    <script src="<?= $config['app']['staticUrl'] ?>/js/config.js" defer></script>
+    <script src="<?= $config['app']['staticUrl'] ?>/js/yboard.js?<?=time()?>" defer></script>
 
     <script>let csrfToken='<?= $user->session->csrfToken ?>';</script>
 
-    <?php if ($config->captcha->enabled && $user->requireCaptcha): ?>
+    <?php if ($config['captcha']['enabled'] && $user->requireCaptcha): ?>
     <script src="https://www.google.com/recaptcha/api.js?onload=YBoard.Captcha.render&render=explicit" async defer></script>
     <?php endif ?>
 </head>

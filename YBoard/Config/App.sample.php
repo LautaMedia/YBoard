@@ -1,36 +1,36 @@
 <?php
 
-return (object)[
-    'app' => (object)[
+return [
+    'app' => [
         'name' => 'YBoard',
         'motto' => 'On speed again',
         'url' => '//localhost:9001', // no trailing slash
         'staticUrl' => '//localhost:9001/static', // no trailing slash
         'logoUrl' => '/img/norppa_ylilauta.svg', // relative to staticUrl
     ],
-    'view' => (object)[
+    'view' => [
         'maxPages' => 100,
         'maxCatalogPages' => 10,
         'previewPosts' => 3,
         'defaultTheme' => 'ylilauta',
     ],
-    'themes' => (object)[
-        'default' => (object)[
+    'themes' => [
+        'default' => [
             'name' => 'Ylilauta',
             'light' => '/css/ylilauta.css', // relative to staticUrl
             'dark' => '/css/ylilauta_dark.css', // relative to staticUrl
         ],
     ],
-    'users' => (object)[
+    'users' => [
         'usernameMaxLength' => 30,
     ],
-    'posts' => (object)[
+    'posts' => [
         'subjectMaxLength' => 60,
         'messageMaxLength' => 12000,
         'replyIntervalLimit' => 5,
         'threadIntervalLimit' => 30,
     ],
-    'files' => (object)[
+    'files' => [
         'url' => '//localhost:9001/static/files', // no trailing slash
         'savePath' => ROOT_PATH . '/public/static/files', // no trailing slash
         'diskMinFree' => 1073741824,
@@ -42,14 +42,14 @@ return (object)[
         'thumbMaxHeight' => 240,
         'acceptedTypes' => '.jpg,.png,.gif,.m4a,.aac,.mp3,.mp4,.webm',
     ],
-    'i18n' => (object)[
+    'i18n' => [
         'defaultLocale' => 'fi_FI.UTF-8', // Used as a fallback if autodetect fails
     ],
-    'search' => (object)[
+    'search' => [
         'enabled' => false,
         'gCsePartnerPub' => 'partner-pub-1234567890:1234567890', // Google CSE
     ],
-    'reCaptcha' => (object)[
+    'reCaptcha' => [
         'enabled' => false,
         'publicKey' => 'xxx',
         'privateKey' => 'xxx',

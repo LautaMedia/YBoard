@@ -2,8 +2,8 @@
     <button id="sidebar-hide-button"></button>
     <nav id="main">
         <a href="/" id="logo">
-            <img src="<?= $config->app->staticUrl . $config->app->logoUrl ?>" alt="<?= htmlspecialchars($config->app->name) ?>">
-            <span><?= htmlspecialchars($config->app->name) ?></span>
+            <img src="<?= $config['app']['staticUrl'] . $config['app']['logoUrl'] ?>" alt="<?= htmlspecialchars($config['app']['name']) ?>">
+            <span><?= htmlspecialchars($config['app']['name']) ?></span>
         </a>
         <div class="columns">
             <a href="/gold"><?= _('Gold account') ?></a>
@@ -12,9 +12,9 @@
             <a href="/about"><?= _('About') ?></a>
             <a href="/advertising"><?= _('Advertising') ?></a>
         </div>
-        <?php if($config->search->enabled): ?>
+        <?php if($config['search']['enabled']): ?>
         <form id="search" method="get" action="/search">
-            <input name="cx" value="<?= $config->search->gCsePartnerPub ?>" type="hidden">
+            <input name="cx" value="<?= $config['search']['gCsePartnerPub'] ?>" type="hidden">
             <input name="cof" value="FORID:10" type="hidden">
             <input name="ie" value="UTF-8" type="hidden">
             <input id="searchfield" name="q" size="24" placeholder="<?= _('Search Ylilauta...') ?>" type="text" required>
@@ -25,8 +25,8 @@
     <nav id="user">
         <?php if (!$user->loggedIn) : ?>
             <h3><?= _('Log in') ?></h3>
-            <form id="login" class="ajax" action="/scripts/session/login" data-signup="/scripts/session/signup" method="post">
-                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config->users->usernameMaxLength ?>" required>
+            <form id="login" class="ajax" action="/api/user/login" data-signup="/api/user/signup" method="post">
+                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['users']['usernameMaxLength'] ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
                 <div id="signup-form">
                     <input type="password" name="repassword" placeholder="<?= _('Password again') ?>">

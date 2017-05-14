@@ -25,14 +25,14 @@
     <div class="input-row" id="label-subject">
         <label>
             <span class="label"><?= _('Subject') ?></span>
-            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $config->posts->subjectMaxLength ?>">
+            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $config['posts']['subjectMaxLength'] ?>">
         </label>
     </div>
 <?php endif ?>
     <div class="input-row">
         <label id="label-file">
-            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config->files->maxSize) ?></span></span>
-            <input type="file" name="files" id="post-files" accept="<?= $config->files->acceptedTypes ?>" data-maxsize="<?= $config->files->maxSize ?>">
+            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config['files']['maxSize']) ?></span></span>
+            <input type="file" name="files" id="post-files" accept="<?= $config['files']['acceptedTypes'] ?>" data-maxsize="<?= $config['files']['maxSize'] ?>">
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">
@@ -68,10 +68,10 @@
                 <a class="icon-palette pink bb-code" title="<?= _('Pink') ?>" data-code="pink"></a>
             </div>
         </div>
-        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config->posts->messageMaxLength ?>"></textarea>
+        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config['posts']['messageMaxLength'] ?>"></textarea>
     </div>
 
-    <?php if ($config->captcha->enabled && $user->requireCaptcha) : ?>
+    <?php if ($config['captcha']['enabled'] && $user->requireCaptcha) : ?>
     <div id="post-form-captcha"></div>
     <?php endif ?>
     <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>

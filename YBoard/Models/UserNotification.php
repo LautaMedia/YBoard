@@ -4,7 +4,7 @@ namespace YBoard\Models;
 use YFW\Library\Database;
 use YFW\Model;
 
-class Notifications extends Model
+class UserNotification extends Model
 {
     const NOTIFICATION_TYPE_POST_REPLY = 1;
     const NOTIFICATION_TYPE_THREAD_REPLY = 2;
@@ -21,6 +21,33 @@ class Notifications extends Model
     protected $list = [];
 
     public $unreadCount = 0;
+    public $id;
+    public $time;
+    public $type;
+    public $postId;
+    public $customData;
+    public $count;
+    public $isRead;
+    public $text;
+
+    public function remove() : bool
+    {
+        $q = $this->db->prepare("DELETE FROM user_notification WHERE id = :id LIMIT 1");
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->execute();
+
+        return true;
+    }
+
+    public function markRead() : bool
+    {
+        $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
+            WHERE id = :id AND is_read = 0 LIMIT 1");
+        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->execute();
+
+        return true;
+    }
 
     public function __construct(Database $db, int $userId = null, array $hiddenTypes = [], bool $skipLoad = false)
     {
@@ -51,7 +78,7 @@ class Notifications extends Model
             $whereType = ' AND type IN (' . $this->db->buildIn($type) . ')';
         }
 
-        $q = $this->db->prepare("UPDATE user_notifications SET count = count-1
+        $q = $this->db->prepare("UPDATE user_notification SET count = count-1
             WHERE post_id IN (" . $this->db->buildIn($postId) . ")" . $whereType);
         $q->execute($params);
 
@@ -64,7 +91,7 @@ class Notifications extends Model
 
     public function clearInvalid()
     {
-        $q = $this->db->prepare("DELETE FROM user_notifications WHERE is_read = 0 and count = 0");
+        $q = $this->db->prepare("DELETE FROM user_notification WHERE is_read = 0 and count = 0");
         $q->execute();
 
         return true;
@@ -72,7 +99,7 @@ class Notifications extends Model
 
     public function add(int $userId, int $type, string $customData = null, int $postId = null)
     {
-        $q = $this->db->prepare("INSERT INTO user_notifications (user_id, type, post_id, custom_data) 
+        $q = $this->db->prepare("INSERT INTO user_notification (user_id, type, post_id, custom_data) 
             VALUES (:user_id, :type, :post_id, :custom_data)
             ON DUPLICATE KEY UPDATE is_read = 0, count = count+1");
 
@@ -87,7 +114,7 @@ class Notifications extends Model
 
     public function markReadByThread(int $threadId) : bool
     {
-        $q = $this->db->prepare("UPDATE user_notifications SET is_read = 1, count = 0
+        $q = $this->db->prepare("UPDATE user_notification SET is_read = 1, count = 0
             WHERE user_id = :user_id AND post_id IN (SELECT id FROM posts WHERE thread_id = :thread_id) AND is_read = 0");
         $q->bindValue('thread_id', $threadId);
         $q->bindValue('user_id', $this->userId);
@@ -98,7 +125,7 @@ class Notifications extends Model
 
     public function markReadByPost(int $postId) : bool
     {
-        $q = $this->db->prepare("UPDATE user_notifications SET count = 0, is_read = 1
+        $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE post_id = :post_id AND user_id = :user_id AND is_read = 0 LIMIT 1");
         $q->bindValue('post_id', $postId);
         $q->bindValue('user_id', $this->userId);
@@ -109,7 +136,7 @@ class Notifications extends Model
 
     public function markAllRead() : bool
     {
-        $q = $this->db->prepare("UPDATE user_notifications SET count = 0, is_read = 1
+        $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE user_id = :user_id AND is_read = 0");
         $q->bindValue('user_id', $this->userId);
         $q->execute();
@@ -138,7 +165,7 @@ class Notifications extends Model
         return $this->list;
     }
 
-    protected function getText(Notification $notification) : string
+    protected function getText(UserNotification $notification) : string
     {
         switch ($notification->type) {
             case static::NOTIFICATION_TYPE_POST_REPLY:
@@ -192,12 +219,12 @@ class Notifications extends Model
             $notIn = ' AND type NOT IN (' . $this->db->buildIn($this->hiddenTypes) . ')';
         }
 
-        $q = $this->db->prepare("SELECT id, time, type, post_id, custom_data, count, is_read FROM user_notifications
+        $q = $this->db->prepare("SELECT id, time, type, post_id, custom_data, count, is_read FROM user_notification
             WHERE user_id = :user_id" . $notIn . " ORDER BY is_read ASC, time DESC LIMIT 100");
         $q->execute($params);
 
         while ($row = $q->fetch()) {
-            $notification = new Notification($this->db);
+            $notification = new UserNotification($this->db);
             $notification->id = $row->id;
             $notification->time = $row->time;
             $notification->type = $row->type;

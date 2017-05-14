@@ -74,6 +74,15 @@ class Modal
         $('.modal-container').remove();
         $('body').css('overflow', '');
     }
+
+    bindClose()
+    {
+        let that = this;
+        document.querySelectorAll('.modal-close').forEach(function(elm) {
+            elm.removeEventListener('click',  that.close);
+            elm.addEventListener('click',  that.close);
+        });
+    }
 }
 
 export default Modal;

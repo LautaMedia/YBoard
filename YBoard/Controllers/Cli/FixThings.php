@@ -2,13 +2,13 @@
 namespace YBoard\Controllers\Cli;
 
 use YBoard\Abstracts\AbstractCliDatabase;
-use YBoard\Models\Files;
+use YBoard\Models\File;
 
 class FixThings extends AbstractCliDatabase
 {
     public function filesizes()
     {
-        $files = new Files($this->db);
+        $files = new File($this->db);
 
         $glob = glob(ROOT_PATH . '/public/static/files/*/t/*.*');
         foreach ($glob AS $filePath) {

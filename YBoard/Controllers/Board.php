@@ -2,7 +2,7 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Posts;
+use YBoard\Models;
 use YFW\Library\HttpResponse;
 
 class Board extends BaseController
@@ -10,13 +10,12 @@ class Board extends BaseController
     public function index($boardUrl, $pageNum = 1)
     {
         $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config->view->maxPages);
+        $this->limitPages($pageNum, $this->config['view']['maxPages']);
 
-        $posts = new Posts($this->db);
-        $posts->setHiddenThreads($this->user->threadHide->getAll());
+        Models\Thread::setHidden($this->user->threadHide->getAll());
 
-        $board = $this->boards->getByUrl($boardUrl);
-        $threads = $posts->getBoardThreads($board->id, $pageNum, $this->user->preferences->threadsPerPage,
+        $board = Models\Board::getByUrl($this->db, $boardUrl);
+        $threads = Models\Thread::getByBoard($this->db, $board->id, $pageNum, $this->user->preferences->threadsPerPage,
             $this->user->preferences->repliesPerThread);
 
         $isLastPage = count($threads) < $this->user->preferences->threadsPerPage;
@@ -27,7 +26,7 @@ class Board extends BaseController
         $view->setVar('bodyClass', 'board-page');
         $view->setVar('threads', $threads);
 
-        $this->initializePagination($view, $pageNum, $this->config->view->maxPages, $isLastPage);
+        $this->initializePagination($view, $pageNum, $this->config['view']['maxPages'], $isLastPage);
 
         $view->setVar('board', $board);
         $view->display('Board');
@@ -36,9 +35,9 @@ class Board extends BaseController
     public function catalog($boardUrl, $pageNum = 1)
     {
         $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config->view->maxCatalogPages);
+        $this->limitPages($pageNum, $this->config['view']['maxCatalogPages']);
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $posts->setHiddenThreads($this->user->threadHide->getAll());
 
         $board = $this->boards->getByUrl($boardUrl);
@@ -51,7 +50,7 @@ class Board extends BaseController
         $view->setVar('pageTitle', $board->name);
         $view->setVar('bodyClass', 'board-catalog');
 
-        $this->initializePagination($view, $pageNum, $this->config->view->maxCatalogPages, $isLastPage, '/catalog');
+        $this->initializePagination($view, $pageNum, $this->config['view']['maxCatalogPages'], $isLastPage, '/catalog');
 
         $view->setVar('board', $board);
         $view->setVar('threads', $threads);
@@ -62,10 +61,10 @@ class Board extends BaseController
     {
         // Verify board exists
         $redirTo = false;
-        if ($this->boards->exists($boardUrl)) {
-            $redirTo = $this->boards->getByUrl($boardUrl)->url;
-        } elseif ($this->boards->isAltUrl($boardUrl)) {
-            $redirTo = $this->boards->getUrlByAltUrl($boardUrl);
+        if (Models\Board::exists($this->db, $boardUrl)) {
+            $redirTo = Models\Board::getByUrl($this->db, $boardUrl)->url;
+        } elseif (Models\Board::isAltUrl($this->db, $boardUrl)) {
+            $redirTo = Models\Board::getUrlByAltUrl($this->db, $boardUrl);
         }
 
         if (!empty($catalog)) {
@@ -81,9 +80,9 @@ class Board extends BaseController
 
     protected function verifyBoard($boardUrl)
     {
-        if (!$this->boards->exists($boardUrl)) {
-            if ($this->boards->isAltUrl($boardUrl)) {
-                HttpResponse::redirectExit('/' . $this->boards->getUrlByAltUrl($boardUrl) . '/', 302);
+        if (!Models\Board::exists($this->db, $boardUrl)) {
+            if (Models\Board::isAltUrl($this->db, $boardUrl)) {
+                HttpResponse::redirectExit('/' . Models\Board::getUrlByAltUrl($this->db, $boardUrl) . '/', 302);
             }
             // Board does not exist and no alt_url match
             $this->notFound(_('Not found'),

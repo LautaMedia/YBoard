@@ -4,13 +4,13 @@ namespace YBoard\Controllers;
 use YBoard\BaseController;
 use YFW\Library\Cache;
 use YFW\Library\HttpResponse;
-use YBoard\Models\Posts;
+use YBoard\Models\Post;
 
 class Thread extends BaseController
 {
     public function index($boardUrl, $threadId)
     {
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
 
         // Get thread
         $thread = $posts->getThread($threadId);
@@ -63,7 +63,7 @@ class Thread extends BaseController
 
         $newest = empty($_POST['newest']) ? false : true;
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['threadId'], false);
         if ($thread === false) {
             $this->throwJsonError(404, _('Thread does not exist'));
@@ -93,7 +93,7 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['threadId'], false);
         $thread->updateStats('hideCount');
 
@@ -108,7 +108,7 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['threadId'], false);
         $thread->updateStats('hideCount', -1);
 
@@ -135,7 +135,7 @@ class Thread extends BaseController
         $this->updateThread('stick', false);
     }
 
-    protected function updateThread(string $do, bool $bool)
+    protected function update(string $do, bool $bool)
     {
         $this->modOnly();
         $this->validateAjaxCsrfToken();
@@ -144,7 +144,7 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['threadId'], false);
 
         if ($do == 'stick') {

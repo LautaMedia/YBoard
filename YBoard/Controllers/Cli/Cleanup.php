@@ -2,17 +2,17 @@
 namespace YBoard\Controllers\Cli;
 
 use YBoard\Abstracts\AbstractCliDatabase;
-use YBoard\Models\Boards;
-use YBoard\Models\Files;
-use YBoard\Models\Posts;
-use YBoard\Models\Users;
-use YBoard\Models\UserSessions;
+use YBoard\Models\Board;
+use YBoard\Models\File;
+use YBoard\Models\Post;
+use YBoard\Models\User;
+use YBoard\Models\UserSession;
 
 class Cleanup extends AbstractCliDatabase
 {
     public function deleteOldFiles()
     {
-        $files = new Files($this->db);
+        $files = new File($this->db);
         $files->deleteOrphans();
 
         $glob = glob(ROOT_PATH . '/public/static/files/*/*/*.*');
@@ -43,8 +43,8 @@ class Cleanup extends AbstractCliDatabase
 
     public function deleteOldPosts()
     {
-        $boards = new Boards($this->db);
-        $posts = new Posts($this->db);
+        $boards = new Board($this->db);
+        $posts = new Post($this->db);
 
         $threads = [];
         foreach ($boards->getAll() as $board) {
@@ -66,8 +66,8 @@ class Cleanup extends AbstractCliDatabase
 
     public function deleteOldUsers()
     {
-        $users = new Users($this->db);
-        $userSessions = new UserSessions($this->db);
+        $users = new User($this->db);
+        $userSessions = new UserSession($this->db);
 
         // Expire old sessions
         $expiredSessions = $userSessions->getExpiredIds();

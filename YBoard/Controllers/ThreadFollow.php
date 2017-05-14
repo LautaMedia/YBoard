@@ -2,7 +2,7 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Posts;
+use YBoard\Models\Post;
 
 class ThreadFollow extends BaseController
 {
@@ -14,7 +14,7 @@ class ThreadFollow extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['thread_id'], false);
         $thread->updateStats('followCount');
 
@@ -32,7 +32,7 @@ class ThreadFollow extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $thread = $posts->getThread($_POST['thread_id'], false);
         $thread->updateStats('followCount', -1);
 

@@ -1,5 +1,3 @@
-import YBoard from './YBoard';
-
 // Go to top
 document.getElementById('scroll-to-top').addEventListener('click', function()
 {
@@ -18,16 +16,7 @@ document.getElementById('reload-page').addEventListener('click', function()
     window.scrollTo(0, document.body.scrollHeight);
 });
 
-
-
-
-
-// Modal close
-// -------------------------------------------
-.on('click', '.modal-close', function () {
-    YB.modal.close();
-})
-
+/*
 // Mobile menu
 // -------------------------------------------
 .on('click', '#sidebar', function (e) {
@@ -112,3 +101,4 @@ document.getElementById(sessionId).remove();
     event.preventDefault();
     YB.post.file.stopAllMedia();
 })
+*/

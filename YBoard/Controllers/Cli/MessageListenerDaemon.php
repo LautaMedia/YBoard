@@ -5,10 +5,9 @@ use YFW\Library\CliLogger;
 use YFW\Library\Database;
 use YFW\Library\FileHandler;
 use YFW\Library\MessageQueue;
-use YBoard\Models\Files;
-use YBoard\Models\Notifications;
-use YBoard\Models\Posts;
-use YBoard\Models\UserNotifications;
+use YBoard\Models\File;
+use YBoard\Models\UserNotification;
+use YBoard\Models\Post;
 
 class MessageListenerDaemon
 {
@@ -74,7 +73,7 @@ class MessageListenerDaemon
 
     protected function doPngCrush(int $fileId) : bool
     {
-        $files = new Files($this->db);
+        $files = new File($this->db);
         $file = $files->get($fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
@@ -102,7 +101,7 @@ class MessageListenerDaemon
     protected function processVideo(int $fileId) : bool
     {
         // $message should be int fileId
-        $files = new Files($this->db);
+        $files = new File($this->db);
         $file = $files->get($fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
@@ -137,7 +136,7 @@ class MessageListenerDaemon
 
     protected function processAudio(int $fileId) : bool
     {
-        $files = new Files($this->db);
+        $files = new File($this->db);
         $file = $files->get($fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
@@ -183,8 +182,8 @@ class MessageListenerDaemon
 
         list($notificationType, $postId, $skipUsers) = $message;
 
-        $posts = new Posts($this->db);
-        $notifications = new Notifications($this->db);
+        $posts = new Post($this->db);
+        $notifications = new UserNotification($this->db);
 
         if (!is_array($postId)) {
             $repliedPost = $posts->get($postId, false);
@@ -214,7 +213,7 @@ class MessageListenerDaemon
     protected function removePostNotification($message) : bool
     {
         // Message should be $postId or [$postId, $postId, $postId, ...]
-        $notifications = new Notifications($this->db);
+        $notifications = new UserNotification($this->db);
 
         if (!is_array($message) || empty($message['types']) || empty($message['posts'])) {
             return false;

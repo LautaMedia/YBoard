@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Models\Traits;
 
-use YBoard\Models\Bans;
+use YBoard\Models\Ban;
 
 trait BanReasons
 {
@@ -9,7 +9,7 @@ trait BanReasons
 
     public function getReasonText() : string
     {
-        foreach (Bans::getReasons() as $reasonId => $reason) {
+        foreach (Ban::getReasons() as $reasonId => $reason) {
             if ($this->reasonId == $reasonId) {
                 return $reason['name'];
             }

@@ -2,9 +2,9 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Posts;
-use YBoard\Models\Users;
-use YBoard\Models\UserSessions;
+use YBoard\Models\Post;
+use YBoard\Models\User;
+use YBoard\Models\UserSession;
 use YFW\Library\Text;
 
 class User extends BaseController
@@ -19,7 +19,7 @@ class User extends BaseController
                 $this->notFound();
             }
 
-            $users = new Users($this->db);
+            $users = new User($this->db);
             $user = $users->getById($userId);
 
             if ($user->id === null) {
@@ -33,7 +33,7 @@ class User extends BaseController
             }
         }
 
-        $sessions = new UserSessions($this->db);
+        $sessions = new UserSession($this->db);
 
         $view = $this->loadTemplateEngine();
         $view->pageTitle = $pageTitle;
@@ -61,7 +61,7 @@ class User extends BaseController
             $this->throwJsonError(400, _('This is your current username'));
         }
 
-        $users = new Users($this->db);
+        $users = new User($this->db);
         if (!$users->usernameIsFree($_POST['newName'])) {
             $this->throwJsonError(400, _('This username is already taken, please choose another one'));
         }
@@ -106,7 +106,7 @@ class User extends BaseController
 
         $sessionId = Text::filterHex($_POST['sessionId']);
 
-        $userSessions = new UserSessions($this->db);
+        $userSessions = new UserSession($this->db);
         $session = $userSessions->get($this->user->id, hex2bin($sessionId));
         if ($session !== false) {
             $session->destroy();
@@ -132,7 +132,7 @@ class User extends BaseController
         }
 
         if (!empty($_POST['deletePosts'])) {
-            $posts = new Posts($this->db);
+            $posts = new Post($this->db);
             $posts->deleteByUser($this->user->id);
         }
 

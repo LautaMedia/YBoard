@@ -2,12 +2,12 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Bans;
-use YBoard\Models\Boards;
+use YBoard\Models\Ban;
+use YBoard\Models\Board;
 use YBoard\Models\LogModel;
-use YBoard\Models\PostReports;
-use YBoard\Models\Posts;
-use YBoard\Models\Users;
+use YBoard\Models\PostReport;
+use YBoard\Models\Post;
+use YBoard\Models\User;
 
 class Mod extends BaseController
 {
@@ -20,8 +20,8 @@ class Mod extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Posts($this->db);
-        $boards = new Boards($this->db);
+        $posts = new Post($this->db);
+        $boards = new Board($this->db);
 
         $post = $posts->get($_POST['postId'], false);
         if (!$post->threadId) {
@@ -35,7 +35,7 @@ class Mod extends BaseController
         $view->post = $post;
         $view->thread = $thread;
         $view->board = $board;
-        $view->banReasons = Bans::getReasons(true);
+        $view->banReasons = Ban::getReasons(true);
 
         $view->display('Mod/BanForm');
     }
@@ -59,7 +59,7 @@ class Mod extends BaseController
 
         // Verify user
         if (!empty($banUser)) {
-            $users = new Users($this->db);
+            $users = new User($this->db);
             $user = $users->getById($_POST['ban_user']);
             if ($user === false) {
                 $this->throwJsonError(400, _('User does not exist, maybe add the ban without the user?'));
@@ -78,7 +78,7 @@ class Mod extends BaseController
         $log = new LogModel($this->db);
         $log->write(LogModel::ACTION_ID_MOD_ADD_BAN, $this->user->id, json_encode(['ip' => $banIp, 'userId' => $banUser]));
 
-        $bans = new Bans($this->db);
+        $bans = new Ban($this->db);
         $bans->add($banIp, $banUser, $banLength, $banReason, $additionalInfo, $postId, $this->user->id);
 
         if (empty($postId)) {
@@ -87,7 +87,7 @@ class Mod extends BaseController
 
         if (!empty($_POST['ban_delete_post'])) {
             // Delete posts?
-            $posts = new Posts($this->db);
+            $posts = new Post($this->db);
             $post = $posts->get($_POST['ban_post_id'], false);
             if ($post !== false) {
                 if (!empty($_POST['ban_delete_posts_24h'])) {
@@ -97,7 +97,7 @@ class Mod extends BaseController
             }
         } else {
             // Mark any possible reports as checked
-            $reports = new PostReports($this->db);
+            $reports = new PostReport($this->db);
             $report = $reports->get($postId);
             if ($report !== false) {
                 $report->setChecked($this->user->id);

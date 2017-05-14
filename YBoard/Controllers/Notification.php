@@ -3,7 +3,7 @@ namespace YBoard\Controllers;
 
 use YBoard\BaseController;
 
-class Notifications extends BaseController
+class Notification extends BaseController
 {
     function get()
     {

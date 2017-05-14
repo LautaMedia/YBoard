@@ -9,6 +9,11 @@ class Ban extends Model
 {
     use BanReasons;
 
+    const REASON_ILLEGAL = 1;
+    const REASON_PLEASE_REMOVE = 2;
+    const REASON_RULE_VIOLATION = 3;
+    const REASON_OTHER = 4;
+
     public $id;
     public $userId;
     public $ip;
@@ -24,7 +29,7 @@ class Ban extends Model
     public $appealIsChecked = false;
     public $messageFrom = false;
 
-    public function __construct(Database $db, $data)
+    public function __construct(Database $db, $data = [])
     {
         parent::__construct($db);
 
@@ -84,7 +89,7 @@ class Ban extends Model
 
     public function expire(): bool
     {
-        $q = $this->db->prepare("UPDATE bans SET is_expired = 1 WHERE id = :id LIMIT 1");
+        $q = $this->db->prepare("UPDATE ban SET is_expired = 1 WHERE id = :id LIMIT 1");
         $q->bindValue('id', $this->id);
         $q->execute();
 
@@ -95,7 +100,7 @@ class Ban extends Model
 
     public function begin(): bool
     {
-        $q = $this->db->prepare("UPDATE bans SET begin_time = NOW(), end_time = DATE_ADD(NOW(), INTERVAL length SECOND)
+        $q = $this->db->prepare("UPDATE ban SET begin_time = NOW(), end_time = DATE_ADD(NOW(), INTERVAL length SECOND)
             WHERE id = :id LIMIT 1");
         $q->bindValue('id', $this->id);
         $q->execute();
@@ -112,7 +117,7 @@ class Ban extends Model
             return false;
         }
 
-        $posts = new Posts($this->db);
+        $posts = new Post($this->db);
         $post = $posts->get($this->postId);
 
         if ($post !== false) {
@@ -122,5 +127,92 @@ class Ban extends Model
         $post = $posts->getDeletedMessage($this->postId);
 
         return $post;
+    }
+
+    public static function getReasons(bool $onlyBannable = false): array
+    {
+        $reportOnlyReasons = [
+            static::REASON_PLEASE_REMOVE => [
+                'name' => _('The content in this post is about me and I want it to be removed'),
+            ],
+        ];
+
+        $bannableReasons = [
+            static::REASON_ILLEGAL => [
+                'name' => _('Illegal content'),
+                'banLength' => 604800,
+            ],
+            static::REASON_RULE_VIOLATION => [
+                'name' => _('Rule violation'),
+                'banLength' => 86400,
+            ],
+            static::REASON_OTHER => [
+                'name' => _('Other'),
+                'banLength' => 3600,
+            ],
+        ];
+
+        if (!$onlyBannable) {
+            $reasons = $reportOnlyReasons + $bannableReasons;
+        } else {
+            $reasons = $bannableReasons;
+        }
+
+        return $reasons;
+    }
+
+    public static function get(Database $db, $ip, int $userId, $beginNow = true)
+    {
+        $q = $db->prepare("SELECT id, user_id, ip, begin_time, end_time, reason_id, additional_info, post_id,
+            banned_by, is_expired, is_appealed, appeal_text, appeal_is_checked
+            FROM ban WHERE (ip = :ip OR user_id = :user_id) AND is_expired = 0 LIMIT 1");
+        $q->bindValue('ip', inet_pton($ip));
+        $q->bindValue('user_id', $userId);
+        $q->execute();
+
+        if ($q->rowCount() == 0) {
+            return false;
+        }
+
+        $data = $q->fetch();
+        $ban = new self($db, $data);
+
+        if (empty($ban->beginTime) && $beginNow) {
+            $ban->begin();
+        }
+
+        return $ban;
+    }
+
+    public function add(
+        string $ip,
+        int $userId,
+        int $length,
+        int $reasonId,
+        $additionalInfo,
+        $postId,
+        int $bannedBy
+    ): bool {
+        $q = $this->db->prepare("INSERT INTO ban (user_id, ip, length, reason_id, additional_info, post_id, banned_by)
+            VALUES (:user_id, :ip, :length, :reason_id, :additional_info, :post_id, :banned_by)");
+        $q->bindValue('user_id', $userId);
+        $q->bindValue('ip', inet_pton($ip));
+        $q->bindValue('length', abs($length));
+        $q->bindValue('reason_id', $reasonId);
+        $q->bindValue('additional_info', $additionalInfo);
+        $q->bindValue('post_id', $postId);
+        $q->bindValue('banned_by', $bannedBy);
+        $q->execute();
+
+        return true;
+    }
+
+    public function getUncheckedAppealCount()
+    {
+        $q = $this->db->prepare("SELECT COUNT(*) AS count FROM ban
+            WHERE is_appealed = 1 AND appeal_is_checked = 0 LIMIT 1");
+        $q->execute();
+
+        return (int)$q->fetch()->count;
     }
 }

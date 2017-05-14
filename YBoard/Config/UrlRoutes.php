@@ -17,26 +17,9 @@ return [
 
     // Preferences
     '#^/preferences$#' => ['Preferences', 'index'],
-    '#^/scripts/preferences/save$#' => ['Preferences', 'save'],
-    '#^/scripts/preferences/togglethemevariation$#' => ['Preferences', 'toggleThemeVariation'],
-    '#^/scripts/preferences/togglesidebar$#' => ['Preferences', 'toggleSidebar'],
 
     // User account related
     '#^/profile/(.+)?$#' => ['User', 'profile'],
-    '#^/scripts/user/destroysession$#' => ['User', 'destroySession'],
-    '#^/scripts/user/changename$#' => ['User', 'changeName'],
-    '#^/scripts/user/changepassword$#' => ['User', 'changePassword'],
-    '#^/scripts/user/delete$#' => ['User', 'delete'],
-
-    // Notifications
-    '#^/scripts/notifications/get$#' => ['Notifications', 'get'],
-    '#^/scripts/notifications/markread$#' => ['Notifications', 'markRead'],
-    '#^/scripts/notifications/markallread$#' => ['Notifications', 'markAllRead'],
-
-    // Sign up, log in, log out
-    '#^/scripts/session/signup$#' => ['Session', 'signUp'],
-    '#^/scripts/session/login$#' => ['Session', 'logIn'],
-    '#^/scripts/session/logout$#' => ['Session', 'logOut'],
 
     // Custom boards
     '#^/mythreads-?([2-9]|[1-9][0-9]+)?/$#' => ['CustomBoard', 'myThreads'],
@@ -50,35 +33,12 @@ return [
 
     // Post scripts
     '#^/scripts/posts/redirect/([0-9]+)$#' => ['Post', 'redirect'],
-    '#^/api/posts/get$#' => ['Post', 'get'],
-    '#^/api/posts/submit$#' => ['Post', 'submit'],
-    '#^/api/posts/delete$#' => ['Post', 'delete'],
-    '#^/api/posts/deletefile$#' => ['Post', 'deleteFile'],
-    '#^/api/report/submit$#' => ['PostReport', 'submit'],
 
     // Mod
     '#^/scripts/mod/banform$#' => ['Mod', 'banForm'],
     '#^/scripts/mod/addban$#' => ['Mod', 'addBan'],
     '#^/scripts/mod/reports/setchecked$#' => ['PostReport', 'setChecked'],
     '#^/mod/reports$#' => ['PostReport', 'uncheckedReports'],
-
-    // Thread scripts
-    '#^/api/threads/getreplies$#' => ['Thread', 'getReplies'],
-    '#^/api/threads/hide$#' => ['Thread', 'hide'],
-    '#^/api/threads/restore$#' => ['Thread', 'restore'],
-    '#^/api/threads/stick$#' => ['Thread', 'stick'],
-    '#^/api/threads/unstick$#' => ['Thread', 'unstick'],
-    '#^/api/threads/lock$#' => ['Thread', 'lock'],
-    '#^/api/threads/unlock$#' => ['Thread', 'unlock'],
-
-    // Follow threads
-    '#^/api/follow/add$#' => ['ThreadFollow', 'add'],
-    '#^/api/follow/remove$#' => ['ThreadFollow', 'remove'],
-    '#^/api/follow/markallread$#' => ['ThreadFollow', 'markAllRead'],
-
-    // File scripts
-    '#^/api/files/upload$#' => ['File', 'upload'],
-    '#^/api/files/getmediaplayer$#' => ['File', 'getMediaPlayer'],
 
     // Post reporting
     '#^/scripts/report/getform$#' => ['PostReport', 'getForm'],
@@ -91,6 +51,44 @@ return [
 
     // Boards without slash at end
     '#^/([a-zA-Z0-9åäö]+)-?([2-9]|[1-9][0-9]+)?/?(catalog)?-?([2-9]|[1-9][0-9]+)?$#' => ['Board', 'redirect'],
+
+    // API
+    // ---
+    '#^/api/user/preferences/save$#' => ['Preferences', 'save'],
+    '#^/api/user/session/destroy$#' => ['User', 'destroySession'],
+    '#^/api/user/changename$#' => ['User', 'changeName'],
+    '#^/api/user/changepassword$#' => ['User', 'changePassword'],
+    '#^/api/user/delete$#' => ['User', 'delete'],
+
+    // Sign up, log in, log out
+    '#^/api/user/session/signup$#' => ['Session', 'signUp'],
+    '#^/api/user/session/login$#' => ['Session', 'logIn'],
+    '#^/api/user/session/logout$#' => ['Session', 'logOut'],
+
+    // Thread scripts
+    '#^/api/thread/getreplies$#' => ['Thread', 'getReplies'],
+    '#^/api/thread/update$#' => ['Thread', 'update'],
+
+    // Follow threads
+    '#^/api/follow/add$#' => ['ThreadFollow', 'add'],
+    '#^/api/follow/remove$#' => ['ThreadFollow', 'remove'],
+    '#^/api/follow/markallread$#' => ['ThreadFollow', 'markAllRead'],
+
+    // File scripts
+    '#^/api/file/upload$#' => ['File', 'upload'],
+    '#^/api/file/getmediaplayer$#' => ['File', 'getMediaPlayer'],
+
+    // Posts
+    '#^/api/post/get$#' => ['Post', 'get'],
+    '#^/api/post/submit$#' => ['Post', 'submit'],
+    '#^/api/post/delete$#' => ['Post', 'delete'],
+    '#^/api/post/deletefile$#' => ['Post', 'deleteFile'],
+    '#^/api/post/report$#' => ['PostReport', 'submit'],
+
+    // Notifications
+    '#^/api/notification/getall$#' => ['Notification', 'getAll'],
+    '#^/api/notification/markread$#' => ['Notification', 'markRead'],
+    '#^/api/notification/markallread$#' => ['Notification', 'markAllRead'],
 
     // Everything else should just return a 404
     '#.*#' => ['Errors', 'notFound'],

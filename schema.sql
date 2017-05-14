@@ -1,4 +1,4 @@
-CREATE TABLE `bans` (
+CREATE TABLE `ban` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `user_id` int(10) unsigned DEFAULT NULL,
     `ip` varbinary(16) DEFAULT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE `bans` (
     KEY (`is_appealed`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `boards` (
+CREATE TABLE `board` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `url` varchar(20) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     `alt_url` varchar(20) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -33,14 +33,15 @@ CREATE TABLE `boards` (
     `inactive_hours_delete` smallint(5) unsigned DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`url`),
-    KEY (`alt_url`)
+    KEY (`alt_url`),
+    KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `files` (
+CREATE TABLE `file` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `folder` char(2) CHARACTER SET ascii NOT NULL,
     `name` char(8) CHARACTER SET ascii NOT NULL,
-    `extension` varchar(32) CHARACTER SET ascii NOT NULL,
+    `extension` varchar(30) CHARACTER SET ascii NOT NULL,
     `size` int(10) unsigned NOT NULL,
     `width` smallint(5) unsigned DEFAULT NULL,
     `height` smallint(5) unsigned DEFAULT NULL,
@@ -55,7 +56,7 @@ CREATE TABLE `files` (
     UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `files_md5` (
+CREATE TABLE `file_md5` (
     `file_id` int(10) unsigned NOT NULL,
     `md5` binary(16) NOT NULL,
     PRIMARY KEY (`file_id`,`md5`),
@@ -75,24 +76,22 @@ CREATE TABLE `log` (
     KEY (`time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `users` (
+CREATE TABLE `user` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-    `username` varchar(32) DEFAULT NULL,
-    `postername` varchar(60) DEFAULT NULL,
+    `username` varchar(30) DEFAULT NULL,
     `password` char(60) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
     `account_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `last_active` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `last_ip` varbinary(16) DEFAULT NULL,
     `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
     `gold_level` tinyint(3) unsigned NOT NULL DEFAULT '0',
-    `goldaccountexpires` int(10) unsigned NOT NULL DEFAULT '0',
-    `last_board` tinyint(3) unsigned NOT NULL DEFAULT '0',
+    `gold_expires` DATETIME NULL DEFAULT NULL,
+    `last_board` tinyint(3) unsigned NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`username`),
     KEY (`last_board`),
-    KEY (`postername`),
     KEY (`class`),
-    KEY (`goldaccountexpires`),
+    KEY (`gold_expires`),
     KEY (`password`,`gold_level`,`id`),
     KEY (`gold_level`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
@@ -102,18 +101,18 @@ CREATE TABLE `user_board_hide` (
     `board_id` int(10) unsigned NOT NULL,
     PRIMARY KEY (`user_id`,`board_id`),
     KEY (`board_id`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`board_id`) REFERENCES `boards` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`board_id`) REFERENCES `board` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts` (
+CREATE TABLE `post` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `user_id` int(10) unsigned DEFAULT NULL,
     `board_id` int(10) unsigned DEFAULT NULL,
     `thread_id` int(10) unsigned DEFAULT NULL,
     `ip` varbinary(16) DEFAULT NULL,
     `country_code` char(2) CHARACTER SET ascii DEFAULT NULL,
-    `username` varchar(40) DEFAULT NULL,
+    `username` varchar(30) DEFAULT NULL,
     `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `subject` varchar(60) DEFAULT NULL,
     `message` text COLLATE utf8mb4_swedish_ci,
@@ -125,11 +124,11 @@ CREATE TABLE `posts` (
     KEY (`bump_time`,`thread_id`,`user_id`,`id`),
     KEY (`thread_id`),
     KEY (`user_id`),
-    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts_deleted` (
+CREATE TABLE `post_deleted` (
     `id` int(10) unsigned NOT NULL,
     `user_id` int(10) unsigned NOT NULL DEFAULT '0',
     `board_id` tinyint(3) unsigned DEFAULT NULL,
@@ -143,36 +142,36 @@ CREATE TABLE `posts_deleted` (
     KEY (`time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts_edited` (
+CREATE TABLE `post_edited` (
     `id` int(10) unsigned NOT NULL,
     `edit_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `ip` varbinary(16) NOT NULL,
     `message_before` text NOT NULL,
     PRIMARY KEY (`id`,`edit_time`),
-    CONSTRAINT FOREIGN KEY (`id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts_files` (
+CREATE TABLE `post_file` (
     `post_id` int(10) unsigned NOT NULL,
     `file_id` int(10) unsigned NOT NULL,
     `file_name` varchar(255) NOT NULL,
     PRIMARY KEY (`post_id`,`file_id`),
     KEY (`file_id`),
-    KEY (`file_name`(191)),
-    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    KEY (`file_name`),
+    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`file_id`) REFERENCES `file` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts_replies` (
+CREATE TABLE `post_reply` (
     `post_id` int(10) unsigned NOT NULL,
     `post_id_replied` int(10) unsigned NOT NULL,
     PRIMARY KEY (`post_id`,`post_id_replied`),
     KEY (`post_id_replied`),
-    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`post_id_replied`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`post_id_replied`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `posts_reports` (
+CREATE TABLE `post_report` (
     `post_id` int(10) unsigned NOT NULL,
     `reason_id` tinyint(4) NOT NULL,
     `additional_info` varchar(120) DEFAULT NULL,
@@ -182,10 +181,10 @@ CREATE TABLE `posts_reports` (
     `checked_by` int(10) unsigned DEFAULT NULL,
     PRIMARY KEY (`post_id`),
     KEY (`is_checked`),
-    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `thread_statistics` (
+CREATE TABLE `post_statistics` (
     `thread_id` int(10) unsigned NOT NULL DEFAULT '0',
     `read_count` int(10) unsigned NOT NULL DEFAULT '0',
     `reply_count` int(10) unsigned NOT NULL DEFAULT '0',
@@ -195,7 +194,7 @@ CREATE TABLE `thread_statistics` (
     PRIMARY KEY (`thread_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `user_notifications` (
+CREATE TABLE `user_notification` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `user_id` int(10) unsigned NOT NULL,
     `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -211,8 +210,8 @@ CREATE TABLE `user_notifications` (
     KEY (`time`),
     KEY (`user_id`,`post_id`,`is_read`),
     KEY (`count`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `user_preferences` (
@@ -220,10 +219,10 @@ CREATE TABLE `user_preferences` (
     `preferences_key` int(10) unsigned NOT NULL,
     `preferences_value` varchar(16000) NOT NULL,
     PRIMARY KEY (`user_id`,`preferences_key`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `user_sessions` (
+CREATE TABLE `user_session` (
     `id` binary(32) NOT NULL,
     `user_id` int(10) unsigned NOT NULL,
     `csrf_token` binary(32) NOT NULL,
@@ -232,7 +231,7 @@ CREATE TABLE `user_sessions` (
     `last_active` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY (`user_id`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `user_statistics` (
@@ -240,7 +239,7 @@ CREATE TABLE `user_statistics` (
     `statistics_key` smallint(5) unsigned NOT NULL DEFAULT '0',
     `statistics_value` bigint(20) NOT NULL,
     PRIMARY KEY (`user_id`,`statistics_key`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `user_thread_follow` (
@@ -253,8 +252,8 @@ CREATE TABLE `user_thread_follow` (
     PRIMARY KEY (`id`),
     UNIQUE KEY (`user_id`,`thread_id`,`unread_count`),
     KEY (`thread_id`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `user_thread_hide` (
@@ -263,11 +262,11 @@ CREATE TABLE `user_thread_hide` (
     `added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`user_id`,`thread_id`),
     KEY (`thread_id`),
-    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`thread_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
-CREATE TABLE `words_blacklist` (
+CREATE TABLE `word_blacklist` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `word` varchar(1000) NOT NULL,
     `reason_id` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -275,5 +274,5 @@ CREATE TABLE `words_blacklist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- Just to get you started...
-INSERT INTO `boards` (`id`, `url`, `alt_url`, `name`, `description`, `is_nsfw`, `is_hidden`, `show_flags`, `inactive_hours_delete`) VALUES
+INSERT INTO `board` (`id`, `url`, `alt_url`, `name`, `description`, `is_nsfw`, `is_hidden`, `show_flags`, `inactive_hours_delete`) VALUES
 (1, 'satunnainen', 'b', 'Satunnainen', 'I guess this is why they call this board random', b'1', b'0', b'0', 720);
