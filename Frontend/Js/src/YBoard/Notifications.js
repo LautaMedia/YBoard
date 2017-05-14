@@ -2,10 +2,11 @@ class Notifications
 {
     constructor()
     {
+        let that = this;
         let button = document.getElementById('notifications-button');
         if (button) {
             button.addEventListener('click', function() {
-                this.open();
+                that.open();
             });
         }
 
@@ -13,10 +14,11 @@ class Notifications
 
     open()
     {
+        let that = this;
         YBoard.Modal.open('/scripts/notifications/get', {
             'onAjaxComplete': function()
             {
-                this.updateUnreadCount($('.notifications-list .not-read').length);
+                that.updateUnreadCount($('.notifications-list .not-read').length);
             },
         });
     }

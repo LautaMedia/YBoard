@@ -22,6 +22,10 @@ class Board extends Model
     {
         parent::__construct($db);
 
+        if ($data === null) {
+            return;
+        }
+
         foreach ($data as $key => $val) {
             switch ($key) {
                 case 'id':

@@ -135,6 +135,14 @@ abstract class BaseController extends Controller
         $bodyClass = false,
         $image = false
     ) {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            if (!$httpStatus || !is_int($httpStatus)) {
+                $httpStatus = 500;
+            }
+            $this->throwJsonError($httpStatus, $errorMessage, $errorTitle);
+            return true;
+        }
+
         if ($httpStatus && is_int($httpStatus)) {
             HttpResponse::setStatusCode($httpStatus);
         }

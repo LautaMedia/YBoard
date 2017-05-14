@@ -2,6 +2,7 @@ class Modal
 {
     open(url, options)
     {
+        let that = this;
         this.$body = $('body');
         this.$blocker = null;
 
@@ -28,13 +29,13 @@ class Modal
         $(document).off('keydown.modal').on('keydown.modal', function(e)
         {
             if (e.which == 27) {
-                this.close();
+                that.close();
             }
         });
         this.$blocker.click(function(e)
         {
             if (e.target == this) {
-                this.close();
+                that.close();
             }
         });
 

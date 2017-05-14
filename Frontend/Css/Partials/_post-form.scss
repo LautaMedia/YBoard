@@ -20,6 +20,7 @@
 
         .input-row {
             $height: 30px;
+            display: flex;
 
             $backgroundColor: #fff;
             @if (lightness($contentBgColor) < 50) {
@@ -31,7 +32,6 @@
             width: 100%;
             height: $height;
             margin-bottom: 5px;
-            display: flex;
 
             label {
                 &:not(#label-file) {
@@ -109,6 +109,9 @@
             vertical-align: top;
             cursor: pointer;
         }
+        #color-buttons {
+            display: none
+        }
     }
     textarea {
         color: $textColor;
@@ -122,15 +125,27 @@
         padding: 3px 5px;
         resize: vertical;
     }
-    #post-form-captcha {
-        overflow: hidden;
-        margin-bottom: 5px;
-        > div {
-            float: right;
+
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        button {
+            margin-right: 5px;
         }
-    }
-    input[type="submit"] {
-        float: right;
+        .primary {
+            margin-right: 0;
+            margin-left: auto;
+        }
+        > div {
+            // ReCaptcha infobox
+            order: 999;
+            flex-basis: 100%;
+            text-align: right;
+            margin-top: 10px;
+            .grecaptcha-badge {
+                margin-left: auto;
+            }
+        }
     }
 
     #label-file {

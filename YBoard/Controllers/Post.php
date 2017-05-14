@@ -153,11 +153,6 @@ class Post extends BaseController
                 $this->throwJsonError(400, _('Please type a message'));
             }
 
-            // At least 20 characters
-            if (mb_strlen($message) < 10) {
-                $this->throwJsonError(400, _('Please type a longer message'));
-            }
-
             $board = $this->boards->getByUrl($_POST['board']);
         } else { // Replying to a thread
             $thread = $posts->getThread($_POST['thread'], false);
@@ -179,11 +174,11 @@ class Post extends BaseController
         }
 
         if ($this->user->requireCaptcha) {
-            if (empty($_POST["g-recaptcha-response"])) {
+            if (empty($_POST["captchaResponse"])) {
                 $this->throwJsonError(400, _('Please fill the CAPTCHA.'));
             }
 
-            $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['reCaptcha']['privateKey']);
+            $captchaOk = ReCaptcha::verify($_POST["captchaResponse"], $this->config['reCaptcha']['privateKey']);
             if (!$captchaOk) {
                 $this->throwJsonError(403, _('Invalid CAPTCHA response. Please try again.'));
             }

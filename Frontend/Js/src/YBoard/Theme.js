@@ -1,15 +1,46 @@
 import YQuery from '../YQuery';
-import YBoard from '../YBoard';
 
 class Theme
 {
+    constructor()
+    {
+        let that = this;
+
+        // Switch theme
+        document.querySelector('.switch-theme').addEventListener('click', function()
+        {
+            that.switchVariation();
+        });
+
+        // Mobile
+        document.getElementById('sidebar').addEventListener('click', function (e) {
+            if (e.offsetX > document.getElementById('sidebar').clientWidth) {
+                document.getElementById('sidebar').classList.toggle('visible');
+            }
+        });
+
+        document.querySelector('.sidebar-toggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('visible');
+        });
+
+        document.querySelectorAll('body > :not(#topbar):not(#sidebar)').forEach(function (elm) {
+            elm.addEventListener('click', function(e)
+            {
+                let sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('visible')) {
+                    sidebar.classList.remove('visible');
+                }
+            });
+        });
+    }
+
     toggleSidebar()
     {
         if (document.getElementById('hide-sidebar') !== null) {
             document.getElementById('hide-sidebar').remove();
             document.getElementById('sidebar').classList.remove('visible');
 
-            YQuery.post('/api/user/preferences/sidebar', {
+            YQuery.post('/api/user/preferences/set', {
                 'sidebarHidden': 'false',
             });
         } else {
@@ -31,15 +62,25 @@ class Theme
         let css = document.querySelectorAll('head .css');
         css = css[css.length - 1];
 
-        let current = css.getAttribute('href');
-        let variation = css.dataset.alt;
+        let light = css.dataset.light;
+        let dark = css.dataset.dark;
+        let currentIsDark = css.dataset.darktheme === 'true';
 
-        let newCss = document.createElement('link');
+        let newVariation;
+        let darkTheme;
+        if (currentIsDark) {
+            newVariation = light;
+            darkTheme = false;
+        } else {
+            newVariation = dark;
+            darkTheme = true;
+        }
+
+        let newCss = css.cloneNode();
+
         newCss.setAttributes({
-            'rel': 'stylesheet',
-            'class': 'css',
-            'href': variation,
-            'data-alt': current,
+            'href': newVariation,
+            'data-darkTheme': darkTheme,
         });
         newCss.appendAfter(css);
 
@@ -49,12 +90,7 @@ class Theme
         }, 5000);
 
         YQuery.post('/api/user/preferences/set', {
-            'themeVariation': 'true',
-            'errorFunction': function()
-            {
-                clearTimeout(timeout);
-                YBoard.Toast.error(messages.errorOccurred);
-            },
+            'darkTheme': darkTheme,
         });
     }
 }

@@ -1,3 +1,4 @@
+import YQuery from '../YQuery';
 import YBoard from '../YBoard';
 
 class PostForm
@@ -6,6 +7,10 @@ class PostForm
     {
         let that = this;
         this.elm = document.getElementById('post-form');
+        if (this.elm === null) {
+            return;
+        }
+
         this.locationParent = this.elm.parentNode;
         this.location = this.elm.nextElementSibling;
         this.msgElm = this.elm.querySelector('#post-message');
@@ -182,7 +187,7 @@ class PostForm
 
         // Restore board selector
         if (boardSelector !== null) {
-            boardSelector.show();
+            boardSelector.show('flex');
             boardSelector.querySelector('select').required = true;
         }
 
@@ -331,17 +336,15 @@ class PostForm
 
     threadReply(threadId)
     {
-        this.elm.appendTo(YB.thread.getElm(threadId).find('.thread-content'));
+        YBoard.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
         this.show(true);
-
         this.setDestination(true, threadId);
-
         this.msgElm.focus();
     }
 
     postReply(postId)
     {
-        var selectedText = YBoard.getSelectionText();
+        let selectedText = YBoard.getSelectionText();
 
         this.elm.appendChild(YBoard.Post.getElm(postId));
         this.show(true);
@@ -349,37 +352,29 @@ class PostForm
         this.setDestination(true, this.elm.closest('.thread').data('id'));
 
         this.msgElm.focus();
-        var append = '';
-        if (this.msgElm.val().substr(-1) == '\n') {
+        let append = '';
+        if (this.msgElm.value.substr(-1) === '\n') {
             append += '\n';
         } else {
-            if (this.msgElm.val().length != 0) {
+            if (this.msgElm.value.length !== 0) {
                 append += '\n\n';
             }
         }
         append += '>>' + postId + '\n';
 
         // If any text on the page was selected, add it to post form with quotes
-        if (selectedText != '') {
+        if (selectedText !== '') {
             append += '>' + selectedText.replace(/(\r\n|\n|\r)/g, '$1>') + '\n';
         }
 
-        this.msgElm.val(this.msgElm.val().trim() + append);
+        this.msgElm.value = this.msgElm.value.trim() + append;
     }
 
     submit(e)
     {
-        if (typeof e !== 'undefined') {
+        let that = this;
+        if (typeof e === 'object') {
             e.preventDefault();
-        }
-
-        var submitButton = this.elm.querySelector('input[type="submit"].button');
-
-        // File upload in progress -> wait until done
-        if (this.fileUploadInProgress) {
-            submitButton.setAttribute('disabled', true);
-            this.submitAfterFileUpload = true;
-            return false;
         }
 
         // Prevent duplicate submissions by double clicking etc.
@@ -388,45 +383,58 @@ class PostForm
         }
         this.submitInProgress = true;
 
+        let submitButton = this.elm.querySelector('input[type="submit"].button');
+
+        // File upload in progress -> wait until done
+        if (this.fileUploadInProgress) {
+            submitButton.disabled = true;
+            this.submitAfterFileUpload = true;
+            return false;
+        }
+
         this.elm.querySelector('#post-files').value = '';
 
-        var fd = new FormData(this.elm);
+        let fd = new FormData(this.elm);
 
-        var that = this;
-        YQuery.post(this.elm.getAttribute('action'), fd).done(function(data)
+        if (typeof window.captchaResponse === 'string') {
+            fd.append('captchaResponse', window.captchaResponse);
+            delete window.captchaResponse;
+        }
+
+        YQuery.post(this.elm.getAttribute('action'), fd).onLoad(function(data)
         {
-            var dest = $('#post-destination');
-            var thread;
-            if (dest.setAttribute('name') != 'thread') {
+            let dest = document.getElementById('post-destination');
+            let thread;
+            if (dest.getAttribute('name') !== 'thread') {
                 thread = null;
             } else {
-                thread = dest.val();
+                thread = dest.value;
             }
 
-            if (thread != null) {
-                toastr.success(messages.postSent);
-                YB.thread.ajaxUpdate.runOnce(thread);
+            if (thread !== null) {
+                YBoard.Toast.success(messages.postSent);
+                YBoard.Thread.AutoUpdate.runOnce(thread);
             } else {
-                if (data.length == 0) {
-                    YB.pageReload();
+                if (data.length === 0) {
+                    YBoard.pageReload();
                 } else {
                     data = JSON.parse(data);
-                    if (typeof data.message == 'undefined') {
-                        toastr.error(messages.errorOccurred);
+                    if (typeof data.message === 'undefined') {
+                        YBoard.Toast.error(messages.errorOccurred);
                     } else {
-                        window.location = '/' + that.elm.find('[name="board"]').val() + '/' + data.message;
+                        window.location = '/' + that.elm.querySelector('[name="board"]').value + '/' + data.message;
                     }
                 }
             }
 
             // Reset post form
             that.reset();
-        }).always(function()
+        }).onEnd(function()
         {
-            submitButton.removeAttribute('disabled');
+            submitButton.disabled = false;
             that.submitInProgress = false;
 
-            YB.captcha.reset();
+            YBoard.Captcha.reset();
         });
     }
 }

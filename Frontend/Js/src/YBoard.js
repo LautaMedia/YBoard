@@ -12,6 +12,7 @@ class YBoard
 {
     constructor()
     {
+        let that = this;
         this.Catalog = new Catalog();
         this.Captcha = new Captcha();
         this.Theme = new Theme();
@@ -30,13 +31,51 @@ class YBoard
             if (!e.ctrlKey && !e.shiftKey && e.which === 116 || e.ctrlKey && !e.shiftKey && e.which === 82) {
                 // Make F5 || CTRL + R function like clicking links and thus not reloading everything
                 // Maybe we can remove this completely one day.
-                this.pageReload();
-                return false;
+                e.preventDefault();
+                that.pageReload();
             }
             if (e.ctrlKey && e.which === 13) {
                 // Submit the post form with CTRL + Enter
-                this.PostForm.submit(e);
+                that.PostForm.submit(e);
             }
+        });
+
+        YQuery.on('submit', 'form.ajax', function (event) {
+            that.submitForm(event);
+        });
+
+        // Sidebar signup & login
+        document.getElementById('login').querySelector('.signup').addEventListener('click', function(e)
+        {
+            that.signup(e, true);
+        });
+        document.getElementById('signup').querySelector('.cancel').addEventListener('click', function(e)
+        {
+            that.signup(e, false);
+        });
+
+        // Hide sidebar
+        document.getElementById('sidebar-hide-button').addEventListener('click', function()
+        {
+            that.Theme.toggleSidebar();
+        });
+
+        // Go to top
+        document.getElementById('scroll-to-top').addEventListener('click', function()
+        {
+            window.scrollTo(0, 0);
+        });
+
+        // Go to bottom
+        document.getElementById('scroll-to-bottom').addEventListener('click', function()
+        {
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Reload page
+        document.getElementById('reload-page').addEventListener('click', function()
+        {
+            that.pageReload()
         });
     }
 
@@ -100,17 +139,25 @@ class YBoard
         return '<span class="' + classes + 'loading icon-loading spin"></span>';
     }
 
-    submitForm(e)
+    submitForm(e, form = false)
     {
-        e.preventDefault();
+        if (e !== null) {
+            e.preventDefault();
+            form = e.target;
+        }
 
-        let form = $(e.target);
-        let fd = new FormData(e.target);
+        if (form === false) {
+            return false;
+        }
 
-        let overlay = $('<div class="form-overlay"><div>' + this.spinnerHtml() + '</div></div>');
+        let fd = new FormData(form);
+
+        let overlay = document.createElement('div');
+        overlay.classList.add('form-overlay');
+        overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
         form.append(overlay);
 
-        YQuery.post(form.getAttribute('action'), fd).done(function(data)
+        YQuery.post(form.getAttribute('action'), fd).onLoad(function(data)
         {
             if (data.reload) {
                 if (data.url) {
@@ -123,44 +170,27 @@ class YBoard
                 this.Toast.success(data.message);
                 form.reset();
             }
-        }).fail(function()
+        }).onError(function()
         {
             overlay.remove();
         });
     }
 
-    signup(elm, e)
+    signup(e, show)
     {
         // Signup form in sidebar
         e.preventDefault();
-        elm = $(elm);
+        let elm = e.target;
 
-        this.Captcha.render('signup-captcha', {
-            'size': 'invisible',
-            'theme': 'dark',
-        });
+        let loginForm = document.getElementById('login');
+        let signupForm = document.getElementById('signup');
 
-        let form = $('#login');
-        let signupForm = $('#signup-form');
-
-        if (typeof form.data('login') === 'undefined') {
-            form.data('login', form.attr('action'));
-        }
-
-        if (!elm.data('open')) {
-            form.attr('action', form.data('signup'));
-            elm.html(messages.cancel);
-            $('#loginbutton').val(messages.signUp);
-            signupForm.slideDown();
-            elm.data('open', true);
+        if (show) {
+            signupForm.show('flex');
+            loginForm.hide();
         } else {
-            form.attr('action', form.data('login'));
-            elm.html(messages.signUp);
-
-            $('#loginbutton').val(messages.logIn);
-            signupForm.slideUp();
-            signupForm.find('input').val('');
-            elm.data('open', false);
+            signupForm.hide();
+            loginForm.show('flex');
         }
     }
 }

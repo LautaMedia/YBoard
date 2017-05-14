@@ -235,7 +235,7 @@ class Thread extends Post
         return $thread;
     }
 
-    public static function getByUser(Database $db, int $userId, int $limit = 1000): array
+    public static function getIdsByUser(Database $db, int $userId, int $limit = 1000): array
     {
         $q = $db->prepare("SELECT id FROM post
             WHERE user_id = ? AND thread_id IS NULL" . static::getHiddenNotIn('id') . " LIMIT ?");
@@ -289,7 +289,7 @@ class Thread extends Post
         return $q->fetchAll(Database::FETCH_COLUMN);
     }
 
-    public static function getCustomThreads(
+    public static function getCustom(
         Database $db,
         array $threadIds,
         int $page,

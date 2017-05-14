@@ -29,11 +29,7 @@
         color: $sidebarLinkColor;
         font-weight: normal;
         &:hover {
-            @if (lightness($sidebarLinkColor) > 50) {
-                color: darken($sidebarLinkColor, 30%);
-            } @else {
-                color: lighten($sidebarLinkColor, 30%);
-            }
+            color: $highlightColorLight;
         }
     }
 
@@ -124,7 +120,9 @@
     }
     .buttons {
         overflow: hidden;
-        margin-top: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        margin: 2.5px -2.5px;
 
         button, a {
             background-color: $buttonBg;
@@ -134,11 +132,9 @@
             }
         }
         > * {
+            margin: 2.5px;
             position: relative;
-            display: inline-block;
-            vertical-align: top;
-            float: left;
-            margin: 0 5px 5px 0;
+            flex: 1 1 0%;
         }
         + a {
             margin-top: 10px;
@@ -146,6 +142,8 @@
     }
     #user form {
         overflow: hidden;
+        display: flex;
+        flex-wrap: wrap;
 
         input[type="text"], input[type="password"] {
             @if (lightness($bgcolor) > 50) {
@@ -159,25 +157,24 @@
             margin-bottom: 5px;
             display: block;
             padding: 5px 10px;
-            width: calc(100% - 20px);
+            flex-grow: 1;
         }
-        > button {
-            float: right;
-        }
-        #signup-form {
-            display: none;
-
-            #signup-captcha {
-                background-color: #222222;
-                margin-bottom: 5px;
-                overflow: hidden;
-                > div {
-                    height: 136px !important;
-                    width: 155px !important;
-                    margin: -2px auto 5px -2px;
-                    overflow: hidden;
+        > div {
+            display: flex;
+            width: 100%;
+            button {
+                flex: 1 1 0%;
+                &.transparent {
+                    margin-left: 5px;
+                    text-align: right;
+                    &:hover {
+                        color: $highlightColorLight;
+                    }
                 }
             }
+        }
+        &#signup {
+            display: none;
         }
     }
 

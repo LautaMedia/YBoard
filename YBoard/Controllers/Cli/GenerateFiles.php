@@ -90,11 +90,11 @@ class GenerateFiles extends Controller
     protected function getJsConfig()
     {
         $config = [
-            'staticUrl' => $this->config['view']['staticUrl'],
+            'staticUrl' => $this->config['app']['staticUrl'],
         ];
 
-        if ($this->config['reCaptcha']['enabled']) {
-            $config['reCaptchaPublicKey'] = $this->config['reCaptcha']['publicKey'];
+        if ($this->config['captcha']['enabled']) {
+            $config['reCaptchaPublicKey'] = $this->config['captcha']['publicKey'];
         }
 
         return 'let config=' . json_encode($config);

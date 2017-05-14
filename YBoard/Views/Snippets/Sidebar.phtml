@@ -25,15 +25,24 @@
     <nav id="user">
         <?php if (!$user->loggedIn) : ?>
             <h3><?= _('Log in') ?></h3>
-            <form id="login" class="ajax" action="/api/user/login" data-signup="/api/user/signup" method="post">
+            <form id="login" class="ajax" action="/api/user/login" method="post">
                 <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['users']['usernameMaxLength'] ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
-                <div id="signup-form">
-                    <input type="password" name="repassword" placeholder="<?= _('Password again') ?>">
-                    <div id="signup-captcha"></div>
+                <div>
+                    <button type="submit" class="button primary" name="login"><?= _('Log_in') ?></button>
+                    <button type="button" class="button transparent signup"><?= _('Sign up') ?></button>
                 </div>
-                <input type="submit" class="button primary" name="login" id="loginbutton" value="<?= _('Log_in') ?>">
-                <button class="button transparent signup"><?= _('Sign up') ?></button>
+            </form>
+            <form id="signup" class="ajax" action="/api/user/signup" method="post">
+                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['users']['usernameMaxLength'] ?>" required>
+                <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
+                <input type="password" name="repassword" placeholder="<?= _('Password again') ?>" required>
+                <div>
+                    <button type="submit" class="button primary<?=
+                    $config['captcha']['enabled'] ? ' g-recaptcha" data-callback="signupCaptchaCallback"' : '"'
+                    ?> name="login"><?= _('Sign up') ?></button>
+                    <button type="button" class="button transparent cancel"><?= _('Cancel') ?></button>
+                </div>
             </form>
         <?php else : ?>
             <h3><?= htmlspecialchars($user->username) ?></h3>

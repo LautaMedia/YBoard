@@ -1,1 +1,1 @@
-let config={"staticUrl":"Ylilauta","reCaptchaPublicKey":"6LeeqyAUAAAAAPojHpZsIZ0X-pszyxYn4OSX9Z8S"}
+let config={"staticUrl":"\/\/localhost:9001\/static","reCaptchaPublicKey":"6LeeqyAUAAAAAPojHpZsIZ0X-pszyxYn4OSX9Z8S"}

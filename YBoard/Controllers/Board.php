@@ -37,11 +37,10 @@ class Board extends BaseController
         $this->verifyBoard($boardUrl);
         $this->limitPages($pageNum, $this->config['view']['maxCatalogPages']);
 
-        $posts = new Post($this->db);
-        $posts->setHiddenThreads($this->user->threadHide->getAll());
+        Models\Thread::setHidden($this->user->threadHide->getAll());
 
-        $board = $this->boards->getByUrl($boardUrl);
-        $threads = $posts->getBoardThreads($board->id, $pageNum, $this->user->preferences->threadsPerCatalogPage);
+        $board = Models\Board::getByUrl($this->db, $boardUrl);
+        $threads = Models\Thread::getByBoard($this->db, $board->id, $pageNum, $this->user->preferences->threadsPerCatalogPage);
 
         $isLastPage = count($threads) < $this->user->preferences->threadsPerCatalogPage;
 

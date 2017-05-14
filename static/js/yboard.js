@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -85,35 +85,35 @@ var _YQuery = __webpack_require__(1);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Captcha = __webpack_require__(5);
+var _Captcha = __webpack_require__(6);
 
 var _Captcha2 = _interopRequireDefault(_Captcha);
 
-var _Theme = __webpack_require__(11);
+var _Theme = __webpack_require__(12);
 
 var _Theme2 = _interopRequireDefault(_Theme);
 
-var _Toast = __webpack_require__(16);
+var _Toast = __webpack_require__(17);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Catalog = __webpack_require__(6);
+var _Catalog = __webpack_require__(7);
 
 var _Catalog2 = _interopRequireDefault(_Catalog);
 
-var _Thread = __webpack_require__(12);
+var _Thread = __webpack_require__(13);
 
 var _Thread2 = _interopRequireDefault(_Thread);
 
-var _Post = __webpack_require__(8);
+var _Post = __webpack_require__(9);
 
 var _Post2 = _interopRequireDefault(_Post);
 
-var _PostForm = __webpack_require__(9);
+var _PostForm = __webpack_require__(10);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
 
-var _Modal = __webpack_require__(7);
+var _Modal = __webpack_require__(8);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -125,6 +125,7 @@ var YBoard = function () {
     function YBoard() {
         _classCallCheck(this, YBoard);
 
+        var that = this;
         this.Catalog = new _Catalog2.default();
         this.Captcha = new _Captcha2.default();
         this.Theme = new _Theme2.default();
@@ -142,13 +143,45 @@ var YBoard = function () {
             if (!e.ctrlKey && !e.shiftKey && e.which === 116 || e.ctrlKey && !e.shiftKey && e.which === 82) {
                 // Make F5 || CTRL + R function like clicking links and thus not reloading everything
                 // Maybe we can remove this completely one day.
-                this.pageReload();
-                return false;
+                e.preventDefault();
+                that.pageReload();
             }
             if (e.ctrlKey && e.which === 13) {
                 // Submit the post form with CTRL + Enter
-                this.PostForm.submit(e);
+                that.PostForm.submit(e);
             }
+        });
+
+        _YQuery2.default.on('submit', 'form.ajax', function (event) {
+            that.submitForm(event);
+        });
+
+        // Sidebar signup & login
+        document.getElementById('login').querySelector('.signup').addEventListener('click', function (e) {
+            that.signup(e, true);
+        });
+        document.getElementById('signup').querySelector('.cancel').addEventListener('click', function (e) {
+            that.signup(e, false);
+        });
+
+        // Hide sidebar
+        document.getElementById('sidebar-hide-button').addEventListener('click', function () {
+            that.Theme.toggleSidebar();
+        });
+
+        // Go to top
+        document.getElementById('scroll-to-top').addEventListener('click', function () {
+            window.scrollTo(0, 0);
+        });
+
+        // Go to bottom
+        document.getElementById('scroll-to-bottom').addEventListener('click', function () {
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        // Reload page
+        document.getElementById('reload-page').addEventListener('click', function () {
+            that.pageReload();
         });
     }
 
@@ -217,15 +250,25 @@ var YBoard = function () {
     }, {
         key: 'submitForm',
         value: function submitForm(e) {
-            e.preventDefault();
+            var form = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-            var form = $(e.target);
-            var fd = new FormData(e.target);
+            if (e !== null) {
+                e.preventDefault();
+                form = e.target;
+            }
 
-            var overlay = $('<div class="form-overlay"><div>' + this.spinnerHtml() + '</div></div>');
+            if (form === false) {
+                return false;
+            }
+
+            var fd = new FormData(form);
+
+            var overlay = document.createElement('div');
+            overlay.classList.add('form-overlay');
+            overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
             form.append(overlay);
 
-            _YQuery2.default.post(form.getAttribute('action'), fd).done(function (data) {
+            _YQuery2.default.post(form.getAttribute('action'), fd).onLoad(function (data) {
                 if (data.reload) {
                     if (data.url) {
                         window.location = data.url;
@@ -237,43 +280,26 @@ var YBoard = function () {
                     this.Toast.success(data.message);
                     form.reset();
                 }
-            }).fail(function () {
+            }).onError(function () {
                 overlay.remove();
             });
         }
     }, {
         key: 'signup',
-        value: function signup(elm, e) {
+        value: function signup(e, show) {
             // Signup form in sidebar
             e.preventDefault();
-            elm = $(elm);
+            var elm = e.target;
 
-            this.Captcha.render('signup-captcha', {
-                'size': 'invisible',
-                'theme': 'dark'
-            });
+            var loginForm = document.getElementById('login');
+            var signupForm = document.getElementById('signup');
 
-            var form = $('#login');
-            var signupForm = $('#signup-form');
-
-            if (typeof form.data('login') === 'undefined') {
-                form.data('login', form.attr('action'));
-            }
-
-            if (!elm.data('open')) {
-                form.attr('action', form.data('signup'));
-                elm.html(messages.cancel);
-                $('#loginbutton').val(messages.signUp);
-                signupForm.slideDown();
-                elm.data('open', true);
+            if (show) {
+                signupForm.show('flex');
+                loginForm.hide();
             } else {
-                form.attr('action', form.data('login'));
-                elm.html(messages.signUp);
-
-                $('#loginbutton').val(messages.logIn);
-                signupForm.slideUp();
-                signupForm.find('input').val('');
-                elm.data('open', false);
+                signupForm.hide();
+                loginForm.show('flex');
             }
         }
     }]);
@@ -497,6 +523,23 @@ exports.default = new YQuery();
 "use strict";
 
 
+var _YQuery = __webpack_require__(1);
+
+var _YQuery2 = _interopRequireDefault(_YQuery);
+
+var _YBoard = __webpack_require__(0);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 if (typeof NodeList.prototype.remove !== 'function') {
     Element.prototype.remove = function () {
         this.parentElement.removeChild(this);
@@ -538,7 +581,7 @@ if (typeof Element.prototype.closest !== 'function') {
 }
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -629,15 +672,17 @@ NodeList.prototype.show = function () {
 };
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(2);
-
 __webpack_require__(3);
+
+__webpack_require__(4);
+
+__webpack_require__(2);
 
 var _YQuery = __webpack_require__(1);
 
@@ -705,7 +750,7 @@ document.querySelectorAll('.currency').forEach(function (elm) {
 });
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -715,11 +760,16 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // reCAPTCHA
+
+
+var _YBoard = __webpack_require__(0);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-// reCAPTCHA
 
 var Captcha = function () {
     function Captcha() {
@@ -727,18 +777,36 @@ var Captcha = function () {
     }
 
     _createClass(Captcha, [{
+        key: 'renderAll',
+        value: function renderAll() {
+            // Post form submit
+            this.render(document.getElementById('post-form').querySelector('.g-recaptcha'), {
+                'size': 'invisible',
+                'callback': function callback(response) {
+                    window.captchaResponse = response;
+                    _YBoard2.default.PostForm.submit();
+                },
+                'badge': 'inline'
+            });
+
+            // Signup submit
+            this.render(document.getElementById('signup').querySelector('.g-recaptcha'), {
+                'size': 'invisible',
+                'callback': function callback(response) {
+                    window.captchaResponse = response;
+                    _YBoard2.default.submitForm(null, document.getElementById('signup'));
+                },
+                'badge': 'inline'
+            });
+        }
+    }, {
         key: 'render',
         value: function render(elm) {
             var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !document.getElementById(elm)) {
+            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !elm) {
                 // Captcha not enabled, grecaptcha -library not loaded or captcha element not found
                 return false;
-            }
-
-            if (!!document.getElementById(elm).innerHTML) {
-                // If the captcha is already rendered
-                return true;
             }
 
             options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
@@ -771,7 +839,7 @@ var Captcha = function () {
 exports.default = Captcha;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -825,7 +893,7 @@ var Catalog = function () {
 exports.default = Catalog;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -847,6 +915,7 @@ var Modal = function () {
     _createClass(Modal, [{
         key: 'open',
         value: function open(url, options) {
+            var that = this;
             this.$body = $('body');
             this.$blocker = null;
 
@@ -870,12 +939,12 @@ var Modal = function () {
             // Bind close event
             $(document).off('keydown.modal').on('keydown.modal', function (e) {
                 if (e.which == 27) {
-                    this.close();
+                    that.close();
                 }
             });
             this.$blocker.click(function (e) {
                 if (e.target == this) {
-                    this.close();
+                    that.close();
                 }
             });
 
@@ -929,7 +998,7 @@ var Modal = function () {
 exports.default = Modal;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -949,7 +1018,7 @@ var _YBoard = __webpack_require__(0);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _File = __webpack_require__(10);
+var _File = __webpack_require__(11);
 
 var _File2 = _interopRequireDefault(_File);
 
@@ -1018,7 +1087,7 @@ var Post = function () {
 exports.default = Post;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1028,7 +1097,13 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _YQuery = __webpack_require__(1);
+
+var _YQuery2 = _interopRequireDefault(_YQuery);
 
 var _YBoard = __webpack_require__(0);
 
@@ -1044,6 +1119,10 @@ var PostForm = function () {
 
         var that = this;
         this.elm = document.getElementById('post-form');
+        if (this.elm === null) {
+            return;
+        }
+
         this.locationParent = this.elm.parentNode;
         this.location = this.elm.nextElementSibling;
         this.msgElm = this.elm.querySelector('#post-message');
@@ -1206,7 +1285,7 @@ var PostForm = function () {
 
             // Restore board selector
             if (boardSelector !== null) {
-                boardSelector.show();
+                boardSelector.show('flex');
                 boardSelector.querySelector('select').required = true;
             }
 
@@ -1275,7 +1354,7 @@ var PostForm = function () {
             fileNameElm.value = fileName.join('.');
 
             var that = this;
-            var fileUpload = YQuery.post('/api/files/upload', fd, {
+            var fileUpload = _YQuery2.default.post('/api/files/upload', fd, {
                 contentType: null,
                 xhr: function xhr(_xhr) {
                     if (!_xhr.upload) {
@@ -1355,11 +1434,9 @@ var PostForm = function () {
     }, {
         key: 'threadReply',
         value: function threadReply(threadId) {
-            this.elm.appendTo(YB.thread.getElm(threadId).find('.thread-content'));
+            _YBoard2.default.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
             this.show(true);
-
             this.setDestination(true, threadId);
-
             this.msgElm.focus();
         }
     }, {
@@ -1374,36 +1451,28 @@ var PostForm = function () {
 
             this.msgElm.focus();
             var append = '';
-            if (this.msgElm.val().substr(-1) == '\n') {
+            if (this.msgElm.value.substr(-1) === '\n') {
                 append += '\n';
             } else {
-                if (this.msgElm.val().length != 0) {
+                if (this.msgElm.value.length !== 0) {
                     append += '\n\n';
                 }
             }
             append += '>>' + postId + '\n';
 
             // If any text on the page was selected, add it to post form with quotes
-            if (selectedText != '') {
+            if (selectedText !== '') {
                 append += '>' + selectedText.replace(/(\r\n|\n|\r)/g, '$1>') + '\n';
             }
 
-            this.msgElm.val(this.msgElm.val().trim() + append);
+            this.msgElm.value = this.msgElm.value.trim() + append;
         }
     }, {
         key: 'submit',
         value: function submit(e) {
-            if (typeof e !== 'undefined') {
+            var that = this;
+            if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object') {
                 e.preventDefault();
-            }
-
-            var submitButton = this.elm.querySelector('input[type="submit"].button');
-
-            // File upload in progress -> wait until done
-            if (this.fileUploadInProgress) {
-                submitButton.setAttribute('disabled', true);
-                this.submitAfterFileUpload = true;
-                return false;
             }
 
             // Prevent duplicate submissions by double clicking etc.
@@ -1412,43 +1481,56 @@ var PostForm = function () {
             }
             this.submitInProgress = true;
 
+            var submitButton = this.elm.querySelector('input[type="submit"].button');
+
+            // File upload in progress -> wait until done
+            if (this.fileUploadInProgress) {
+                submitButton.disabled = true;
+                this.submitAfterFileUpload = true;
+                return false;
+            }
+
             this.elm.querySelector('#post-files').value = '';
 
             var fd = new FormData(this.elm);
 
-            var that = this;
-            YQuery.post(this.elm.getAttribute('action'), fd).done(function (data) {
-                var dest = $('#post-destination');
-                var thread;
-                if (dest.setAttribute('name') != 'thread') {
+            if (typeof window.captchaResponse === 'string') {
+                fd.append('captchaResponse', window.captchaResponse);
+                delete window.captchaResponse;
+            }
+
+            _YQuery2.default.post(this.elm.getAttribute('action'), fd).onLoad(function (data) {
+                var dest = document.getElementById('post-destination');
+                var thread = void 0;
+                if (dest.getAttribute('name') !== 'thread') {
                     thread = null;
                 } else {
-                    thread = dest.val();
+                    thread = dest.value;
                 }
 
-                if (thread != null) {
-                    toastr.success(messages.postSent);
-                    YB.thread.ajaxUpdate.runOnce(thread);
+                if (thread !== null) {
+                    _YBoard2.default.Toast.success(messages.postSent);
+                    _YBoard2.default.Thread.AutoUpdate.runOnce(thread);
                 } else {
-                    if (data.length == 0) {
-                        YB.pageReload();
+                    if (data.length === 0) {
+                        _YBoard2.default.pageReload();
                     } else {
                         data = JSON.parse(data);
-                        if (typeof data.message == 'undefined') {
-                            toastr.error(messages.errorOccurred);
+                        if (typeof data.message === 'undefined') {
+                            _YBoard2.default.Toast.error(messages.errorOccurred);
                         } else {
-                            window.location = '/' + that.elm.find('[name="board"]').val() + '/' + data.message;
+                            window.location = '/' + that.elm.querySelector('[name="board"]').value + '/' + data.message;
                         }
                     }
                 }
 
                 // Reset post form
                 that.reset();
-            }).always(function () {
-                submitButton.removeAttribute('disabled');
+            }).onEnd(function () {
+                submitButton.disabled = false;
                 that.submitInProgress = false;
 
-                YB.captcha.reset();
+                _YBoard2.default.Captcha.reset();
             });
         }
     }]);
@@ -1459,7 +1541,7 @@ var PostForm = function () {
 exports.default = PostForm;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1601,7 +1683,7 @@ var File = function () {
 exports.default = File;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1617,10 +1699,6 @@ var _YQuery = __webpack_require__(1);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
-
-var _YBoard2 = _interopRequireDefault(_YBoard);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1628,6 +1706,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Theme = function () {
     function Theme() {
         _classCallCheck(this, Theme);
+
+        var that = this;
+
+        // Switch theme
+        document.querySelector('.switch-theme').addEventListener('click', function () {
+            that.switchVariation();
+        });
+
+        // Mobile
+        document.getElementById('sidebar').addEventListener('click', function (e) {
+            if (e.offsetX > document.getElementById('sidebar').clientWidth) {
+                document.getElementById('sidebar').classList.toggle('visible');
+            }
+        });
+
+        document.querySelector('.sidebar-toggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('visible');
+        });
+
+        document.querySelectorAll('body > :not(#topbar):not(#sidebar)').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('visible')) {
+                    sidebar.classList.remove('visible');
+                }
+            });
+        });
     }
 
     _createClass(Theme, [{
@@ -1637,7 +1742,7 @@ var Theme = function () {
                 document.getElementById('hide-sidebar').remove();
                 document.getElementById('sidebar').classList.remove('visible');
 
-                _YQuery2.default.post('/api/user/preferences/sidebar', {
+                _YQuery2.default.post('/api/user/preferences/set', {
                     'sidebarHidden': 'false'
                 });
             } else {
@@ -1658,15 +1763,25 @@ var Theme = function () {
             var css = document.querySelectorAll('head .css');
             css = css[css.length - 1];
 
-            var current = css.getAttribute('href');
-            var variation = css.dataset.alt;
+            var light = css.dataset.light;
+            var dark = css.dataset.dark;
+            var currentIsDark = css.dataset.darktheme === 'true';
 
-            var newCss = document.createElement('link');
+            var newVariation = void 0;
+            var darkTheme = void 0;
+            if (currentIsDark) {
+                newVariation = light;
+                darkTheme = false;
+            } else {
+                newVariation = dark;
+                darkTheme = true;
+            }
+
+            var newCss = css.cloneNode();
+
             newCss.setAttributes({
-                'rel': 'stylesheet',
-                'class': 'css',
-                'href': variation,
-                'data-alt': current
+                'href': newVariation,
+                'data-darkTheme': darkTheme
             });
             newCss.appendAfter(css);
 
@@ -1675,11 +1790,7 @@ var Theme = function () {
             }, 5000);
 
             _YQuery2.default.post('/api/user/preferences/set', {
-                'themeVariation': 'true',
-                'errorFunction': function errorFunction() {
-                    clearTimeout(timeout);
-                    _YBoard2.default.Toast.error(messages.errorOccurred);
-                }
+                'darkTheme': darkTheme
             });
         }
     }]);
@@ -1690,7 +1801,7 @@ var Theme = function () {
 exports.default = Theme;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1702,15 +1813,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _AutoUpdate = __webpack_require__(13);
+var _AutoUpdate = __webpack_require__(14);
 
 var _AutoUpdate2 = _interopRequireDefault(_AutoUpdate);
 
-var _Hide = __webpack_require__(15);
+var _Hide = __webpack_require__(16);
 
 var _Hide2 = _interopRequireDefault(_Hide);
 
-var _Follow = __webpack_require__(14);
+var _Follow = __webpack_require__(15);
 
 var _Follow2 = _interopRequireDefault(_Follow);
 
@@ -1796,7 +1907,7 @@ var Thread = function () {
 exports.default = Thread;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1972,7 +2083,7 @@ var AutoUpdate = function () {
 exports.default = AutoUpdate;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2048,7 +2159,7 @@ var Follow = function () {
 exports.default = Follow;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2097,7 +2208,7 @@ var Hide = function () {
 exports.default = Hide;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

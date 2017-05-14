@@ -54,7 +54,7 @@
             <a class="icon-superscript bb-code" title="<?= _('Superscript') ?>" data-code="sup"></a>
             <a class="icon-subscript bb-code" title="<?= _('Subscript') ?>" data-code="sub"></a>
             <a class="icon-palette bb-color-bar" title="<?= _('Colors') ?>"></a>
-            <div id="color-buttons" style="display:none">
+            <div id="color-buttons">
                 <a class="icon-palette black bb-code" title="<?= _('Black') ?>" data-code="black"></a>
                 <a class="icon-palette gray bb-code" title="<?= _('Gray') ?>" data-code="gray"></a>
                 <a class="icon-palette white bb-code" title="<?= _('White') ?>" data-code="white"></a>
@@ -70,13 +70,13 @@
         </div>
         <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config['posts']['messageMaxLength'] ?>"></textarea>
     </div>
-
-    <?php if ($config['captcha']['enabled'] && $user->requireCaptcha) : ?>
-    <div id="post-form-captcha"></div>
-    <?php endif ?>
-    <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
-    <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
-    <input type="submit" class="button primary" value="<?= _('Submit') ?>">
+    <div class="buttons">
+        <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
+        <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
+        <input type="submit" class="button primary<?=
+            $config['captcha']['enabled'] ? ' g-recaptcha" data-callback="captchaCallback" data-badge="inline"' : '"'
+        ?> value="<?= _('Submit') ?>">
+    </div>
     <div id="post-options">
         <h4><?= _('Functions') ?></h4>
         <label>
