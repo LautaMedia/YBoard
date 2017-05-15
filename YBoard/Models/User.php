@@ -106,7 +106,7 @@ class User extends Model
         // Relations will handle the deletion of rest of the data, so we don't have to care.
         // Thank you relations!
         $q = $this->db->prepare("DELETE FROM user WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -127,8 +127,8 @@ class User extends Model
         $newPassword = password_hash($newPassword, static::PASSWORD_HASH_TYPE, ['cost' => static::PASSWORD_HASH_COST]);
 
         $q = $this->db->prepare("UPDATE user SET password = :new_password WHERE id = :id LIMIT 1");
-        $q->bindValue('new_password', $newPassword);
-        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':new_password', $newPassword);
+        $q->bindValue(':id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -137,8 +137,8 @@ class User extends Model
     public function setUsername(string $newUsername): bool
     {
         $q = $this->db->prepare("UPDATE user SET username = :new_username WHERE id = :id LIMIT 1");
-        $q->bindValue('new_username', $newUsername);
-        $q->bindValue('id', $this->id);
+        $q->bindValue(':new_username', $newUsername);
+        $q->bindValue(':id', $this->id);
         $q->execute();
 
         return true;
@@ -147,8 +147,8 @@ class User extends Model
     public function updateLastActive(): bool
     {
         $q = $this->db->prepare("UPDATE user SET last_active = NOW(), last_ip = :last_ip WHERE id = :id LIMIT 1");
-        $q->bindValue('id', (int)$this->id);
-        $q->bindValue('last_ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q->bindValue(':id', (int)$this->id);
+        $q->bindValue(':last_ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
 
         return true;
@@ -179,7 +179,7 @@ class User extends Model
     {
         $q = $db->prepare("SELECT id, username, password, class, gold_level, account_created, last_active, last_ip
             FROM user WHERE id = :user_id LIMIT 1");
-        $q->bindValue('user_id', $userId);
+        $q->bindValue(':user_id', $userId);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -193,7 +193,7 @@ class User extends Model
     {
         $q = $db->prepare("SELECT id, username, password, class, gold_level, account_created, last_active, last_ip
             FROM user WHERE username = :username LIMIT 1");
-        $q->bindValue('username', $username);
+        $q->bindValue(':username', $username);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -206,7 +206,7 @@ class User extends Model
     public static function getByLogin(Database $db, string $username, string $password)
     {
         $q = $db->prepare("SELECT id, username, password, class FROM user WHERE username = :username LIMIT 1");
-        $q->bindValue('username', $username);
+        $q->bindValue(':username', $username);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -232,7 +232,7 @@ class User extends Model
     public static function create(Database $db): User
     {
         $q = $db->prepare("INSERT INTO user (last_ip) VALUES (:last_ip)");
-        $q->bindValue('last_ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q->bindValue(':last_ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
 
         $user = new self($db, null, true);
@@ -257,7 +257,7 @@ class User extends Model
     public static function usernameIsFree(Database $db, string $username): bool
     {
         $q = $db->prepare("SELECT id FROM user WHERE username LIKE :username LIMIT 1");
-        $q->bindValue('username', $username);
+        $q->bindValue(':username', $username);
         $q->execute();
 
         if ($q->rowCount() === 0) {

@@ -49,15 +49,6 @@ window.YBoard = YBoard;
 window.YQuery = YQuery;
 
 // Localize dates, numbers and currencies
-document.querySelectorAll('.datetime').forEach(function(elm) {
-    this.innerHTML = new Date(this.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
-});
-document.querySelectorAll('.number').forEach(function(elm) {
-    this.innerHTML = parseFloat(this.innerHTML).toLocaleString();
-});
-document.querySelectorAll('.currency').forEach(function(elm) {
-    this.innerHTML = parseFloat(this.innerHTML).toLocaleString('', {
-        'style': 'currency',
-        'currency': 'eur'
-    });
-});
+document.querySelectorAll('.datetime').forEach(YBoard.localizeDatetime);
+document.querySelectorAll('.number').forEach(YBoard.localizeNumber);
+document.querySelectorAll('.currency').forEach(YBoard.localizeCurrency);

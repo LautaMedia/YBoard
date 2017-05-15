@@ -28,8 +28,7 @@
     <script>let csrfToken='<?= $user->session->csrfToken ?>';</script>
 
     <?php if ($config['captcha']['enabled'] && $user->requireCaptcha): ?>
-    <script>function renderCaptchas(){YBoard.Captcha.renderAll();}</script>
-    <script src="https://www.google.com/recaptcha/api.js?onload=renderCaptchas&render=explicit" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
     <?php endif ?>
 </head>
 <body<?= (!empty($bodyClass)?' class="' . $bodyClass . '"':'') ?>>

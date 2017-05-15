@@ -1,9 +1,9 @@
 <?php
 namespace YBoard\Models;
 
-use YBoard\BaseModel;
+use YFW\Model;
 
-class WordBlacklist extends BaseModel
+class WordBlacklist extends Model
 {
     public $blacklist;
 
@@ -24,7 +24,7 @@ class WordBlacklist extends BaseModel
             return $this->blacklist;
         }
 
-        $q = $this->db->query("SELECT word, reason_id FROM words_blacklist");
+        $q = $this->db->query("SELECT word, reason_id FROM word_blacklist");
         $blacklist = [];
         while ($row = $q->fetch()) {
             $blacklist[$row->word] = $this->reasonToText($row->reason_id);

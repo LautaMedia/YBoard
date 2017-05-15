@@ -32,15 +32,6 @@ class YQuery
         return this;
     }
 
-    toggle(element)
-    {
-        if (window.getComputedStyle(element).display === 'block') {
-            element.style.display = 'none';
-        } else {
-            element.style.display = 'block';
-        }
-    }
-
     // AJAX
 
     ajaxSetup(options, headers = {})
@@ -55,7 +46,7 @@ class YQuery
             'url': url,
         }, options);
 
-        headers = Object.assign(this.ajaxHeaders, headers);
+        headers = Object.assign({}, this.ajaxHeaders, headers);
 
         return this.ajax(options, headers);
     }
@@ -66,23 +57,16 @@ class YQuery
             'method': 'POST',
             'url': url,
             'data': data,
-            'contentType': 'application/x-www-form-urlencoded; charset=UTF-8',
         }, options);
 
-        if (options.contentType !== null) {
-            headers = Object.assign(headers, {
-                'Content-Type': options.contentType
-            });
-        }
-
-        headers = Object.assign(this.ajaxHeaders, headers);
+        headers = Object.assign({}, this.ajaxHeaders, headers);
 
         return this.ajax(options, headers);
     }
 
     ajax(options = {}, headers = {})
     {
-        options = Object.assign(this.ajaxOptions, options);
+        options = Object.assign({}, this.ajaxOptions, options);
 
         if (!options.cache) {
             headers = Object.assign(headers, {
@@ -175,7 +159,13 @@ class YQuery
             xhr = options.xhr(xhr);
         }
 
-        window.fd = options.data;
+        if (typeof options.data.entries !== 'function') {
+            // Not FormData... Maybe a regular object? Convert to FormData.
+            let data = new FormData();
+            Object.keys(options.data).forEach(key => data.append(key, options.data[key]));
+            options.data = data;
+        }
+
         xhr.send(options.data);
 
         return this;

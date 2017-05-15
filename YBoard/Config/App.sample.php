@@ -54,4 +54,10 @@ return [
         'publicKey' => 'xxx',
         'privateKey' => 'xxx',
     ],
+    'ip2location' => [
+        'enabled' => true,
+        'apiFile' => ROOT_PATH . '/YBoard/Vendor/IP2Location/ip2location.php',
+        'v4Database' => ROOT_PATH . '/YBoard/Vendor/IP2Location/IP2LOCATION-LITE-DB1.BIN',
+        'v6Database' => ROOT_PATH . '/YBoard/Vendor/IP2Location/IP2LOCATION-LITE-DB1.IPV6.BIN',
+    ],
 ];

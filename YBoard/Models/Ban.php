@@ -90,7 +90,7 @@ class Ban extends Model
     public function expire(): bool
     {
         $q = $this->db->prepare("UPDATE ban SET is_expired = 1 WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id);
+        $q->bindValue(':id', $this->id);
         $q->execute();
 
         $this->isExpired = 1;
@@ -102,7 +102,7 @@ class Ban extends Model
     {
         $q = $this->db->prepare("UPDATE ban SET begin_time = NOW(), end_time = DATE_ADD(NOW(), INTERVAL length SECOND)
             WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id);
+        $q->bindValue(':id', $this->id);
         $q->execute();
 
         $this->beginTime = date('Y-m-d H:i:s');
@@ -166,8 +166,8 @@ class Ban extends Model
         $q = $db->prepare("SELECT id, user_id, ip, begin_time, end_time, reason_id, additional_info, post_id,
             banned_by, is_expired, is_appealed, appeal_text, appeal_is_checked
             FROM ban WHERE (ip = :ip OR user_id = :user_id) AND is_expired = 0 LIMIT 1");
-        $q->bindValue('ip', inet_pton($ip));
-        $q->bindValue('user_id', $userId);
+        $q->bindValue(':ip', inet_pton($ip));
+        $q->bindValue(':user_id', $userId);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -195,13 +195,13 @@ class Ban extends Model
     ): bool {
         $q = $this->db->prepare("INSERT INTO ban (user_id, ip, length, reason_id, additional_info, post_id, banned_by)
             VALUES (:user_id, :ip, :length, :reason_id, :additional_info, :post_id, :banned_by)");
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('ip', inet_pton($ip));
-        $q->bindValue('length', abs($length));
-        $q->bindValue('reason_id', $reasonId);
-        $q->bindValue('additional_info', $additionalInfo);
-        $q->bindValue('post_id', $postId);
-        $q->bindValue('banned_by', $bannedBy);
+        $q->bindValue(':user_id', $userId);
+        $q->bindValue(':ip', inet_pton($ip));
+        $q->bindValue(':length', abs($length));
+        $q->bindValue(':reason_id', $reasonId);
+        $q->bindValue(':additional_info', $additionalInfo);
+        $q->bindValue(':post_id', $postId);
+        $q->bindValue(':banned_by', $bannedBy);
         $q->execute();
 
         return true;

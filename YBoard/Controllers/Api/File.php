@@ -1,15 +1,46 @@
 <?php
-namespace YBoard\Controllers;
+namespace YBoard\Controllers\Api;
 
 use YBoard\BaseController;
-use YBoard\Models\File;
+use YBoard\Models;
 use YFW\Exceptions\FileUploadException;
 use YFW\Library\TemplateEngine;
 
 class File Extends BaseController
 {
+    public function delete()
+    {
+        $this->validateAjaxCsrfToken();
+
+        if (empty($_POST['fileId'])) {
+            $this->throwJsonError(400);
+        }
+
+        $file = Models\File::get($this->db, $_POST['fileId']);
+        if ($file === false) {
+            $this->throwJsonError(404, _('File does not exist'));
+        }
+
+        if ($file->userId != $this->user->id && !$this->user->isMod) {
+            $this->throwJsonError(403, _('This isn\'t your file!'));
+        }
+
+        $thumbnail = $this->config['files']['savePath'] . '/' . $file->folder . '/t/' . $file->name . '.jpg';
+        $full = $this->config['files']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
+        if (is_file($thumbnail)) {
+            unlink($thumbnail);
+        }
+        if (is_file($full)) {
+            unlink($full);
+        }
+
+        $file->delete();
+    }
+
     public function upload()
     {
+        $this->validateAjaxCsrfToken();
+
         if (empty($_FILES['file'])) {
             $this->throwJsonError(400, _('No file uploaded'));
         }
@@ -20,17 +51,16 @@ class File Extends BaseController
 
         // Check that we have enough free space for files
         if (disk_free_space($this->config['files']['savePath']) <= $this->config['files']['diskMinFree']) {
-            die(disk_free_space($this->config['files']['savePath']));
             $this->throwJsonError(403, _('File uploads are temporarily disabled'));
         }
 
         // Process file
-        $files = new File($this->db);
-        $files->setConfig($this->config['files']);
+        $uploadedFile = new Models\UploadedFile($this->db);
+        $uploadedFile->setConfig($this->config['files']);
 
         // Calculate file sizes
         $uploadSize = 0;
-        foreach ($_FILES['file'] as $file) {
+        foreach ($_FILES as $file) {
             $uploadSize += $file['size'];
         }
 
@@ -39,9 +69,9 @@ class File Extends BaseController
         }
 
         $ids = [];
-        foreach ($_FILES['file'] as $file) {
+        foreach ($_FILES as $file) {
             try {
-                $file = $files->processUpload($file, true);
+                $uploadedFile->processUpload($file, $this->user->id, true);
             } catch (FileUploadException $e) {
                 $this->throwJsonError(400, $e->getMessage());
             }
@@ -49,13 +79,13 @@ class File Extends BaseController
             $this->user->statistics->increment('uploadedFiles');
             $this->user->statistics->increment('uploadedFilesTotalSize', $file['size']);
 
-            $ids[] = $file->id;
+            $ids[] = $uploadedFile->id;
 
             // Limit to one file per upload for now
             break;
         }
 
-        $this->jsonMessage(json_encode($ids));
+        $this->jsonMessage($ids);
     }
 
     public function getMediaPlayer()

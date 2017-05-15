@@ -8,6 +8,7 @@ class UserSession extends Model
 {
     public $id;
     public $userId;
+    public $verifyKey;
     public $csrfToken;
     public $ip;
     public $loginTime;
@@ -52,8 +53,8 @@ class UserSession extends Model
         }
 
         $q = $this->db->prepare("UPDATE user_session SET last_active = NOW(), ip = :ip WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id);
-        $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q->bindValue(':id', $this->id);
+        $q->bindValue(':ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
 
         return true;
@@ -62,37 +63,48 @@ class UserSession extends Model
     public function destroy(): bool
     {
         $q = $this->db->prepare("DELETE FROM user_session WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id);
+        $q->bindValue(':id', $this->id);
         $q->execute();
 
         return true;
     }
 
-    public static function get(Database $db, int $userId, $sessionId)
-    {
-        $q = $db->prepare("SELECT id, user_id, csrf_token, ip, login_time, last_active
+    public static function get(
+        Database $db,
+        int $userId,
+        string $sessionId,
+        string $verifyKey,
+        bool $verifyValidity = true
+    ) {
+        $q = $db->prepare("SELECT id, user_id, verify_key, csrf_token, ip, login_time, last_active
             FROM user_session WHERE id = :id AND user_id = :user_id LIMIT 1");
-        $q->bindValue('id', $sessionId);
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':id', $sessionId);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
             return false;
         }
 
-        return new UserSession($db, $q->fetch());
+        $row = $q->fetch();
+
+        if ($verifyValidity && !hash_equals($row->verify_key, $verifyKey)) {
+            return false;
+        }
+
+        return new self($db, $row);
     }
 
     public static function getAll(Database $db, int $userId): array
     {
         $q = $db->prepare("SELECT id, user_id, csrf_token, ip, login_time, last_active
             FROM user_session WHERE user_id = :user_id");
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         $sessions = [];
         while ($row = $q->fetch()) {
-            $sessions[] = new UserSession($db, $row);
+            $sessions[] = new self($db, $row);
         }
 
         return $sessions;
@@ -102,18 +114,21 @@ class UserSession extends Model
     {
         $sessionId = random_bytes(32);
         $csrfToken = random_bytes(32);
+        $verifyKey = random_bytes(32);
 
-        $q = $db->prepare("INSERT INTO user_session (user_id, id, csrf_token, ip)
-            VALUES (:user_id, :id, :csrf_token, :ip)");
-        $q->bindValue('id', $sessionId, Database::PARAM_INT);
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
-        $q->bindValue('csrf_token', $csrfToken);
-        $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q = $db->prepare("INSERT INTO user_session (id, user_id, verify_key, csrf_token, ip)
+            VALUES (:id, :user_id, :verify_key, :csrf_token, :ip)");
+        $q->bindValue(':id', $sessionId, Database::PARAM_INT);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':verify_key', $verifyKey);
+        $q->bindValue(':csrf_token', $csrfToken);
+        $q->bindValue(':ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
 
-        $session = new UserSession($db);
+        $session = new self($db);
         $session->id = $sessionId;
         $session->userId = $userId;
+        $session->verifyKey = $verifyKey;
         $session->csrfToken = bin2hex($csrfToken);
         $session->ip = $_SERVER['REMOTE_ADDR'];
         $session->loginTime = $session->lastActive = date('Y-m-d H:i:s');

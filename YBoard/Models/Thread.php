@@ -65,7 +65,7 @@ class Thread extends Post
     public function bump(): bool
     {
         $q = $this->db->prepare("UPDATE post SET bump_time = NOW() WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -75,7 +75,7 @@ class Thread extends Post
     {
         $q = $this->db->prepare("UPDATE post a LEFT JOIN post b ON a.id = b.thread_id
             SET a.bump_time = IFNULL(b.time, a.time) WHERE a.id = :thread_id");
-        $q->bindValue('thread_id', (int)$this->id, Database::PARAM_INT);
+        $q->bindValue(':thread_id', (int)$this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -84,8 +84,8 @@ class Thread extends Post
     public function setLocked(bool $locked): bool
     {
         $q = $this->db->prepare("UPDATE post SET locked = :locked WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('locked', $locked, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':locked', $locked, Database::PARAM_INT);
         $q->execute();
 
         $this->locked = $locked;
@@ -96,8 +96,8 @@ class Thread extends Post
     public function setSticky(bool $sticky): bool
     {
         $q = $this->db->prepare("UPDATE post SET sticky = :sticky WHERE id = :thread_id LIMIT 1");
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('sticky', $sticky, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':sticky', $sticky, Database::PARAM_INT);
         $q->execute();
 
         $this->sticky = $sticky;
@@ -115,12 +115,12 @@ class Thread extends Post
             (user_id, thread_id, ip, country_code, username, message)
             VALUES (:user_id, :thread_id, :ip, :country_code, :username, :message)
         ");
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
-        $q->bindValue('country_code', $countryCode);
-        $q->bindValue('username', $username);
-        $q->bindValue('message', $message);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q->bindValue(':country_code', $countryCode);
+        $q->bindValue(':username', $username);
+        $q->bindValue(':message', $message);
         $q->execute();
 
         $reply = new Reply($this->db);
@@ -151,9 +151,9 @@ class Thread extends Post
         }
 
         $q = $this->db->prepare($this->getPostQuery('WHERE a.thread_id = :thread_id' . $from . ' ORDER BY a.id ' . $order . $limit));
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         if ($from) {
-            $q->bindValue('from', $fromId, Database::PARAM_INT);
+            $q->bindValue(':from', $fromId, Database::PARAM_INT);
         }
         $q->execute();
 
@@ -189,12 +189,12 @@ class Thread extends Post
                 return false;
         }
 
-        $q = $this->db->prepare("INSERT INTO thread_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
+        $q = $this->db->prepare("INSERT INTO post_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
             ON DUPLICATE KEY UPDATE " . $column . " =  " . $column . "+:val_2");
 
-        $q->bindValue('thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('val', $val, Database::PARAM_INT);
-        $q->bindValue('val_2', $val, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':val', $val, Database::PARAM_INT);
+        $q->bindValue(':val_2', $val, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -222,7 +222,7 @@ class Thread extends Post
             $q = $db->prepare("SELECT id, board_id, user_id, ip, country_code, time, locked, sticky
             FROM post WHERE id = :id AND thread_id IS NULL LIMIT 1");
         }
-        $q->bindValue('id', $threadId, Database::PARAM_INT);
+        $q->bindValue(':id', $threadId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -259,9 +259,9 @@ class Thread extends Post
             WHERE board_id = :board_id AND thread_id IS NULL AND bump_time < DATE_SUB(NOW(), INTERVAL :hours HOUR)
             AND sticky = 0
             LIMIT :limit");
-        $q->bindValue('board_id', $boardId, Database::PARAM_INT);
-        $q->bindValue('hours', $hours, Database::PARAM_INT);
-        $q->bindValue('limit', $limit, Database::PARAM_INT);
+        $q->bindValue(':board_id', $boardId, Database::PARAM_INT);
+        $q->bindValue(':hours', $hours, Database::PARAM_INT);
+        $q->bindValue(':limit', $limit, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -358,7 +358,7 @@ class Thread extends Post
         return $threads;
     }
 
-    public static function createThread(
+    public static function create(
         Database $db,
         int $userId,
         int $boardId,
@@ -380,13 +380,13 @@ class Thread extends Post
             (user_id, board_id, ip, country_code, username, subject, message, bump_time, locked, sticky)
             VALUES (:user_id, :board_id, :ip, :country_code, :username, :subject, :message, NOW(), 0, 0)
         ");
-        $q->bindValue('user_id', $thread->userId, Database::PARAM_INT);
-        $q->bindValue('board_id', $thread->boardId, Database::PARAM_INT);
-        $q->bindValue('ip', inet_pton($thread->ip));
-        $q->bindValue('country_code', $thread->countryCode);
-        $q->bindValue('username', $thread->username);
-        $q->bindValue('subject', $thread->subject);
-        $q->bindValue('message', $thread->message);
+        $q->bindValue(':user_id', $thread->userId, Database::PARAM_INT);
+        $q->bindValue(':board_id', $thread->boardId, Database::PARAM_INT);
+        $q->bindValue(':ip', inet_pton($thread->ip));
+        $q->bindValue(':country_code', $thread->countryCode);
+        $q->bindValue(':username', $thread->username);
+        $q->bindValue(':subject', $thread->subject);
+        $q->bindValue(':message', $thread->message);
         $q->execute();
 
         $thread->id = $db->lastInsertId();
@@ -407,10 +407,10 @@ class Thread extends Post
         return $notIn;
     }
 
-    protected static function getPostQuery(string $append = '') : string
+    protected static function getPostQuery(string $append = ''): string
     {
         $query = "SELECT
-            a.id, a.board_id, a.thread_id, user_id, ip, country_code, time, locked, sticky, username, subject, message,
+            a.id, a.board_id, a.thread_id, a.user_id, a.ip, a.country_code, a.time, a.locked, a.sticky, a.username, a.subject, a.message,
             b.file_name AS file_display_name, c.id AS file_id, c.folder AS file_folder, c.name AS file_name,
             c.extension AS file_extension, c.size AS file_size, c.width AS file_width, c.height AS file_height,
             c.duration AS file_duration, c.has_thumbnail AS file_has_thumbnail, c.has_sound AS file_has_sound,

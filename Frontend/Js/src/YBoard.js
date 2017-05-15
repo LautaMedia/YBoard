@@ -79,6 +79,24 @@ class YBoard
         });
     }
 
+    localizeDatetime(elm)
+    {
+        elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
+    }
+
+    localizeNumber(elm)
+    {
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString();
+    }
+
+    localizeCurrency(elm, currency = 'eur')
+    {
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('', {
+            'style': 'currency',
+            'currency': currency
+        });
+    }
+
     getSelectionText()
     {
         let text = '';
@@ -178,6 +196,7 @@ class YBoard
 
     signup(e, show)
     {
+        let that = this;
         // Signup form in sidebar
         e.preventDefault();
         let elm = e.target;
@@ -188,6 +207,14 @@ class YBoard
         if (show) {
             signupForm.show('flex');
             loginForm.hide();
+
+            this.Captcha.render(signupForm.querySelector('.g-recaptcha'), {
+                'size': 'invisible',
+                'callback': function(response)
+                {
+                    that.submitForm(null, signupForm);
+                }
+            });
         } else {
             signupForm.hide();
             loginForm.show('flex');

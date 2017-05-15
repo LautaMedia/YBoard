@@ -77,7 +77,7 @@ class UserStatistics extends AbstractUserModel
     protected function load(): bool
     {
         $q = $this->db->prepare("SELECT statistics_key, statistics_value FROM user_statistics WHERE user_id = :user_id");
-        $q->bindValue('user_id', $this->userId, Database::PARAM_INT);
+        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
         $q->execute();
 
         while ($row = $q->fetch()) {

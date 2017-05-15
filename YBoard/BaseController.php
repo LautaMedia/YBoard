@@ -72,7 +72,7 @@ abstract class BaseController extends Controller
         $cookie = $this->getLoginCookie();
         if ($cookie !== false) {
             // Load session
-            $session = UserSession::get($this->db, $cookie['userId'], $cookie['sessionId']);
+            $session = UserSession::get($this->db, $cookie['userId'], $cookie['sessionId'], $cookie['verifyKey']);
             if ($session === false) {
                 $this->deleteLoginCookie(true);
             }
@@ -100,7 +100,7 @@ abstract class BaseController extends Controller
             $this->user = User::create($this->db);
             $this->user->session = UserSession::create($this->db, $this->user->id);
 
-            $this->setLoginCookie($this->user->id, $this->user->session->id);
+            $this->setLoginCookie($this->user->id, $this->user->session->id, $this->user->session->verifyKey);
         }
 
         return true;
@@ -207,7 +207,7 @@ abstract class BaseController extends Controller
 
     protected function loadTemplateEngine($templateFile = 'Default')
     {
-        $templateEngine = new TemplateEngine(ROOT_PATH . '/YBoard/Views/', $templateFile);
+        $templateEngine = new TemplateEngine(ROOT_PATH . '/YBoard/Views', $templateFile);
 
         $templateEngine->setVar('config', $this->config);
 
@@ -328,7 +328,7 @@ abstract class BaseController extends Controller
         echo json_encode(['reload' => true, 'url' => $url]);
     }
 
-    protected function jsonMessage(string $message, string $title = null, bool $reload = false, string $url = null)
+    protected function jsonMessage($message, string $title = null, bool $reload = false, string $url = null)
     {
         $args = [
             'title' => $title,
@@ -357,19 +357,20 @@ abstract class BaseController extends Controller
             return false;
         }
 
-        if (strlen($_COOKIE['user']) <= 65 || substr_count($_COOKIE['user'], '-') !== 1) {
+        if (strlen($_COOKIE['user']) <= 130 || substr_count($_COOKIE['user'], '-') !== 2) {
             return false;
         }
 
-        list($userId, $sessionId) = explode('-', $_COOKIE['user']);
+        list($userId, $sessionId, $verifyKey) = explode('-', $_COOKIE['user']);
 
-        return ['userId' => (int)$userId, 'sessionId' => hex2bin($sessionId)];
+        return ['userId' => (int)$userId, 'sessionId' => hex2bin($sessionId), 'verifyKey' => hex2bin($verifyKey)];
     }
 
-    protected function setLoginCookie(int $userId, $sessionId): bool
+    protected function setLoginCookie(int $userId, string $sessionId, string $verifyKey): bool
     {
         $sessionId = bin2hex($sessionId);
-        HttpResponse::setCookie('user', $userId . '-' . $sessionId);
+        $verifyKey = bin2hex($verifyKey);
+        HttpResponse::setCookie('user', $userId . '-' . $sessionId . '-' . $verifyKey);
 
         return true;
     }

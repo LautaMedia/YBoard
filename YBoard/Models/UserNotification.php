@@ -33,7 +33,7 @@ class UserNotification extends Model
     public function remove() : bool
     {
         $q = $this->db->prepare("DELETE FROM user_notification WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -43,7 +43,7 @@ class UserNotification extends Model
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE id = :id AND is_read = 0 LIMIT 1");
-        $q->bindValue('id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -103,10 +103,10 @@ class UserNotification extends Model
             VALUES (:user_id, :type, :post_id, :custom_data)
             ON DUPLICATE KEY UPDATE is_read = 0, count = count+1");
 
-        $q->bindValue('user_id', $userId);
-        $q->bindValue('type', $type);
-        $q->bindValue('custom_data', $customData);
-        $q->bindValue('post_id', $postId);
+        $q->bindValue(':user_id', $userId);
+        $q->bindValue(':type', $type);
+        $q->bindValue(':custom_data', $customData);
+        $q->bindValue(':post_id', $postId);
         $q->execute();
 
         return true;
@@ -115,9 +115,9 @@ class UserNotification extends Model
     public function markReadByThread(int $threadId) : bool
     {
         $q = $this->db->prepare("UPDATE user_notification SET is_read = 1, count = 0
-            WHERE user_id = :user_id AND post_id IN (SELECT id FROM posts WHERE thread_id = :thread_id) AND is_read = 0");
-        $q->bindValue('thread_id', $threadId);
-        $q->bindValue('user_id', $this->userId);
+            WHERE user_id = :user_id AND post_id IN (SELECT id FROM post WHERE thread_id = :thread_id) AND is_read = 0");
+        $q->bindValue(':thread_id', $threadId);
+        $q->bindValue(':user_id', $this->userId);
         $q->execute();
 
         return true;
@@ -127,8 +127,8 @@ class UserNotification extends Model
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE post_id = :post_id AND user_id = :user_id AND is_read = 0 LIMIT 1");
-        $q->bindValue('post_id', $postId);
-        $q->bindValue('user_id', $this->userId);
+        $q->bindValue(':post_id', $postId);
+        $q->bindValue(':user_id', $this->userId);
         $q->execute();
 
         return true;
@@ -138,7 +138,7 @@ class UserNotification extends Model
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE user_id = :user_id AND is_read = 0");
-        $q->bindValue('user_id', $this->userId);
+        $q->bindValue(':user_id', $this->userId);
         $q->execute();
 
         return true;

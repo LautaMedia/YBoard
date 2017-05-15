@@ -77,11 +77,210 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var YQuery = function () {
+    function YQuery() {
+        _classCallCheck(this, YQuery);
+
+        this.ajaxOptions = {
+            'method': 'GET',
+            'url': '',
+            'data': null,
+            'timeout': 30000,
+            'loadFunction': null,
+            'timeoutFunction': null,
+            'errorFunction': null,
+            'loadendFunction': null,
+            'cache': false,
+            'contentType': null,
+            'xhr': null
+        };
+        this.ajaxHeaders = {
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+    }
+
+    _createClass(YQuery, [{
+        key: 'on',
+        value: function on(eventName, target, fn) {
+            document.addEventListener(eventName, function (event) {
+                if (!target || event.target.matches(target)) {
+                    fn(event);
+                }
+            });
+
+            return this;
+        }
+
+        // AJAX
+
+    }, {
+        key: 'ajaxSetup',
+        value: function ajaxSetup(options) {
+            var headers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            this.ajaxOptions = Object.assign(this.ajaxOptions, options);
+            this.ajaxHeaders = Object.assign(this.ajaxHeaders, headers);
+        }
+    }, {
+        key: 'get',
+        value: function get(url) {
+            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+            var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            options = Object.assign({
+                'url': url
+            }, options);
+
+            headers = Object.assign({}, this.ajaxHeaders, headers);
+
+            return this.ajax(options, headers);
+        }
+    }, {
+        key: 'post',
+        value: function post(url, data) {
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+            var headers = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+            options = Object.assign({
+                'method': 'POST',
+                'url': url,
+                'data': data
+            }, options);
+
+            headers = Object.assign({}, this.ajaxHeaders, headers);
+
+            return this.ajax(options, headers);
+        }
+    }, {
+        key: 'ajax',
+        value: function ajax() {
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+            var headers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            options = Object.assign({}, this.ajaxOptions, options);
+
+            if (!options.cache) {
+                headers = Object.assign(headers, {
+                    'Cache-Control': 'no-cache, max-age=0'
+                });
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.timeout = options.timeout;
+            xhr.open(options.method, options.url);
+
+            for (var key in headers) {
+                if (!headers.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                xhr.setRequestHeader(key, headers[key]);
+            }
+
+            // OnLoad
+            this.onLoad = function (fn) {
+                xhr.addEventListener('load', function () {
+                    if (xhr.status !== 200) {
+                        return;
+                    }
+
+                    fn(xhr);
+                });
+
+                return this;
+            };
+            if (typeof options.loadFunction === 'function') {
+                this.onLoad(options.loadFunction);
+            }
+
+            // OnTimeout
+            this.onTimeout = function (fn) {
+                xhr.addEventListener('timeout', function () {
+                    fn(xhr);
+                });
+
+                return this;
+            };
+            if (typeof options.timeoutFunction === 'function') {
+                this.onTimeout(options.timeoutFunction);
+            }
+
+            // OnError
+            this.onError = function (fn) {
+                xhr.addEventListener('loadend', function () {
+                    if (xhr.status === 200 || xhr.status === 0) {
+                        return;
+                    }
+                    fn(xhr);
+                });
+
+                return this;
+            };
+            if (typeof options.errorFunction === 'function') {
+                this.onError(options.errorFunction);
+            }
+
+            // Run always
+            this.onEnd = function (fn) {
+                xhr.addEventListener('loadend', function () {
+                    fn(xhr);
+                });
+
+                return this;
+            };
+            if (typeof options.loadendFunction === 'function') {
+                this.onEnd(options.loadendFunction);
+            }
+
+            this.getXhrObject = function () {
+                return xhr;
+            };
+
+            // Customizable XHR-object
+            if (typeof options.xhr === 'function') {
+                xhr = options.xhr(xhr);
+            }
+
+            if (typeof options.data.entries !== 'function') {
+                // Not FormData... Maybe a regular object? Convert to FormData.
+                var data = new FormData();
+                Object.keys(options.data).forEach(function (key) {
+                    return data.append(key, options.data[key]);
+                });
+                options.data = data;
+            }
+
+            xhr.send(options.data);
+
+            return this;
+        }
+    }]);
+
+    return YQuery;
+}();
+
+exports.default = new YQuery();
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
@@ -186,6 +385,26 @@ var YBoard = function () {
     }
 
     _createClass(YBoard, [{
+        key: 'localizeDatetime',
+        value: function localizeDatetime(elm) {
+            elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
+        }
+    }, {
+        key: 'localizeNumber',
+        value: function localizeNumber(elm) {
+            elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString();
+        }
+    }, {
+        key: 'localizeCurrency',
+        value: function localizeCurrency(elm) {
+            var currency = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'eur';
+
+            elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('', {
+                'style': 'currency',
+                'currency': currency
+            });
+        }
+    }, {
         key: 'getSelectionText',
         value: function getSelectionText() {
             var text = '';
@@ -287,6 +506,7 @@ var YBoard = function () {
     }, {
         key: 'signup',
         value: function signup(e, show) {
+            var that = this;
             // Signup form in sidebar
             e.preventDefault();
             var elm = e.target;
@@ -297,6 +517,13 @@ var YBoard = function () {
             if (show) {
                 signupForm.show('flex');
                 loginForm.hide();
+
+                this.Captcha.render(signupForm.querySelector('.g-recaptcha'), {
+                    'size': 'invisible',
+                    'callback': function callback(response) {
+                        that.submitForm(null, signupForm);
+                    }
+                });
             } else {
                 signupForm.hide();
                 loginForm.show('flex');
@@ -310,224 +537,17 @@ var YBoard = function () {
 exports.default = new YBoard();
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var YQuery = function () {
-    function YQuery() {
-        _classCallCheck(this, YQuery);
-
-        this.ajaxOptions = {
-            'method': 'GET',
-            'url': '',
-            'data': null,
-            'timeout': 30000,
-            'loadFunction': null,
-            'timeoutFunction': null,
-            'errorFunction': null,
-            'loadendFunction': null,
-            'cache': false,
-            'contentType': null,
-            'xhr': null
-        };
-        this.ajaxHeaders = {
-            'X-Requested-With': 'XMLHttpRequest'
-        };
-    }
-
-    _createClass(YQuery, [{
-        key: 'on',
-        value: function on(eventName, target, fn) {
-            document.addEventListener(eventName, function (event) {
-                if (!target || event.target.matches(target)) {
-                    fn(event);
-                }
-            });
-
-            return this;
-        }
-    }, {
-        key: 'toggle',
-        value: function toggle(element) {
-            if (window.getComputedStyle(element).display === 'block') {
-                element.style.display = 'none';
-            } else {
-                element.style.display = 'block';
-            }
-        }
-
-        // AJAX
-
-    }, {
-        key: 'ajaxSetup',
-        value: function ajaxSetup(options) {
-            var headers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            this.ajaxOptions = Object.assign(this.ajaxOptions, options);
-            this.ajaxHeaders = Object.assign(this.ajaxHeaders, headers);
-        }
-    }, {
-        key: 'get',
-        value: function get(url) {
-            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-            var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            options = Object.assign({
-                'url': url
-            }, options);
-
-            headers = Object.assign(this.ajaxHeaders, headers);
-
-            return this.ajax(options, headers);
-        }
-    }, {
-        key: 'post',
-        value: function post(url, data) {
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-            var headers = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-            options = Object.assign({
-                'method': 'POST',
-                'url': url,
-                'data': data,
-                'contentType': 'application/x-www-form-urlencoded; charset=UTF-8'
-            }, options);
-
-            if (options.contentType !== null) {
-                headers = Object.assign(headers, {
-                    'Content-Type': options.contentType
-                });
-            }
-
-            headers = Object.assign(this.ajaxHeaders, headers);
-
-            return this.ajax(options, headers);
-        }
-    }, {
-        key: 'ajax',
-        value: function ajax() {
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-            var headers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            options = Object.assign(this.ajaxOptions, options);
-
-            if (!options.cache) {
-                headers = Object.assign(headers, {
-                    'Cache-Control': 'no-cache, max-age=0'
-                });
-            }
-
-            var xhr = new XMLHttpRequest();
-            xhr.timeout = options.timeout;
-            xhr.open(options.method, options.url);
-
-            for (var key in headers) {
-                if (!headers.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                xhr.setRequestHeader(key, headers[key]);
-            }
-
-            // OnLoad
-            this.onLoad = function (fn) {
-                xhr.addEventListener('load', function () {
-                    if (xhr.status !== 200) {
-                        return;
-                    }
-
-                    fn(xhr);
-                });
-
-                return this;
-            };
-            if (typeof options.loadFunction === 'function') {
-                this.onLoad(options.loadFunction);
-            }
-
-            // OnTimeout
-            this.onTimeout = function (fn) {
-                xhr.addEventListener('timeout', function () {
-                    fn(xhr);
-                });
-
-                return this;
-            };
-            if (typeof options.timeoutFunction === 'function') {
-                this.onTimeout(options.timeoutFunction);
-            }
-
-            // OnError
-            this.onError = function (fn) {
-                xhr.addEventListener('loadend', function () {
-                    if (xhr.status === 200 || xhr.status === 0) {
-                        return;
-                    }
-                    fn(xhr);
-                });
-
-                return this;
-            };
-            if (typeof options.errorFunction === 'function') {
-                this.onError(options.errorFunction);
-            }
-
-            // Run always
-            this.onEnd = function (fn) {
-                xhr.addEventListener('loadend', function () {
-                    fn(xhr);
-                });
-
-                return this;
-            };
-            if (typeof options.loadendFunction === 'function') {
-                this.onEnd(options.loadendFunction);
-            }
-
-            this.getXhrObject = function () {
-                return xhr;
-            };
-
-            // Customizable XHR-object
-            if (typeof options.xhr === 'function') {
-                xhr = options.xhr(xhr);
-            }
-
-            window.fd = options.data;
-            xhr.send(options.data);
-
-            return this;
-        }
-    }]);
-
-    return YQuery;
-}();
-
-exports.default = new YQuery();
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -684,11 +704,11 @@ __webpack_require__(4);
 
 __webpack_require__(2);
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -736,18 +756,9 @@ window.YBoard = _YBoard2.default;
 window.YQuery = _YQuery2.default;
 
 // Localize dates, numbers and currencies
-document.querySelectorAll('.datetime').forEach(function (elm) {
-    this.innerHTML = new Date(this.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
-});
-document.querySelectorAll('.number').forEach(function (elm) {
-    this.innerHTML = parseFloat(this.innerHTML).toLocaleString();
-});
-document.querySelectorAll('.currency').forEach(function (elm) {
-    this.innerHTML = parseFloat(this.innerHTML).toLocaleString('', {
-        'style': 'currency',
-        'currency': 'eur'
-    });
-});
+document.querySelectorAll('.datetime').forEach(_YBoard2.default.localizeDatetime);
+document.querySelectorAll('.number').forEach(_YBoard2.default.localizeNumber);
+document.querySelectorAll('.currency').forEach(_YBoard2.default.localizeCurrency);
 
 /***/ }),
 /* 6 */
@@ -760,14 +771,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // reCAPTCHA
-
-
-var _YBoard = __webpack_require__(0);
-
-var _YBoard2 = _interopRequireDefault(_YBoard);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -777,37 +781,16 @@ var Captcha = function () {
     }
 
     _createClass(Captcha, [{
-        key: 'renderAll',
-        value: function renderAll() {
-            // Post form submit
-            this.render(document.getElementById('post-form').querySelector('.g-recaptcha'), {
-                'size': 'invisible',
-                'callback': function callback(response) {
-                    window.captchaResponse = response;
-                    _YBoard2.default.PostForm.submit();
-                },
-                'badge': 'inline'
-            });
-
-            // Signup submit
-            this.render(document.getElementById('signup').querySelector('.g-recaptcha'), {
-                'size': 'invisible',
-                'callback': function callback(response) {
-                    window.captchaResponse = response;
-                    _YBoard2.default.submitForm(null, document.getElementById('signup'));
-                },
-                'badge': 'inline'
-            });
-        }
-    }, {
         key: 'render',
         value: function render(elm) {
             var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !elm) {
-                // Captcha not enabled, grecaptcha -library not loaded or captcha element not found
+            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !elm || !!elm.dataset.rendered) {
+                // Captcha not enabled, grecaptcha -library not loaded, captcha element not found or already rendered
                 return false;
             }
+
+            elm.dataset.rendered = true;
 
             options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
             grecaptcha.render(elm, options);
@@ -1010,11 +993,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -1101,11 +1084,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -1152,15 +1135,6 @@ var PostForm = function () {
             }
         });
 
-        // Reply to a post
-        document.querySelectorAll('.add-post-reply').forEach(function (elm) {
-            elm.addEventListener('click', function (e) {
-                e.preventDefault();
-                that.postReply(e.target.closest('.post').dataset.id);
-                that.msgElm.focus();
-            });
-        });
-
         // Create thread
         document.querySelectorAll('.create-thread').forEach(function (elm) {
             elm.addEventListener('click', function () {
@@ -1171,7 +1145,17 @@ var PostForm = function () {
         // Reply to a thread
         document.querySelectorAll('.add-reply').forEach(function (elm) {
             elm.addEventListener('click', function (e) {
+                e.preventDefault();
                 that.threadReply(e.target.closest('.thread').dataset.id);
+                that.msgElm.focus();
+            });
+        });
+
+        // Reply to a post
+        document.querySelectorAll('.add-post-reply').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                e.preventDefault();
+                that.postReply(e.target.closest('.post').dataset.id);
                 that.msgElm.focus();
             });
         });
@@ -1207,11 +1191,24 @@ var PostForm = function () {
     _createClass(PostForm, [{
         key: 'show',
         value: function show(isReply) {
+            var that = this;
             if (!isReply) {
                 // Reset if we click the "Create thread" -button
                 this.reset();
             }
 
+            if (_YBoard2.default.Captcha.isEnabled()) {
+                var button = this.elm.querySelector('.g-recaptcha');
+                if (!!button && !button.dataset.rendered) {
+                    // Button exists and captcha not rendered
+                    _YBoard2.default.Captcha.render(button, {
+                        'size': 'invisible',
+                        'callback': function callback(response) {
+                            that.submit(null, response);
+                        }
+                    });
+                }
+            }
             this.elm.classList.add('visible');
             if (this.msgElm.offsetParent !== null) {
                 this.msgElm.focus();
@@ -1315,16 +1312,16 @@ var PostForm = function () {
     }, {
         key: 'uploadFile',
         value: function uploadFile() {
+            this.elm.querySelector('#remove-file').show();
+
+            // Abort any ongoing uploads
+            this.removeFile(true);
+
             var fileInput = this.elm.querySelector('#post-files');
             var fileNameElm = this.elm.querySelector('#file-name');
 
             fileNameElm.value = '';
             this.submitAfterFileUpload = false;
-
-            // Abort any ongoing uploads
-            if (this.fileUploadXhr !== null) {
-                this.fileUploadXhr.abort();
-            }
 
             this.updateFileProgressBar(1);
 
@@ -1354,36 +1351,36 @@ var PostForm = function () {
             fileNameElm.value = fileName.join('.');
 
             var that = this;
-            var fileUpload = _YQuery2.default.post('/api/files/upload', fd, {
-                contentType: null,
-                xhr: function xhr(_xhr) {
+            var fileUpload = _YQuery2.default.post('/api/file/upload', fd, {
+                'contentType': null,
+                'xhr': function xhr(_xhr) {
                     if (!_xhr.upload) {
                         return _xhr;
                     }
-                    _xhr.upload.addEventListener('progress', function (evt) {
-                        console.log(evt);
-                        if (evt.lengthComputable) {
-                            var percent = Math.round(evt.loaded / evt.total * 100);
-                            if (percent < 1) {
-                                percent = 1;
+
+                    _xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var percent = Math.round(e.loaded / e.total * 100);
+                            if (percent < 0) {
+                                percent = 0;
                             } else {
-                                if (percent > 95) {
-                                    percent = 95;
+                                if (percent > 99) {
+                                    percent = 99;
                                 }
                             }
                             that.updateFileProgressBar(percent);
                         }
-                    }, false);
+                    });
 
                     return _xhr;
                 }
             }).onEnd(function () {
                 that.fileUploadInProgress = false;
-            }).onLoad(function (data) {
+            }).onLoad(function (xhr) {
                 that.updateFileProgressBar(100);
-                data = JSON.parse(data);
+                var data = JSON.parse(xhr.responseText);
                 if (data.message.length !== 0) {
-                    that.elm.querySelector('#file-id').value = data.message;
+                    that.elm.querySelector('#file-id').value = data.message[0];
 
                     if (that.submitAfterFileUpload) {
                         this.submit();
@@ -1401,34 +1398,49 @@ var PostForm = function () {
     }, {
         key: 'removeFile',
         value: function removeFile() {
-            this.elm.querySelector('#post-files').value = '';
-            this.elm.querySelector('#file-id').value = '';
-            this.elm.querySelector('#file-name').value = '';
-            this.updateFileProgressBar(0);
-            this.submitAfterFileUpload = false;
+            var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
             if (this.fileUploadXhr !== null) {
                 this.fileUploadXhr.abort();
+                this.fileUploadXhr = null;
             }
+
+            var fileIdElm = this.elm.querySelector('#file-id');
+
+            if (fileIdElm.value !== '') {
+                _YQuery2.default.post('/api/file/delete', {
+                    'fileId': fileIdElm.value
+                });
+            }
+
+            if (!refresh) {
+                this.elm.querySelector('#remove-file').hide();
+                this.elm.querySelector('#post-files').value = '';
+            }
+
+            fileIdElm.value = '';
+            this.elm.querySelector('#file-name').value = '';
+            this.updateFileProgressBar(0);
+            this.submitAfterFileUpload = false;
         }
     }, {
         key: 'updateFileProgressBar',
         value: function updateFileProgressBar(progress) {
             if (progress < 0) {
                 progress = 0;
-            } else {
-                if (progress > 100) {
-                    progress = 100;
-                }
+            } else if (progress > 100) {
+                progress = 100;
             }
 
-            var bar = this.elm.querySelector('.file-progress div');
+            var elm = this.elm.querySelector('.file-progress');
+            var bar = elm.querySelector('div');
+
             if (progress === 0) {
                 bar.style.width = 0;
-                bar.classList.remove('in-progress');
+                elm.classList.remove('in-progress');
             } else {
                 bar.style.width = progress + '%';
-                bar.classList.add('in-progress');
+                elm.classList.add('in-progress');
             }
         }
     }, {
@@ -1444,10 +1456,10 @@ var PostForm = function () {
         value: function postReply(postId) {
             var selectedText = _YBoard2.default.getSelectionText();
 
-            this.elm.appendChild(_YBoard2.default.Post.getElm(postId));
+            _YBoard2.default.Post.getElm(postId).appendChild(this.elm);
             this.show(true);
 
-            this.setDestination(true, this.elm.closest('.thread').data('id'));
+            this.setDestination(true, this.elm.closest('.thread').dataset.id);
 
             this.msgElm.focus();
             var append = '';
@@ -1471,7 +1483,7 @@ var PostForm = function () {
         key: 'submit',
         value: function submit(e) {
             var that = this;
-            if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object') {
+            if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object' && e !== null) {
                 e.preventDefault();
             }
 
@@ -1494,12 +1506,9 @@ var PostForm = function () {
 
             var fd = new FormData(this.elm);
 
-            if (typeof window.captchaResponse === 'string') {
-                fd.append('captchaResponse', window.captchaResponse);
-                delete window.captchaResponse;
-            }
-
-            _YQuery2.default.post(this.elm.getAttribute('action'), fd).onLoad(function (data) {
+            _YQuery2.default.post(this.elm.getAttribute('action'), fd, {
+                'contentType': null
+            }).onLoad(function (xhr) {
                 var dest = document.getElementById('post-destination');
                 var thread = void 0;
                 if (dest.getAttribute('name') !== 'thread') {
@@ -1512,14 +1521,14 @@ var PostForm = function () {
                     _YBoard2.default.Toast.success(messages.postSent);
                     _YBoard2.default.Thread.AutoUpdate.runOnce(thread);
                 } else {
-                    if (data.length === 0) {
+                    if (xhr.responseText.length === 0) {
                         _YBoard2.default.pageReload();
                     } else {
-                        data = JSON.parse(data);
+                        var data = JSON.parse(xhr.responseText);
                         if (typeof data.message === 'undefined') {
                             _YBoard2.default.Toast.error(messages.errorOccurred);
                         } else {
-                            window.location = '/' + that.elm.querySelector('[name="board"]').value + '/' + data.message;
+                            window.location = '/' + fd.get('board') + '/' + data.message;
                         }
                     }
                 }
@@ -1553,11 +1562,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -1695,7 +1704,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
@@ -1841,7 +1850,7 @@ var Thread = function () {
     _createClass(Thread, [{
         key: 'getElm',
         value: function getElm(id) {
-            return $('#thread-' + id);
+            return document.getElementById('thread-' + id);
         }
     }, {
         key: 'toggleLock',
@@ -1919,12 +1928,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _YBoard = __webpack_require__(1);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
+var _YQuery = __webpack_require__(0);
+
+var _YQuery2 = _interopRequireDefault(_YQuery);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var AutoUpdate = function () {
     function AutoUpdate() {
         _classCallCheck(this, AutoUpdate);
 
+        var that = this;
         this.threadId = false;
         this.nextLoadDelay = 2000;
         this.newReplies = 0;
@@ -1935,6 +1955,13 @@ var AutoUpdate = function () {
         this.nextRunTimeout = 0;
         this.startDelayTimeout = 0;
         this.originalDocTitle = document.title;
+
+        document.querySelectorAll('.thread .get-replies').forEach(function (elm) {
+            elm.addEventListener('click', function (e) {
+                e.preventDefault();
+                that.runOnce(elm.closest('.thread').dataset.id);
+            });
+        });
     }
 
     _createClass(AutoUpdate, [{
@@ -1944,7 +1971,7 @@ var AutoUpdate = function () {
                 return false;
             }
 
-            this.nextLoadDelay = this.nextLoadDelay * (this.runCount == 0 ? 1 : this.runCount);
+            this.nextLoadDelay = this.nextLoadDelay * (this.runCount === 0 ? 1 : this.runCount);
             if (this.nextLoadDelay > 30000) {
                 this.nextLoadDelay = 30000;
             }
@@ -1961,38 +1988,47 @@ var AutoUpdate = function () {
                 }
             }
 
-            var thread = YB.thread.getElm(this.threadId);
-            var fromId = thread.find('.reply:last').attr('id');
-            if (typeof fromId === 'undefined') {
+            var thread = _YBoard2.default.Thread.getElm(this.threadId);
+            var fromId = thread.querySelector('.reply:last-of-type');
+            if (fromId === null) {
                 fromId = 0;
             } else {
-                fromId = fromId.replace('post-', '');
+                fromId = fromId.getAttribute('id').replace('post-', '');
             }
 
             this.nowLoading = true;
             var that = this;
-            YQuery.post('/scripts/threads/getreplies', {
+            _YQuery2.default.post('/api/thread/getreplies', {
                 'threadId': this.threadId,
                 'fromId': fromId,
-                'newest': true
-            }).onLoad(function (data) {
-                if (manual && data.length == 0) {
-                    YBoard.Toast.info(messages.noNewReplies);
-                }
-                // Update timestamps
-                data = $(data);
-                data.find('.datetime').localizeTimestamp(this);
+                'newest': true,
+                'xhr': function xhr(_xhr) {
+                    _xhr.responseType = 'document';
 
-                that.lastUpdateNewReplies = data.find('.message').length;
+                    return _xhr;
+                }
+            }).onLoad(function (xhr) {
+                if (manual && xhr.responseText.length === 0) {
+                    _YBoard2.default.Toast.info(messages.noNewReplies);
+                    return;
+                }
+
+                var data = document.createElement('template');
+                data.innerHTML = xhr.responseText;
+
+                // Update timestamps
+                data.content.querySelectorAll('.datetime').forEach(_YBoard2.default.localizeDatetime);
+
+                that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
                 that.newReplies += that.lastUpdateNewReplies;
 
-                if (that.lastUpdateNewReplies == 0) {
+                if (that.lastUpdateNewReplies === 0) {
                     ++that.runCount;
                 } else {
                     that.runCount = 0;
                 }
 
-                data.appendTo(thread.find('.replies'));
+                thread.querySelector('.replies').appendChild(data.content);
 
                 // Run again
                 if (!manual) {
@@ -2006,13 +2042,14 @@ var AutoUpdate = function () {
                 that.nowLoading = false;
 
                 // Notify about new posts on title
-                if (!document.hasFocus() && that.newReplies > 0 && $('body').hasClass('thread-page')) {
+                if (!document.hasFocus() && that.newReplies > 0 && document.body.classList.contains('thread-page')) {
                     document.title = '(' + that.newReplies + ') ' + that.originalDocTitle;
-                    var replies = $('.replies');
-                    replies.find('hr').remove();
-                    replies.find('.reply:eq(-' + that.newReplies + ')').before('<hr>');
+                    var replies = document.querySelector('.replies');
+                    replies.querySelector('hr').remove();
+                    var hr = document.createElement('hr');
+                    replies.insertBefore(hr, replies.querySelector('.reply:eq(-' + that.newReplies + ')'));
                 } else {
-                    if (self.newReplies != 0) {
+                    if (that.newReplies !== 0) {
                         that.newReplies = 0;
                     }
                 }
@@ -2095,11 +2132,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YQuery = __webpack_require__(1);
+var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -2171,7 +2208,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YBoard = __webpack_require__(0);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -2237,28 +2274,29 @@ var Toast = function () {
     }, {
         key: 'info',
         value: function info(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
             this._show('info', message, title);
         }
     }, {
         key: 'warning',
         value: function warning(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
             this._show('warning', message, title);
         }
     }, {
         key: 'error',
         value: function error(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
             this._show('error', message, title);
         }
     }, {
         key: '_show',
         value: function _show(type, message, title) {
-            alert(type + ': ' + title + "\n\n" + message);
+            title = title !== false ? title + "\n\n" : '';
+            alert(type + "\n\n" + title + message);
         }
     }]);
 

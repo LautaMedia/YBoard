@@ -1,4 +1,4 @@
-<form class="content-box" id="post-form" action="/scripts/posts/submit" method="post">
+<form class="content-box" id="post-form" action="/api/post/submit" method="post">
     <fieldset>
         <input type="hidden" id="file-id" name="file_id">
 <?php if (!empty($thread->id)) : ?>
@@ -36,7 +36,7 @@
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">
-        <button type="button" id="remove-file" class="button gray icon-cross2"></button>
+        <button type="button" id="remove-file" class="button gray icon-trash2"></button>
     </div>
     <div class="file-progress progressbar"><div></div></div>
 
@@ -74,7 +74,7 @@
         <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
         <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
         <input type="submit" class="button primary<?=
-            $config['captcha']['enabled'] ? ' g-recaptcha" data-callback="captchaCallback" data-badge="inline"' : '"'
+            $config['captcha']['enabled'] ? ' g-recaptcha"' : '"'
         ?> value="<?= _('Submit') ?>">
     </div>
     <div id="post-options">

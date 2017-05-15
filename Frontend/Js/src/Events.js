@@ -19,13 +19,6 @@ import YBoard from './YBoard';
  YB.notifications.get();
  })
 
- // Autoupdate
- // -------------------------------------------
- .on('click', '.get-replies', function () {
- var threadId = $(this).closest('.thread').data('id');
- YB.thread.ajaxUpdate.runOnce(threadId);
- })
-
  // Post files
  // -------------------------------------------
  .on('click', '.post figure.thumbnail .image', function (event) {

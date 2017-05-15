@@ -17,18 +17,16 @@ class Session extends BaseController
             $this->throwJsonError(401, _('Invalid username or password'), _('Login failed'));
         }
 
-        $users = new User($this->db);
-        $newUser = $users->getByLogin($_POST['username'], $_POST['password']);
+        $newUser = User::getByLogin($this->db, $_POST['username'], $_POST['password']);
         if (!$newUser) {
             $this->throwJsonError(403, _('Invalid username or password'), _('Login failed'));
         }
 
         $this->user->session->destroy();
 
-        $userSessions = new UserSession($this->db);
-        $newUser->session = $userSessions->create($newUser->id);
+        $newUser->session = UserSession::create($this->db, $newUser->id);
 
-        $this->setLoginCookie($newUser->id, $newUser->session->id);
+        $this->setLoginCookie($newUser->id, $newUser->session->id, $newUser->session->verifyKey);
 
         // Log mod logins
         if ($newUser->class != 0) {
@@ -83,8 +81,7 @@ class Session extends BaseController
             $this->throwJsonError(400, _('Username is too long'), _('Signup failed'));
         }
 
-        $users = new User($this->db);
-        if (!$users->usernameIsFree($_POST['username'])) {
+        if (!User::usernameIsFree($this->db, $_POST['username'])) {
             $this->throwJsonError(400, _('This username is already taken, please choose another one'), _('Signup failed'));
         }
 

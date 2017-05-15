@@ -44,17 +44,6 @@ class PostForm
             }
         });
 
-        // Reply to a post
-        document.querySelectorAll('.add-post-reply').forEach(function(elm)
-        {
-            elm.addEventListener('click', function(e)
-            {
-                e.preventDefault();
-                that.postReply(e.target.closest('.post').dataset.id);
-                that.msgElm.focus();
-            });
-        });
-
         // Create thread
         document.querySelectorAll('.create-thread').forEach(function(elm)
         {
@@ -69,7 +58,19 @@ class PostForm
         {
             elm.addEventListener('click', function(e)
             {
+                e.preventDefault();
                 that.threadReply(e.target.closest('.thread').dataset.id);
+                that.msgElm.focus();
+            });
+        });
+
+        // Reply to a post
+        document.querySelectorAll('.add-post-reply').forEach(function(elm)
+        {
+            elm.addEventListener('click', function(e)
+            {
+                e.preventDefault();
+                that.postReply(e.target.closest('.post').dataset.id);
                 that.msgElm.focus();
             });
         });
@@ -109,11 +110,26 @@ class PostForm
 
     show(isReply)
     {
+        let that = this;
         if (!isReply) {
             // Reset if we click the "Create thread" -button
             this.reset();
         }
 
+        if (YBoard.Captcha.isEnabled()) {
+            let button = this.elm.querySelector('.g-recaptcha');
+            if (!!button && !button.dataset.rendered) {
+                // Button exists and captcha not rendered
+                YBoard.Captcha.render(button, {
+                    'size': 'invisible',
+                    'callback': function(response)
+                    {
+                        that.submit(null, response);
+                    },
+                    //'badge': 'inline',
+                });
+            }
+        }
         this.elm.classList.add('visible');
         if (this.msgElm.offsetParent !== null) {
             this.msgElm.focus();
@@ -217,16 +233,17 @@ class PostForm
 
     uploadFile()
     {
+        this.elm.querySelector('#remove-file').show();
+
+        // Abort any ongoing uploads
+        this.removeFile(true);
+
         let fileInput = this.elm.querySelector('#post-files');
         let fileNameElm = this.elm.querySelector('#file-name');
 
         fileNameElm.value = '';
         this.submitAfterFileUpload = false;
 
-        // Abort any ongoing uploads
-        if (this.fileUploadXhr !== null) {
-            this.fileUploadXhr.abort();
-        }
 
         this.updateFileProgressBar(1);
 
@@ -256,36 +273,36 @@ class PostForm
         fileNameElm.value = fileName.join('.');
 
         let that = this;
-        let fileUpload = YQuery.post('/api/files/upload', fd, {
-            contentType: null,
-            xhr: function(xhr) {
+        let fileUpload = YQuery.post('/api/file/upload', fd, {
+            'contentType': null,
+            'xhr': function(xhr) {
                 if (!xhr.upload) {
                     return xhr;
                 }
-                xhr.upload.addEventListener('progress', function(evt) {
-                    console.log(evt);
-                    if (evt.lengthComputable) {
-                        let percent = Math.round((evt.loaded / evt.total) * 100);
-                        if (percent < 1) {
-                            percent = 1;
+
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        let percent = Math.round((e.loaded / e.total) * 100);
+                        if (percent < 0) {
+                            percent = 0;
                         } else {
-                            if (percent > 95) {
-                                percent = 95;
+                            if (percent > 99) {
+                                percent = 99;
                             }
                         }
                         that.updateFileProgressBar(percent);
                     }
-                }, false);
+                });
 
                 return xhr;
             }
         }).onEnd(function() {
             that.fileUploadInProgress = false;
-        }).onLoad(function(data) {
+        }).onLoad(function(xhr) {
             that.updateFileProgressBar(100);
-            data = JSON.parse(data);
+            let data = JSON.parse(xhr.responseText);
             if (data.message.length !== 0) {
-                that.elm.querySelector('#file-id').value = data.message;
+                that.elm.querySelector('#file-id').value = data.message[0];
 
                 if (that.submitAfterFileUpload) {
                     this.submit();
@@ -301,36 +318,49 @@ class PostForm
         this.fileUploadXhr = fileUpload.getXhrObject();
     }
 
-    removeFile()
+    removeFile(refresh = false)
     {
-        this.elm.querySelector('#post-files').value = '';
-        this.elm.querySelector('#file-id').value = '';
+        if (this.fileUploadXhr !== null) {
+            this.fileUploadXhr.abort();
+            this.fileUploadXhr = null;
+        }
+
+        let fileIdElm = this.elm.querySelector('#file-id');
+
+        if (fileIdElm.value !== '') {
+            YQuery.post('/api/file/delete', {
+                'fileId': fileIdElm.value
+            });
+        }
+
+        if (!refresh) {
+            this.elm.querySelector('#remove-file').hide();
+            this.elm.querySelector('#post-files').value = '';
+        }
+
+        fileIdElm.value = '';
         this.elm.querySelector('#file-name').value = '';
         this.updateFileProgressBar(0);
         this.submitAfterFileUpload = false;
-
-        if (this.fileUploadXhr !== null) {
-            this.fileUploadXhr.abort();
-        }
     }
 
     updateFileProgressBar(progress)
     {
         if (progress < 0) {
             progress = 0;
-        } else {
-            if (progress > 100) {
-                progress = 100;
-            }
+        } else if (progress > 100) {
+            progress = 100;
         }
 
-        let bar = this.elm.querySelector('.file-progress div');
+        let elm = this.elm.querySelector('.file-progress');
+        let bar = elm.querySelector('div');
+
         if (progress === 0) {
             bar.style.width = 0;
-            bar.classList.remove('in-progress');
+            elm.classList.remove('in-progress');
         } else {
             bar.style.width = progress + '%';
-            bar.classList.add('in-progress');
+            elm.classList.add('in-progress');
         }
     }
 
@@ -346,10 +376,10 @@ class PostForm
     {
         let selectedText = YBoard.getSelectionText();
 
-        this.elm.appendChild(YBoard.Post.getElm(postId));
+        YBoard.Post.getElm(postId).appendChild(this.elm);
         this.show(true);
 
-        this.setDestination(true, this.elm.closest('.thread').data('id'));
+        this.setDestination(true, this.elm.closest('.thread').dataset.id);
 
         this.msgElm.focus();
         let append = '';
@@ -373,7 +403,7 @@ class PostForm
     submit(e)
     {
         let that = this;
-        if (typeof e === 'object') {
+        if (typeof e === 'object' && e !== null) {
             e.preventDefault();
         }
 
@@ -396,12 +426,9 @@ class PostForm
 
         let fd = new FormData(this.elm);
 
-        if (typeof window.captchaResponse === 'string') {
-            fd.append('captchaResponse', window.captchaResponse);
-            delete window.captchaResponse;
-        }
-
-        YQuery.post(this.elm.getAttribute('action'), fd).onLoad(function(data)
+        YQuery.post(this.elm.getAttribute('action'), fd, {
+            'contentType': null
+        }).onLoad(function(xhr)
         {
             let dest = document.getElementById('post-destination');
             let thread;
@@ -415,14 +442,14 @@ class PostForm
                 YBoard.Toast.success(messages.postSent);
                 YBoard.Thread.AutoUpdate.runOnce(thread);
             } else {
-                if (data.length === 0) {
+                if (xhr.responseText.length === 0) {
                     YBoard.pageReload();
                 } else {
-                    data = JSON.parse(data);
+                    let data = JSON.parse(xhr.responseText);
                     if (typeof data.message === 'undefined') {
                         YBoard.Toast.error(messages.errorOccurred);
                     } else {
-                        window.location = '/' + that.elm.querySelector('[name="board"]').value + '/' + data.message;
+                        window.location = '/' + fd.get('board') + '/' + data.message;
                     }
                 }
             }

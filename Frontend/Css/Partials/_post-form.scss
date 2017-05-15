@@ -167,6 +167,9 @@
             box-sizing: border-box;
         }
     }
+    #remove-file {
+        display: none;
+    }
 }
 
 .file-progress {
@@ -174,16 +177,20 @@
     box-sizing: border-box;
     color: #eee;
     overflow: hidden;
-    margin-top: -5px;
     margin-bottom: 5px;
+    $bg: #ccc;
+    @if (lightness($contentBgColor) < 50) {
+        $bg: #333;
+    }
+    background: $bg;
+    &:not(.in-progress) {
+        display: none;
+    }
     > div {
         width: 0;
-        height: 0;
+        height: 5px;
         background-color: $highlightColor;
         box-sizing: border-box;
-        &.in-progress {
-            height: 5px;
-        }
     }
 }
 

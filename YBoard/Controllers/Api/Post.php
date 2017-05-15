@@ -1,12 +1,12 @@
 <?php
-namespace YBoard\Controllers;
+namespace YBoard\Controllers\Api;
 
 use YBoard\BaseController;
+use YBoard\MessageQueue;
 use YFW\Library\BbCode;
 use YFW\Library\Cache;
 use YFW\Library\GeoIP;
 use YFW\Library\HttpResponse;
-use YFW\Library\MessageQueue;
 use YFW\Library\ReCaptcha;
 use YFW\Library\Text;
 use YBoard\Models;
@@ -30,29 +30,28 @@ class Post extends BaseController
         if (empty($post->threadId)) {
             $post->threadId = $post->id;
         }
-        $thread = $posts->getThread($post->threadId, false);
+        $thread = Models\Thread::get($this->db, $post->threadId, false);
 
         $view = $this->loadTemplateEngine('Blank');
 
-        $view->tooltip = true;
-        $view->post = $post;
-        $view->thread = $thread;
-        $view->board = $this->boards->getById($thread->boardId);
+        $view->setVar('tooltip', true);
+        $view->setVar('post', $post);
+        $view->setVar('thread', $thread);
+        $view->setVar('board', Models\Board::getById($this->db, $thread->boardId));
 
         $view->display('Ajax/Post');
     }
 
     public function redirect($postId)
     {
-        $posts = new Post($this->db);
-        $post = $posts->get($postId, false);
+        $post = Models\Post::get($postId, false);
 
         if ($post === false) {
             $this->notFound(_('Not found'), _('Post does not exist'));
         }
 
         if (!$post->boardId) {
-            $thread = $posts->getThread($post->threadId, false);
+            $thread = Models\Thread::get($this->db, $post->threadId, false);
 
             if ($thread === false) {
                 $this->internalError();
@@ -63,7 +62,7 @@ class Post extends BaseController
             $boardId = $post->boardId;
         }
 
-        $board = $this->boards->getById($boardId);
+        $board = Models\Board::getById($this->db, $boardId);
         if (!$board) {
             $this->internalError();
         }
@@ -87,8 +86,6 @@ class Post extends BaseController
         if ($this->user->ban) {
             $this->throwJsonError(403, _('You are banned!'));
         }
-
-        $posts = new Post($this->db);
 
         // Is this a reply or a new thread?
         if (!empty($_POST['thread'])) {
@@ -116,8 +113,7 @@ class Post extends BaseController
 
         // Verify file
         if ($hasFile) {
-            $files = new File($this->db);
-            $file = $files->get($_POST['file_id']);
+            $file = Models\File::get($this->db, $_POST['file_id']);
             if ($file === false) {
                 $this->throwJsonError(400, _('Invalid file'));
             }
@@ -125,11 +121,10 @@ class Post extends BaseController
 
         // Try getting a file by given name
         if (!$hasFile && !empty($fileName)) {
-            $files = new File($this->db);
-            $file = $files->getByOrigName($fileName);
+            $file = Models\File::getByOrigName($this->db, $fileName);
             if (!$file) {
                 $this->throwJsonError(404,
-                    sprintf(_('File "%s" was not found, please type a different name or choose a file'),
+                    sprintf(_('File "%s" was not found, please type a different name or choose a file to upload'),
                         htmlspecialchars($fileName)));
             }
             $hasFile = true;
@@ -144,7 +139,7 @@ class Post extends BaseController
 
         if (!$isReply) { // Creating a new thread
             // Verify board
-            if (empty($_POST['board']) || !$this->boards->exists($_POST['board'])) {
+            if (empty($_POST['board']) || !Models\Board::exists($this->db, $_POST['board'])) {
                 $this->throwJsonError(400, _('Invalid board'));
             }
 
@@ -153,9 +148,9 @@ class Post extends BaseController
                 $this->throwJsonError(400, _('Please type a message'));
             }
 
-            $board = $this->boards->getByUrl($_POST['board']);
+            $board = Models\Board::getByUrl($this->db, $_POST['board']);
         } else { // Replying to a thread
-            $thread = $posts->getThread($_POST['thread'], false);
+            $thread = Models\Thread::get($this->db, $_POST['thread'], false);
 
             // Verify thread
             if ($thread === false) {
@@ -165,7 +160,7 @@ class Post extends BaseController
             if ($thread->locked && !$this->user->isMod) {
                 $this->throwJsonError(400, _('This thread is locked'));
             }
-            $board = $this->boards->getById($thread->boardId);
+            $board = Models\Board::getById($this->db, $thread->boardId);
 
             // Message OR file is required for replies
             if (!$hasMessage && !$hasFile) {
@@ -174,17 +169,31 @@ class Post extends BaseController
         }
 
         if ($this->user->requireCaptcha) {
-            if (empty($_POST["captchaResponse"])) {
-                $this->throwJsonError(400, _('Please fill the CAPTCHA.'));
+            if (empty($_POST["g-recaptcha-response"])) {
+                $this->throwJsonError(400, _('Empty CAPTCHA response. Please try again.'));
             }
 
-            $captchaOk = ReCaptcha::verify($_POST["captchaResponse"], $this->config['reCaptcha']['privateKey']);
+            $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['captcha']['privateKey']);
             if (!$captchaOk) {
-                $this->throwJsonError(403, _('Invalid CAPTCHA response. Please try again.'));
+                $this->throwJsonError(403, _('Validating the CAPTCHA response failed. Please try again.'));
             }
         }
 
-        $countryCode = GeoIP::getCountryCode($_SERVER['REMOTE_ADDR']);
+        // IP2Location
+        if ($this->config['ip2location']['enabled']) {
+            require_once($this->config['ip2location']['apiFile']);
+            if (!filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                // IPv4
+                $ip2location = new \IP2Location\Database($this->config['ip2location']['v4Database']);
+            } else {
+                // IPv6
+                $ip2location = new \IP2Location\Database($this->config['ip2location']['v6Database']);
+            }
+            $countryCode = $ip2location->lookup($_SERVER['REMOTE_ADDR'], \IP2Location\Database::COUNTRY)['countryCode'];
+            $countryCode = strtoupper($countryCode);
+        } else {
+            $countryCode = null;
+        }
 
         // Message options
         $sage = empty($_POST['sage']) ? false : true;
@@ -204,7 +213,7 @@ class Post extends BaseController
         if (!empty($message)) {
             $message = Text::removeForbiddenUnicode($message);
             $message = Text::limitEmptyLines($message);
-            $message = mb_substr($message, 0, $this->config['view']['messageMaxLength']);
+            $message = mb_substr($message, 0, $this->config['posts']['messageMaxLength']);
         }
 
         // Only most basic text formatting for non-golds.
@@ -213,7 +222,7 @@ class Post extends BaseController
         }
 
         // Check blacklist
-        $wordBlacklist = new WordBlacklist($this->db);
+        $wordBlacklist = new Models\WordBlacklist($this->db);
         $blacklistReason = $wordBlacklist->match($message);
         if ($blacklistReason !== false) {
             $this->throwJsonError(403, sprintf(_('Your message contained a blacklisted word: %s'), $blacklistReason));
@@ -221,7 +230,7 @@ class Post extends BaseController
 
         $subject = null;
         if (!$isReply && isset($_POST['subject'])) {
-            $subject = trim(mb_substr($_POST['subject'], 0, $this->config['view']['subjectMaxLength']));
+            $subject = trim(mb_substr($_POST['subject'], 0, $this->config['posts']['subjectMaxLength']));
         }
 
         $username = null;
@@ -237,7 +246,7 @@ class Post extends BaseController
                 $this->throwJsonError(403, _('You are sending messages too fast. Please don\'t spam.'));
             }
 
-            $post = $posts->createThread($this->user->id, $board->id, $subject, $message, $username, $countryCode);
+            $post = Models\Thread::create($this->db, $this->user->id, $board->id, $subject, $message, $username, $countryCode);
 
             // Increment stats
             $this->user->statistics->increment('createdThreads');
@@ -257,8 +266,7 @@ class Post extends BaseController
             $thread->updateStats('replyCount');
 
             // Increment followed threads unread count
-            $followed = new UserThreadFollow($this->db);
-            $followed->incrementUnreadCount($thread->id, $this->user->id);
+            Models\UserThreadFollow::incrementUnreadCount($this->db, $thread->id, $this->user->id);
 
             // Enable flood limit
             Cache::add('SpamLimit-reply-' . $_SERVER['REMOTE_ADDR'], 1, $this->config['posts']['replyIntervalLimit']);
@@ -270,7 +278,7 @@ class Post extends BaseController
             if ($thread->userId != $this->user->id) {
                 // Notify OP
                 $messageQueue->send([
-                    UserNotification::NOTIFICATION_TYPE_THREAD_REPLY,
+                    Models\UserNotification::NOTIFICATION_TYPE_THREAD_REPLY,
                     $thread->id,
                     $notificationsSkipUsers,
                 ], MessageQueue::MSG_TYPE_ADD_POST_NOTIFICATION);
@@ -303,7 +311,7 @@ class Post extends BaseController
         if (!empty($postReplies)) {
             $notificationsSkipUsers[] = $this->user->id;
             $messageQueue->send([
-                UserNotification::NOTIFICATION_TYPE_POST_REPLY,
+                Models\UserNotification::NOTIFICATION_TYPE_POST_REPLY,
                 $postReplies,
                 $notificationsSkipUsers
             ], MessageQueue::MSG_TYPE_ADD_POST_NOTIFICATION);
@@ -317,6 +325,7 @@ class Post extends BaseController
     public function delete()
     {
         $this->validateAjaxCsrfToken();
+
         if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
@@ -360,6 +369,7 @@ class Post extends BaseController
     public function deleteFile()
     {
         $this->validateAjaxCsrfToken();
+
         if (empty($_POST['post_id'])) {
             $this->throwJsonError(400);
         }
@@ -382,5 +392,32 @@ class Post extends BaseController
 
         // Delete file
         $post->removeFiles();
+    }
+
+    public function report()
+    {
+        $this->validateAjaxCsrfToken();
+
+        if ($this->user->ban) {
+            $this->throwJsonError(403, _('You are banned!'));
+        }
+
+        if (empty($_POST['post_id']) || empty($_POST['reason_id'])) {
+            $this->throwJsonError(400);
+        }
+
+        $posts = new Post($this->db);
+        if ($posts->get($_POST['post_id'], false) === false) {
+            $this->throwJsonError(404, _('Post does not exist'));
+        }
+
+        $postReports = new PostReport($this->db);
+
+        if ($postReports->isReported($_POST['post_id'])) {
+            $this->throwJsonError(418, _('This message has already been reported and is waiting for a review'));
+        }
+
+        $additionalInfo = empty($_POST['report_additional_info']) ? null : mb_substr($_POST['report_additional_info'], 0, 120);
+        $postReports->add($_POST['post_id'], $_POST['reason_id'], $additionalInfo);
     }
 }

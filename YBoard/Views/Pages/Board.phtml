@@ -22,9 +22,9 @@
             <div class="replies">
             <?php if (!empty($thread->replies)) : ?>
                 <div class="replies-buttons">
-                    <?php if ($thread->replyCount > $previewPosts) : ?>
-                    <button class="link more-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show more replies') ?></button>
-                    <button class="link less-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show less replies') ?></button>
+                    <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
+                        <button class="link more-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show more replies') ?></button>
+                        <button class="link less-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show less replies') ?></button>
                     <?php endif ?>
                 </div>
                 <div class="more-replies-container"></div>

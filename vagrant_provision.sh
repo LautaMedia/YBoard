@@ -88,6 +88,18 @@ server {
 
     location /static/ {
         root /vagrant;
+
+        location ~ ^/static/files/([a-z0-9]+)/o/([a-z0-9]+)(\.\w+)\$ { return 404; }
+        location ~ \.php\$ { return 404; }
+
+        location /static/files/ {
+            # Files do not use query strings.
+            if (\$query_string != '') { return 404; }
+
+            # Fake filenames for browsers
+            rewrite ^/static/files/([a-z0-9]+)/o/([a-z0-9]+)/(.+)(\.\w+)\$ /static/files/\$1/o/\$2\$4 break;
+        }
+
     }
 
     index index.php;

@@ -11,7 +11,7 @@ class Thread {
 
     getElm(id)
     {
-        return $('#thread-' + id);
+        return document.getElementById('thread-' + id);
     }
 
     toggleLock(id)

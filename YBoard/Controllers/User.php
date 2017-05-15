@@ -106,8 +106,7 @@ class User extends BaseController
 
         $sessionId = Text::filterHex($_POST['sessionId']);
 
-        $userSessions = new UserSession($this->db);
-        $session = $userSessions->get($this->user->id, hex2bin($sessionId));
+        $session = UserSession::get($this->db, $this->user->id, hex2bin($sessionId), null, false);
         if ($session !== false) {
             $session->destroy();
         }

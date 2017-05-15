@@ -75,15 +75,16 @@ return [
     '#^/api/follow/markallread$#' => ['ThreadFollow', 'markAllRead'],
 
     // File scripts
-    '#^/api/file/upload$#' => ['File', 'upload'],
-    '#^/api/file/getmediaplayer$#' => ['File', 'getMediaPlayer'],
+    '#^/api/file/upload$#' => ['Api\File', 'upload'],
+    '#^/api/file/delete#' => ['Api\File', 'delete'],
+    '#^/api/file/getmediaplayer$#' => ['Api\File', 'getMediaPlayer'],
 
     // Posts
-    '#^/api/post/get$#' => ['Post', 'get'],
-    '#^/api/post/submit$#' => ['Post', 'submit'],
-    '#^/api/post/delete$#' => ['Post', 'delete'],
-    '#^/api/post/deletefile$#' => ['Post', 'deleteFile'],
-    '#^/api/post/report$#' => ['PostReport', 'submit'],
+    '#^/api/post/get$#' => ['Api\Post', 'get'],
+    '#^/api/post/submit$#' => ['Api\Post', 'submit'],
+    '#^/api/post/delete$#' => ['Api\Post', 'delete'],
+    '#^/api/post/deletefile$#' => ['Api\Post', 'deleteFile'],
+    '#^/api/post/report$#' => ['Api\Post', 'report'],
 
     // Notifications
     '#^/api/notification/getall$#' => ['Notification', 'getAll'],

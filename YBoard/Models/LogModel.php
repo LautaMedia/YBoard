@@ -15,10 +15,10 @@ class LogModel extends BaseModel
     {
         $q = $this->db->prepare("INSERT INTO log (action_id, user_id, custom_data, ip)
             VALUES (:action_id, :user_id, :custom_data, :ip)");
-        $q->bindValue('action_id', $actionId, Database::PARAM_INT);
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
-        $q->bindValue('custom_data', $customData);
-        $q->bindValue('ip', inet_pton($_SERVER['REMOTE_ADDR']));
+        $q->bindValue(':action_id', $actionId, Database::PARAM_INT);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':custom_data', $customData);
+        $q->bindValue(':ip', inet_pton($_SERVER['REMOTE_ADDR']));
         $q->execute();
 
         return true;

@@ -5,24 +5,25 @@ class Toast
         this._show('success', message, title);
     }
 
-    info(message, title = '')
+    info(message, title = false)
     {
         this._show('info', message, title);
     }
 
-    warning(message, title = '')
+    warning(message, title = false)
     {
         this._show('warning', message, title);
     }
 
-    error(message, title = '')
+    error(message, title = false)
     {
         this._show('error', message, title);
     }
 
     _show(type, message, title)
     {
-        alert(type + ': ' + title + "\n\n" + message);
+        title = title !== false ? title + "\n\n" : '';
+        alert(type + "\n\n" + title + message);
     }
 }
 

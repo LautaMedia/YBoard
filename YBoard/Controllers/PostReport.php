@@ -2,10 +2,7 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Ban;
-use YBoard\Models\LogModel;
-use YBoard\Models\PostReport;
-use YBoard\Models\Post;
+use YBoard\Models;
 
 class PostReport extends BaseController
 {
@@ -47,32 +44,5 @@ class PostReport extends BaseController
 
         $view->reasons = Ban::getReasons();
         $view->display('Ajax/ReportForm');
-    }
-
-    public function submit()
-    {
-        $this->validateAjaxCsrfToken();
-
-        if ($this->user->ban) {
-            $this->throwJsonError(403, _('You are banned!'));
-        }
-
-        if (empty($_POST['post_id']) || empty($_POST['reason_id'])) {
-            $this->throwJsonError(400);
-        }
-
-        $posts = new Post($this->db);
-        if ($posts->get($_POST['post_id'], false) === false) {
-            $this->throwJsonError(404, _('Post does not exist'));
-        }
-
-        $postReports = new PostReport($this->db);
-
-        if ($postReports->isReported($_POST['post_id'])) {
-            $this->throwJsonError(418, _('This message has already been reported and is waiting for a review'));
-        }
-
-        $additionalInfo = empty($_POST['report_additional_info']) ? null : mb_substr($_POST['report_additional_info'], 0, 120);
-        $postReports->add($_POST['post_id'], $_POST['reason_id'], $additionalInfo);
     }
 }

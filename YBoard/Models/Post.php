@@ -69,12 +69,12 @@ class Post extends Model
         $q = $this->db->prepare("INSERT IGNORE INTO post_deleted (id, user_id, board_id, thread_id, ip, time, subject, message, time_deleted)
             SELECT id, user_id, board_id, thread_id, ip, time, subject, message, NOW() FROM post
             WHERE id = :post_id OR thread_id = :post_id_2");
-        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('post_id_2', $this->id, Database::PARAM_INT);
+        $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':post_id_2', $this->id, Database::PARAM_INT);
         $q->execute();
 
         $q = $this->db->prepare("DELETE FROM post WHERE id = :post_id LIMIT 1");
-        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return $q->rowCount() !== 0;
@@ -83,7 +83,7 @@ class Post extends Model
     public function getRepliedPosts(): array
     {
         $q = $this->db->prepare("SELECT post_id_replied FROM post_reply WHERE post_id = :post_id");
-        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return $q->fetchAll(Database::FETCH_COLUMN);
@@ -92,7 +92,7 @@ class Post extends Model
     public function removeFiles(): bool
     {
         $q = $this->db->prepare("DELETE FROM post_file WHERE post_id = :post_id");
-        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -102,9 +102,9 @@ class Post extends Model
     {
         $q = $this->db->prepare("INSERT INTO post_file (post_id, file_id, file_name)
             VALUES (:post_id, :file_id, :file_name)");
-        $q->bindValue('post_id', $this->id, Database::PARAM_INT);
-        $q->bindValue('file_id', $fileId, Database::PARAM_INT);
-        $q->bindValue('file_name', $fileName);
+        $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
+        $q->bindValue(':file_id', $fileId, Database::PARAM_INT);
+        $q->bindValue(':file_name', $fileName);
         $q->execute();
 
         return true;
@@ -127,7 +127,7 @@ class Post extends Model
 
         if ($clearOld) {
             $q = $this->db->prepare("DELETE FROM post_reply WHERE post_id = :post_id");
-            $q->bindValue('post_id', $this->id, Database::PARAM_INT);
+            $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
             $q->execute();
         }
 
@@ -173,7 +173,7 @@ class Post extends Model
     public static function getDeleted(Database $db, int $postId)
     {
         $q = $db->prepare("SELECT * FROM post_deleted WHERE id = :id LIMIT 1");
-        $q->bindValue('id', $postId, Database::PARAM_INT);
+        $q->bindValue(':id', $postId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
@@ -203,14 +203,14 @@ class Post extends Model
         $q = $db->prepare("INSERT INTO post_deleted (id, user_id, board_id, thread_id, ip, time, subject, message, time_deleted)
             SELECT id, user_id, board_id, thread_id, ip, time, subject, message, NOW() FROM post
             WHERE user_id = :user_id AND time >= DATE_SUB(NOW(), INTERVAL :interval_hours HOUR)");
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
-        $q->bindValue('interval_hours', $intervalHours, Database::PARAM_INT);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':interval_hours', $intervalHours, Database::PARAM_INT);
         $q->execute();
 
         $q = $db->prepare("DELETE FROM post
             WHERE user_id = :user_id AND time >= DATE_SUB(NOW(), INTERVAL :interval_hours HOUR)");
-        $q->bindValue('user_id', $userId, Database::PARAM_INT);
-        $q->bindValue('interval_hours', $intervalHours, Database::PARAM_INT);
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':interval_hours', $intervalHours, Database::PARAM_INT);
         $q->execute();
 
         return true;

@@ -1,7 +1,11 @@
+import YBoard from '../../YBoard';
+import YQuery from '../../YQuery';
+
 class AutoUpdate
 {
     constructor()
     {
+        let that = this;
         this.threadId = false;
         this.nextLoadDelay = 2000;
         this.newReplies = 0;
@@ -12,6 +16,13 @@ class AutoUpdate
         this.nextRunTimeout = 0;
         this.startDelayTimeout = 0;
         this.originalDocTitle = document.title;
+
+        document.querySelectorAll('.thread .get-replies').forEach(function(elm) {
+            elm.addEventListener('click', function(e) {
+                e.preventDefault();
+                that.runOnce(elm.closest('.thread').dataset.id);
+            });
+        });
     }
 
     run(manual)
@@ -20,7 +31,7 @@ class AutoUpdate
             return false;
         }
 
-        this.nextLoadDelay = this.nextLoadDelay * (this.runCount == 0 ? 1 : this.runCount);
+        this.nextLoadDelay = this.nextLoadDelay * (this.runCount === 0 ? 1 : this.runCount);
         if (this.nextLoadDelay > 30000) {
             this.nextLoadDelay = 30000;
         }
@@ -37,39 +48,48 @@ class AutoUpdate
             }
         }
 
-        let thread = YB.thread.getElm(this.threadId);
-        let fromId = thread.find('.reply:last').attr('id');
-        if (typeof fromId === 'undefined') {
+        let thread = YBoard.Thread.getElm(this.threadId);
+        let fromId = thread.querySelector('.reply:last-of-type');
+        if (fromId === null) {
             fromId = 0;
         } else {
-            fromId = fromId.replace('post-', '');
+            fromId = fromId.getAttribute('id').replace('post-', '');
         }
 
         this.nowLoading = true;
         let that = this;
-        YQuery.post('/scripts/threads/getreplies', {
+        YQuery.post('/api/thread/getreplies', {
             'threadId': this.threadId,
             'fromId': fromId,
             'newest': true,
-        }).onLoad(function(data)
-        {
-            if (manual && data.length == 0) {
-                YBoard.Toast.info(messages.noNewReplies);
-            }
-            // Update timestamps
-            data = $(data);
-            data.find('.datetime').localizeTimestamp(this);
+            'xhr': function(xhr) {
+                xhr.responseType = 'document';
 
-            that.lastUpdateNewReplies = data.find('.message').length;
+                return xhr;
+            },
+        }).onLoad(function(xhr)
+        {
+            if (manual && xhr.responseText.length === 0) {
+                YBoard.Toast.info(messages.noNewReplies);
+                return;
+            }
+
+            let data = document.createElement('template');
+            data.innerHTML = xhr.responseText;
+
+            // Update timestamps
+            data.content.querySelectorAll('.datetime').forEach(YBoard.localizeDatetime);
+
+            that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
             that.newReplies += that.lastUpdateNewReplies;
 
-            if (that.lastUpdateNewReplies == 0) {
+            if (that.lastUpdateNewReplies === 0) {
                 ++that.runCount;
             } else {
                 that.runCount = 0;
             }
 
-            data.appendTo(thread.find('.replies'));
+            thread.querySelector('.replies').appendChild(data.content);
 
             // Run again
             if (!manual) {
@@ -86,13 +106,14 @@ class AutoUpdate
             that.nowLoading = false;
 
             // Notify about new posts on title
-            if (!document.hasFocus() && that.newReplies > 0 && $('body').hasClass('thread-page')) {
+            if (!document.hasFocus() && that.newReplies > 0 && document.body.classList.contains('thread-page')) {
                 document.title = '(' + that.newReplies + ') ' + that.originalDocTitle;
-                var replies = $('.replies');
-                replies.find('hr').remove();
-                replies.find('.reply:eq(-' + that.newReplies + ')').before('<hr>');
+                let replies = document.querySelector('.replies');
+                replies.querySelector('hr').remove();
+                let hr = document.createElement('hr');
+                replies.insertBefore(hr, replies.querySelector('.reply:eq(-' + that.newReplies + ')'));
             } else {
-                if (self.newReplies != 0) {
+                if (that.newReplies !== 0) {
                     that.newReplies = 0;
                 }
             }

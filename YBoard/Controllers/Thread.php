@@ -2,24 +2,22 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
+use YBoard\Models;
 use YFW\Library\Cache;
 use YFW\Library\HttpResponse;
-use YBoard\Models\Post;
 
 class Thread extends BaseController
 {
     public function index($boardUrl, $threadId)
     {
-        $posts = new Post($this->db);
-
         // Get thread
-        $thread = $posts->getThread($threadId);
+        $thread = Models\Thread::get($this->db, $threadId);
         if ($thread === false) {
             $this->notFound(_('Not found'), _('The thread you are looking for does not exist.'));
         }
 
         // Get board
-        $board = $this->boards->getById($thread->boardId);
+        $board = Models\Board::getById($this->db, $thread->boardId);
         if ($boardUrl != $board->url) {
             // Invalid board for current thread, redirect
             HttpResponse::redirectExit('/' . $board->url . '/' . $thread->id);
@@ -44,11 +42,10 @@ class Thread extends BaseController
         }
 
         $view = $this->loadTemplateEngine();
-        $view->pageTitle = $thread->subject;
-        $view->bodyClass = 'thread-page';
-
-        $view->board = $board;
-        $view->thread = $thread;
+        $view->setVar('pageTitle', $thread->subject);
+        $view->setVar('bodyClass', 'thread-page');
+        $view->setVar('board', $board);
+        $view->setVar('thread', $thread);
 
         $view->display('Thread');
     }
@@ -63,17 +60,16 @@ class Thread extends BaseController
 
         $newest = empty($_POST['newest']) ? false : true;
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['threadId'], false);
+        $thread = Models\Thread::get($this->db, $_POST['threadId'], false);
         if ($thread === false) {
             $this->throwJsonError(404, _('Thread does not exist'));
         }
 
         $view = $this->loadTemplateEngine('Blank');
 
-        $view->thread = $thread;
-        $view->board = $this->boards->getById($thread->boardId);
-        $view->replies = $thread->getReplies(null, $newest, $_POST['fromId']);
+        $view->setVar('thread', $thread);
+        $view->setVar('board', Models\Board::getById($this->db, $thread->boardId));
+        $view->setVar('replies', $thread->getReplies(null, $newest, $_POST['fromId']));
 
         $view->display('Ajax/ThreadExpand');
 
