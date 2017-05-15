@@ -60,7 +60,7 @@ class UserNotification extends Model
         }
     }
 
-    public function decrementCountByPostId($postId, $type = null)
+    public static function decrementCountByPostId(Database $db, $postId, $type = null)
     {
         if (!is_array($postId)) {
             $postId = [$postId];
@@ -75,11 +75,11 @@ class UserNotification extends Model
             }
 
             $params = array_merge($postId, $type);
-            $whereType = ' AND type IN (' . $this->db->buildIn($type) . ')';
+            $whereType = ' AND type IN (' . $db->buildIn($type) . ')';
         }
 
-        $q = $this->db->prepare("UPDATE user_notification SET count = count-1
-            WHERE post_id IN (" . $this->db->buildIn($postId) . ")" . $whereType);
+        $q = $db->prepare("UPDATE user_notification SET count = count-1
+            WHERE post_id IN (" . $db->buildIn($postId) . ")" . $whereType);
         $q->execute($params);
 
         if ($q->rowCount() == 0) {
@@ -89,17 +89,17 @@ class UserNotification extends Model
         return true;
     }
 
-    public function clearInvalid()
+    public static function clearInvalid(Database $db)
     {
-        $q = $this->db->prepare("DELETE FROM user_notification WHERE is_read = 0 and count = 0");
+        $q = $db->prepare("DELETE FROM user_notification WHERE is_read = 0 and count = 0");
         $q->execute();
 
         return true;
     }
 
-    public function add(int $userId, int $type, string $customData = null, int $postId = null)
+    public static function add(Database $db, int $userId, int $type, string $customData = null, int $postId = null)
     {
-        $q = $this->db->prepare("INSERT INTO user_notification (user_id, type, post_id, custom_data) 
+        $q = $db->prepare("INSERT INTO user_notification (user_id, type, post_id, custom_data) 
             VALUES (:user_id, :type, :post_id, :custom_data)
             ON DUPLICATE KEY UPDATE is_read = 0, count = count+1");
 

@@ -91,6 +91,7 @@ class PostForm
         // Remove file -button
         this.elm.querySelector('#remove-file').addEventListener('click', function()
         {
+            that.deleteUploadedFile();
             that.removeFile();
         });
 
@@ -236,6 +237,7 @@ class PostForm
         this.elm.querySelector('#remove-file').show();
 
         // Abort any ongoing uploads
+        this.deleteUploadedFile();
         this.removeFile(true);
 
         let fileInput = this.elm.querySelector('#post-files');
@@ -325,23 +327,25 @@ class PostForm
             this.fileUploadXhr = null;
         }
 
-        let fileIdElm = this.elm.querySelector('#file-id');
-
-        if (fileIdElm.value !== '') {
-            YQuery.post('/api/file/delete', {
-                'fileId': fileIdElm.value
-            });
-        }
-
         if (!refresh) {
             this.elm.querySelector('#remove-file').hide();
             this.elm.querySelector('#post-files').value = '';
         }
 
-        fileIdElm.value = '';
+        this.elm.querySelector('#file-id').value = '';
         this.elm.querySelector('#file-name').value = '';
         this.updateFileProgressBar(0);
         this.submitAfterFileUpload = false;
+    }
+
+    deleteUploadedFile()
+    {
+        let fileIdElm = this.elm.querySelector('#file-id');
+        if (fileIdElm.value !== '') {
+            YQuery.post('/api/file/delete', {
+                'fileId': fileIdElm.value
+            });
+        }
     }
 
     updateFileProgressBar(progress)

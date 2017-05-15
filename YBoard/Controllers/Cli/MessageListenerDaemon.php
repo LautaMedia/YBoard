@@ -1,13 +1,13 @@
 <?php
 namespace YBoard\Controllers\Cli;
 
+use YBoard\MessageQueue;
+use YBoard\Models\File;
+use YBoard\Models\Post;
+use YBoard\Models\UserNotification;
 use YFW\Library\CliLogger;
 use YFW\Library\Database;
 use YFW\Library\FileHandler;
-use YFW\Library\MessageQueue;
-use YBoard\Models\File;
-use YBoard\Models\UserNotification;
-use YBoard\Models\Post;
 
 class MessageListenerDaemon
 {
@@ -17,13 +17,12 @@ class MessageListenerDaemon
     public function __construct()
     {
         // Load config
-        $this->config = require(ROOT_PATH . '/Config/App.php');
+        $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
     }
 
     protected function connectDb()
     {
-
-        $this->db = new Database(require(ROOT_PATH . '/Config/Database.php'));
+        $this->db = new Database(require(ROOT_PATH . '/YBoard/Config/Database.php'));
     }
 
     protected function closeDb()
@@ -71,10 +70,9 @@ class MessageListenerDaemon
         }
     }
 
-    protected function doPngCrush(int $fileId) : bool
+    protected function doPngCrush(int $fileId): bool
     {
-        $files = new File($this->db);
-        $file = $files->get($fileId);
+        $file = File::get($this->db, $fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
 
@@ -92,17 +90,16 @@ class MessageListenerDaemon
         $md5 = md5(file_get_contents($filePath));
 
         $file->saveMd5List([$md5]);
-        $file->updateSize(filesize($filePath));
-        $file->updateInProgress(false);
+        $file->setSize(filesize($filePath));
+        $file->setInProgress(false);
 
         return true;
     }
 
-    protected function processVideo(int $fileId) : bool
+    protected function processVideo(int $fileId): bool
     {
         // $message should be int fileId
-        $files = new File($this->db);
-        $file = $files->get($fileId);
+        $file = File::get($this->db, $fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
 
@@ -128,16 +125,15 @@ class MessageListenerDaemon
 
         $md5 = md5(file_get_contents($filePath));
         $file->saveMd5List([$md5]);
-        $file->updateSize(filesize($filePath));
-        $file->updateInProgress(false);
+        $file->setSize(filesize($filePath));
+        $file->setInProgress(false);
 
         return true;
     }
 
-    protected function processAudio(int $fileId) : bool
+    protected function processAudio(int $fileId): bool
     {
-        $files = new File($this->db);
-        $file = $files->get($fileId);
+        $file = File::get($this->db, $fileId);
         if (!$file) {
             CliLogger::write('[ERROR] Invalid file: ' . $fileId);
 
@@ -163,13 +159,13 @@ class MessageListenerDaemon
 
         $md5 = md5(file_get_contents($filePath));
         $file->saveMd5List([$md5]);
-        $file->updateSize(filesize($filePath));
-        $file->updateInProgress(false);
+        $file->setSize(filesize($filePath));
+        $file->setInProgress(false);
 
         return true;
     }
 
-    protected function addPostNotification(array $message) : bool
+    protected function addPostNotification(array $message): bool
     {
         // Message should be [notificationType, postId, [userId], skipUsers]
         if (!is_array($message)) {
@@ -182,11 +178,8 @@ class MessageListenerDaemon
 
         list($notificationType, $postId, $skipUsers) = $message;
 
-        $posts = new Post($this->db);
-        $notifications = new UserNotification($this->db);
-
         if (!is_array($postId)) {
-            $repliedPost = $posts->get($postId, false);
+            $repliedPost = Post::get($this->db, $postId, false);
             if (!$repliedPost || empty($repliedPost->userId)) {
                 return false;
             }
@@ -194,15 +187,15 @@ class MessageListenerDaemon
             if (in_array($repliedPost->userId, $skipUsers)) {
                 return true;
             }
-            $notifications->add($repliedPost->userId, $notificationType, null, $repliedPost->id);
+            UserNotification::add($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
         } else {
-            $repliedPosts = $posts->get($postId, false);
+            $repliedPosts = Post::get($this->db, $postId, false);
             foreach ($repliedPosts as $repliedPost) {
                 if (in_array($repliedPost->userId, $skipUsers)) {
                     continue;
                 }
 
-                $notifications->add($repliedPost->userId, $notificationType, null, $repliedPost->id);
+                UserNotification::add($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
                 $skipUsers[] = $repliedPost->userId;
             }
         }
@@ -210,17 +203,15 @@ class MessageListenerDaemon
         return true;
     }
 
-    protected function removePostNotification($message) : bool
+    protected function removePostNotification($message): bool
     {
         // Message should be $postId or [$postId, $postId, $postId, ...]
-        $notifications = new UserNotification($this->db);
-
         if (!is_array($message) || empty($message['types']) || empty($message['posts'])) {
             return false;
         }
 
-        $notifications->decrementCountByPostId($message['posts'], $message['types']);
-        $notifications->clearInvalid();
+        UserNotification::decrementCountByPostId($this->db, $message['posts'], $message['types']);
+        UserNotification::clearInvalid();
 
         return true;
     }

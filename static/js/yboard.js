@@ -1173,6 +1173,7 @@ var PostForm = function () {
 
         // Remove file -button
         this.elm.querySelector('#remove-file').addEventListener('click', function () {
+            that.deleteUploadedFile();
             that.removeFile();
         });
 
@@ -1315,6 +1316,7 @@ var PostForm = function () {
             this.elm.querySelector('#remove-file').show();
 
             // Abort any ongoing uploads
+            this.deleteUploadedFile();
             this.removeFile(true);
 
             var fileInput = this.elm.querySelector('#post-files');
@@ -1405,23 +1407,25 @@ var PostForm = function () {
                 this.fileUploadXhr = null;
             }
 
-            var fileIdElm = this.elm.querySelector('#file-id');
-
-            if (fileIdElm.value !== '') {
-                _YQuery2.default.post('/api/file/delete', {
-                    'fileId': fileIdElm.value
-                });
-            }
-
             if (!refresh) {
                 this.elm.querySelector('#remove-file').hide();
                 this.elm.querySelector('#post-files').value = '';
             }
 
-            fileIdElm.value = '';
+            this.elm.querySelector('#file-id').value = '';
             this.elm.querySelector('#file-name').value = '';
             this.updateFileProgressBar(0);
             this.submitAfterFileUpload = false;
+        }
+    }, {
+        key: 'deleteUploadedFile',
+        value: function deleteUploadedFile() {
+            var fileIdElm = this.elm.querySelector('#file-id');
+            if (fileIdElm.value !== '') {
+                _YQuery2.default.post('/api/file/delete', {
+                    'fileId': fileIdElm.value
+                });
+            }
         }
     }, {
         key: 'updateFileProgressBar',

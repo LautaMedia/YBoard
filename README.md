@@ -122,4 +122,8 @@ If you edit the config or locales, please regenerate the javascripts with `php R
 
 
 ## Discussion
-For discussions in finnish, please see http://ylilauta.org/ohjelmistot/
+For discussions, please see https://ylilauta.org/yboard/
+
+## Contributing
+Due to legal implications, pull requests are not accepted at this time.
+Please use the aforementioned discussion board for any kind of contributions.

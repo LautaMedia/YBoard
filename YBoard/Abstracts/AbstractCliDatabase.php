@@ -12,12 +12,12 @@ abstract class AbstractCliDatabase
     {
         // Load config
         if ($config === null) {
-            $this->config = require(ROOT_PATH . '/Config/App.php');
+            $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
         }
 
         // Get a database connection
         if ($db === null) {
-            $this->db = new Database(require(ROOT_PATH . '/Config/Database.php'));
+            $this->db = new Database(require(ROOT_PATH . '/YBoard/Config/Database.php'));
         } else {
             $this->db = $db;
         }

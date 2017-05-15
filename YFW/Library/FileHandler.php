@@ -66,11 +66,21 @@ class FileHandler
 
     public static function convertVideo(string $file): bool
     {
-        $tmpFile = sys_get_temp_dir() . '/video-' . time() . mt_rand(000000, 999999) . '.mp4';
+        $tmpFile = tempnam(sys_get_temp_dir(), 'vid') . '.mp4';
 
-        system('nice --adjustment=19 ffmpeg -i ' . escapeshellarg($file) . ' -threads 0 -c:v libx264' . ' -pix_fmt yuv420p -crf 23 -maxrate 3000k -bufsize 9000k -preset:v veryfast -profile:v high -level:v 4.1' . ' -filter_complex scale="trunc(in_w/2)*2:trunc(in_h/2)*2"' . ' -movflags faststart -c:a aac -ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile) . ' > /dev/null 2>&1');
+        system('nice --adjustment=19 ffmpeg -i ' . escapeshellarg($file) . ' -threads 0 -strict -2 '
+            . '-c:v libx264 -pix_fmt yuv420p -crf 23 -maxrate 3000k -bufsize 9000k -preset:v veryfast -profile:v high '
+            . '-level:v 4.1 -filter_complex scale="trunc(in_w/2)*2:trunc(in_h/2)*2" -movflags faststart -c:a aac '
+            . '-ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile));
 
         if (!is_file($tmpFile)) {
+            return false;
+        }
+
+        // If the file gets deleted before we finish
+        if (!is_file($file)) {
+            unlink($tmpFile);
+
             return false;
         }
 
@@ -82,11 +92,19 @@ class FileHandler
 
     public static function convertAudio(string $file): bool
     {
-        $tmpFile = sys_get_temp_dir() . '/audio-' . time() . mt_rand(000000, 999999) . '.m4a';
+        $tmpFile = tempnam(sys_get_temp_dir(), 'aud') . '.m4a';
 
-        system('nice --adjustment=19 ffmpeg -i ' . escapeshellarg($file) . ' -threads 0' . ' -c:a aac -ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile) . ' > /dev/null 2>&1');
+        system('nice --adjustment=19 ffmpeg -i ' . escapeshellarg($file) . ' -threads 0 -strict -2 -c:a aac '
+            . '-ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile));
 
         if (!is_file($tmpFile)) {
+            return false;
+        }
+
+        // If the file gets deleted before we finish
+        if (!is_file($file)) {
+            unlink($tmpFile);
+
             return false;
         }
 
@@ -167,7 +185,7 @@ class FileHandler
 
     public static function pngCrush(string $file): bool
     {
-        $tmpFile = $file . '.tmp.png';
+        $tmpFile = tempnam(sys_get_temp_dir(), 'img') . '.png';
 
         $cmd = 'nice --adjustment=' . (int)static::NICE_VALUE . ' pngcrush ';
         $cmd .= static::PNGCRUSH_OPTIONS . ' ' . escapeshellarg($file) . ' ' . escapeshellarg($tmpFile);
@@ -180,6 +198,13 @@ class FileHandler
         }
 
         if (!is_file($tmpFile)) {
+            return false;
+        }
+
+        // If the file gets deleted before we finish
+        if (!is_file($file)) {
+            unlink($tmpFile);
+
             return false;
         }
 
