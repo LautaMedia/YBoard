@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
 
     # Virtual machine details
     config.vm.provider "virtualbox" do |vb|
-        vb.gui = true
+        vb.gui = false
         vb.cpus = 2
         vb.memory = 1024
         vb.name = "YBoard"
