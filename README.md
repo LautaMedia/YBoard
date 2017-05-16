@@ -78,12 +78,12 @@ You should be able to use `webpack --watch` and some similar command for node-sa
 
 ## Manual/production setup
 ### Requirements
-* **Linux/Unix server**
-* Nginx
-* PHP 7+
-* MySQL 5.6+ / MariaDB
-* ImageMagick
+* **Linux/Unix server** (Ubuntu 16.04+ preferred)
+* Nginx 1.12+
+* PHP 7.1+
+* MySQL 5.7+ / MariaDB 10.1+
 * FFmpeg 3+
+* ImageMagick
 * PNGCrush
 * Jpegoptim
 * Jpegtran (for exif rotation, might be redundant)
