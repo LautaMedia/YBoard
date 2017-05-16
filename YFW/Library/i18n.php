@@ -35,7 +35,7 @@ class i18n
         return $locales;
     }
 
-    public function loadLocale($locale, $domain = 'default')
+    public function loadLocale(string $locale, string $domain = 'default'): void
     {
         $locale = addslashes($locale);
         $domain = addslashes($domain);
@@ -48,11 +48,11 @@ class i18n
         textdomain($domain);
     }
 
-    public function getPreferredLocale()
+    public function getPreferredLocale(): ?string
     {
         // Originally from http://www.thefutureoftheweb.com/blog/use-accept-language-header
         if (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            return false;
+            return null;
         }
 
         $locales = [];
@@ -98,6 +98,6 @@ class i18n
             }
         }
 
-        return false;
+        return null;
     }
 }

@@ -7,7 +7,7 @@ use YFW\Library\HttpResponse;
 
 class Board extends BaseController
 {
-    public function index($boardUrl, $pageNum = 1)
+    public function index(string $boardUrl, int $pageNum = 1): void
     {
         $this->verifyBoard($boardUrl);
         $this->limitPages($pageNum, $this->config['view']['maxPages']);
@@ -32,7 +32,7 @@ class Board extends BaseController
         $view->display('Board');
     }
 
-    public function catalog($boardUrl, $pageNum = 1)
+    public function catalog(string $boardUrl, int $pageNum = 1): void
     {
         $this->verifyBoard($boardUrl);
         $this->limitPages($pageNum, $this->config['view']['maxCatalogPages']);
@@ -56,7 +56,7 @@ class Board extends BaseController
         $view->display('BoardCatalog');
     }
 
-    public function redirect(string $boardUrl, int $boardPage = 1, string $catalog = '', int $catalogPage = 1)
+    public function redirect(string $boardUrl, int $boardPage = 1, string $catalog = '', int $catalogPage = 1): void
     {
         // Verify board exists
         $redirTo = false;
@@ -77,7 +77,7 @@ class Board extends BaseController
         $this->notFound();
     }
 
-    protected function verifyBoard($boardUrl)
+    protected function verifyBoard(string $boardUrl): void
     {
         if (!Models\Board::exists($this->db, $boardUrl)) {
             if (Models\Board::isAltUrl($this->db, $boardUrl)) {

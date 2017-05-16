@@ -214,7 +214,7 @@ class Thread extends Post
         static::$hiddenIds = $hiddenIds;
     }
 
-    public static function get(Database $db, int $threadId, bool $allData = true)
+    public static function get(Database $db, int $threadId, bool $allData = true): ?self
     {
         if ($allData) {
             $q = $db->prepare(static::getPostQuery("WHERE a.id = :id AND a.thread_id IS NULL LIMIT 1"));
@@ -226,7 +226,7 @@ class Thread extends Post
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $row = $q->fetch();
@@ -295,7 +295,7 @@ class Thread extends Post
         int $page,
         int $count,
         int $replyCount = 0,
-        $keepOrder = false
+        bool $keepOrder = false
     ): array {
         $limitStart = ($page - 1) * $count;
 
@@ -362,10 +362,10 @@ class Thread extends Post
         Database $db,
         int $userId,
         int $boardId,
-        string $subject,
+        ?string $subject,
         string $message,
-        $username,
-        string $countryCode
+        ?string $username,
+        ?string $countryCode
     ): Thread {
         $thread = new self($db, null, false);
         $thread->userId = $userId;
@@ -373,7 +373,7 @@ class Thread extends Post
         $thread->ip = $_SERVER['REMOTE_ADDR'];
         $thread->countryCode = $countryCode;
         $thread->username = $username;
-        $thread->subject = empty($subject) ? null : $subject;
+        $thread->subject = $subject;
         $thread->message = $message;
 
         $q = $db->prepare("INSERT INTO post

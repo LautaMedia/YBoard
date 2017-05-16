@@ -155,7 +155,7 @@ class Post extends Model
         $q->execute($postId);
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         if (!$wasArray) {
@@ -170,14 +170,14 @@ class Post extends Model
         return $posts;
     }
 
-    public static function getDeleted(Database $db, int $postId)
+    public static function getDeleted(Database $db, int $postId): ?self
     {
         $q = $db->prepare("SELECT * FROM post_deleted WHERE id = :id LIMIT 1");
         $q->bindValue(':id', $postId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());

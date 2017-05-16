@@ -41,7 +41,7 @@ class UserPreferences extends AbstractUserModel
     {
         // Delayed update to prevent unnecessary database queries
         if ($this->userId === null || empty($this->toUpdate)) {
-            return true;
+            return;
         }
 
         $query = str_repeat('(?,?,?),', count($this->toUpdate));
@@ -59,7 +59,7 @@ class UserPreferences extends AbstractUserModel
         $q->execute($queryVars);
     }
 
-    public function set($keyName, $value): bool
+    public function set(string $keyName, $value): bool
     {
         if (!array_search($keyName, $this->keyToName)) {
             return false;
@@ -105,7 +105,7 @@ class UserPreferences extends AbstractUserModel
         return true;
     }
 
-    public function reset($keyName)
+    public function reset($keyName): bool
     {
         if (array_search($keyName, $this->keyToName)) {
             $key = array_search($keyName, $this->keyToName);
@@ -123,7 +123,7 @@ class UserPreferences extends AbstractUserModel
         return true;
     }
 
-    protected function load(): bool
+    protected function load(): void
     {
         $q = $this->db->prepare("SELECT preferences_key, preferences_value FROM user_preferences WHERE user_id = :user_id");
         $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
@@ -153,7 +153,5 @@ class UserPreferences extends AbstractUserModel
             }
             $this->{$keyName} = $value;
         }
-
-        return true;
     }
 }

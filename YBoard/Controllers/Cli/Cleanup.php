@@ -10,7 +10,7 @@ use YBoard\Models\UserSession;
 
 class Cleanup extends AbstractCliDatabase
 {
-    public function deleteOldFiles()
+    public function deleteOldFiles(): void
     {
         $files = new File($this->db);
         $files->deleteOrphans();
@@ -41,7 +41,7 @@ class Cleanup extends AbstractCliDatabase
         }
     }
 
-    public function deleteOldPosts()
+    public function deleteOldPosts(): void
     {
         $boards = new Board($this->db);
         $posts = new Post($this->db);
@@ -64,7 +64,7 @@ class Cleanup extends AbstractCliDatabase
         }
     }
 
-    public function deleteOldUsers()
+    public function deleteOldUsers(): void
     {
         $users = new User($this->db);
         $userSessions = new UserSession($this->db);

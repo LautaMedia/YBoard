@@ -5,13 +5,13 @@ use YBoard\Abstracts\AbstractCliDatabase;
 
 class Cron extends AbstractCliDatabase
 {
-    public function daily()
+    public function daily(): void
     {
         $cleanup = new Cleanup($this->config, $this->db);
         $cleanup->deleteOldFiles();
     }
 
-    public function hourly()
+    public function hourly(): void
     {
         $cleanup = new Cleanup($this->config, $this->db);
         $cleanup->deleteOldPosts();

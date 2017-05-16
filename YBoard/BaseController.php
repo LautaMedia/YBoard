@@ -67,7 +67,7 @@ abstract class BaseController extends Controller
         }
     }
 
-    protected function loadUser()
+    protected function loadUser(): bool
     {
         $cookie = $this->getLoginCookie();
         if ($cookie !== false) {
@@ -106,7 +106,7 @@ abstract class BaseController extends Controller
         return true;
     }
 
-    protected function userMaybeBot()
+    protected function userMaybeBot(): bool
     {
         if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
             // Great way of detecting crawlers!
@@ -129,21 +129,21 @@ abstract class BaseController extends Controller
     }
 
     protected function dieWithMessage(
-        $errorTitle,
-        $errorMessage,
-        $httpStatus = false,
-        $bodyClass = false,
-        $image = false
-    ) {
+        string $errorTitle,
+        string $errorMessage,
+        ?int $httpStatus = null,
+        ?string $bodyClass = null,
+        ?string $image = null
+    ): void {
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            if (!$httpStatus || !is_int($httpStatus)) {
+            if ($httpStatus === null) {
                 $httpStatus = 500;
             }
             $this->throwJsonError($httpStatus, $errorMessage, $errorTitle);
-            return true;
+            return;
         }
 
-        if ($httpStatus && is_int($httpStatus)) {
+        if ($httpStatus !== null) {
             HttpResponse::setStatusCode($httpStatus);
         }
 
@@ -171,7 +171,7 @@ abstract class BaseController extends Controller
         $this->stopExecution();
     }
 
-    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, string $base = '')
+    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, string $base = ''): void
     {
         if ($isLastPage) {
             $maxPages = $pageNum;
@@ -198,14 +198,14 @@ abstract class BaseController extends Controller
         ]);
     }
 
-    protected function limitPages($pageNum, $maxPages)
+    protected function limitPages(int $pageNum, int $maxPages): void
     {
         if ($pageNum > $maxPages) {
             $this->notFound(_('Not found'), sprintf(_('Please don\'t. %s pages is enough.'), $maxPages));
         }
     }
 
-    protected function loadTemplateEngine($templateFile = 'Default')
+    protected function loadTemplateEngine(string $templateFile = 'Default'): TemplateEngine
     {
         $templateEngine = new TemplateEngine(ROOT_PATH . '/YBoard/Views', $templateFile);
 
@@ -260,14 +260,14 @@ abstract class BaseController extends Controller
         return $templateEngine;
     }
 
-    protected function modOnly()
+    protected function modOnly(): void
     {
         if (!$this->user->isMod) {
             $this->notFound();
         }
     }
 
-    protected function validateCsrfToken($token)
+    protected function validateCsrfToken(string $token): bool
     {
         if (empty($token) || empty($this->user->session->csrfToken)) {
             return false;
@@ -280,14 +280,14 @@ abstract class BaseController extends Controller
         return false;
     }
 
-    protected function validatePostCsrfToken()
+    protected function validatePostCsrfToken(): void
     {
         if (!$this->isPostRequest() || empty($_POST['csrf_token']) || !$this->validateCsrfToken($_POST['csrf_token'])) {
             $this->badRequest();
         }
     }
 
-    protected function validateAjaxCsrfToken()
+    protected function validateAjaxCsrfToken(): bool
     {
         if ($this->user->id === null) {
             $this->ajaxCsrfValidationFail();
@@ -310,25 +310,25 @@ abstract class BaseController extends Controller
         return false;
     }
 
-    protected function ajaxCsrfValidationFail()
+    protected function ajaxCsrfValidationFail(): void
     {
         $this->throwJsonError(401, _('Your session has expired. Please refresh this page and try again.'));
         $this->stopExecution();
     }
 
-    protected function invalidAjaxData()
+    protected function invalidAjaxData(): void
     {
         HttpResponse::setStatusCode(400);
         $this->jsonMessage(_('Invalid request'));
         $this->stopExecution();
     }
 
-    protected function jsonPageReload(string $url = null)
+    protected function jsonPageReload(string $url = null): void
     {
         echo json_encode(['reload' => true, 'url' => $url]);
     }
 
-    protected function jsonMessage($message, string $title = null, bool $reload = false, string $url = null)
+    protected function jsonMessage($message, string $title = null, bool $reload = false, string $url = null): void
     {
         $args = [
             'title' => $title,
@@ -340,7 +340,7 @@ abstract class BaseController extends Controller
         echo json_encode($args);
     }
 
-    protected function throwJsonError(int $statusCode, string $message = null, string $title = null)
+    protected function throwJsonError(int $statusCode, string $message = null, string $title = null): void
     {
         HttpResponse::setStatusCode($statusCode);
 
@@ -351,14 +351,14 @@ abstract class BaseController extends Controller
         $this->stopExecution();
     }
 
-    protected function getLoginCookie()
+    protected function getLoginCookie(): ?array
     {
         if (empty($_COOKIE['user'])) {
-            return false;
+            return null;
         }
 
         if (strlen($_COOKIE['user']) <= 130 || substr_count($_COOKIE['user'], '-') !== 2) {
-            return false;
+            return null;
         }
 
         list($userId, $sessionId, $verifyKey) = explode('-', $_COOKIE['user']);
@@ -385,28 +385,28 @@ abstract class BaseController extends Controller
         return true;
     }
 
-    protected function badRequest($errorTitle = false, $errorMessage = false)
+    protected function badRequest(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Bad request') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Your request did not complete because it contained invalid information.') : $errorMessage;
         $this->dieWithMessage($errorTitle, $errorMessage, 400);
     }
 
-    protected function unauthorized($errorTitle = false, $errorMessage = false)
+    protected function unauthorized(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Unauthorized') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('You are not authorized to perform this operation') : $errorMessage;
         $this->dieWithMessage($errorTitle, $errorMessage, 401);
     }
 
-    protected function blockAccess($errorTitle = false, $errorMessage = false)
+    protected function blockAccess(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Forbidden') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Thou shalt not access this resource!') : $errorMessage;
         $this->dieWithMessage($errorTitle, $errorMessage, 403);
     }
 
-    public function notFound($errorTitle = false, $errorMessage = false)
+    public function notFound(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Page not found') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. Probably never did.') : $errorMessage;
@@ -415,13 +415,13 @@ abstract class BaseController extends Controller
         if (!empty($images)) {
             $image = $this->imagePathToUrl($images[array_rand($images)]);
         } else {
-            $images = false;
+            $image = null;
         }
 
         $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
     }
 
-    protected function internalError($errorTitle = false, $errorMessage = false)
+    protected function internalError(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Oh noes!') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('We\'re terribly sorry. An internal error occurred when we tried to complete your request.') : $errorMessage;
@@ -430,18 +430,18 @@ abstract class BaseController extends Controller
         if (!empty($images)) {
             $image = $this->imagePathToUrl($images[array_rand($images)]);
         } else {
-            $images = false;
+            $image = null;
         }
 
         $this->dieWithMessage($errorTitle, $errorMessage, 500, 'internalerror', $image);
     }
 
-    protected function imagePathToUrl($path)
+    protected function imagePathToUrl(string $path): string
     {
         return $this->config['app']['staticUrl'] . str_replace(ROOT_PATH . '/static', '', $path);
     }
 
-    protected function disallowNonPost()
+    protected function disallowNonPost(): void
     {
         if (!$this->isPostRequest()) {
             HttpResponse::setStatusCode(405, ['Allowed' => 'POST']);
@@ -449,7 +449,7 @@ abstract class BaseController extends Controller
         }
     }
 
-    protected function isPostRequest()
+    protected function isPostRequest(): bool
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             return true;

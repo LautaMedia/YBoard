@@ -5,7 +5,7 @@ use YBoard\BaseController;
 
 class Search extends BaseController
 {
-    public function index()
+    public function index(): void
     {
         $view = $this->loadTemplateEngine();
 

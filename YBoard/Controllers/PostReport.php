@@ -6,7 +6,7 @@ use YBoard\Models;
 
 class PostReport extends BaseController
 {
-    public function uncheckedReports()
+    public function uncheckedReports(): void
     {
         $this->modOnly();
 
@@ -18,7 +18,7 @@ class PostReport extends BaseController
         $view->display('Mod/Reports');
     }
 
-    public function setChecked()
+    public function setChecked(): void
     {
         $this->modOnly();
         $this->validateAjaxCsrfToken();
@@ -38,7 +38,7 @@ class PostReport extends BaseController
         $report->setChecked($this->user->id);
     }
 
-    public function getForm()
+    public function getForm(): void
     {
         $view = $this->loadTemplateEngine('Blank');
 

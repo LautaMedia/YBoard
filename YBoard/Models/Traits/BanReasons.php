@@ -7,7 +7,7 @@ trait BanReasons
 {
     public $reasonId;
 
-    public function getReasonText() : string
+    public function getReasonText() : ?string
     {
         foreach (Ban::getReasons() as $reasonId => $reason) {
             if ($this->reasonId == $reasonId) {
@@ -15,6 +15,6 @@ trait BanReasons
             }
         }
 
-        return '';
+        return null;
     }
 }

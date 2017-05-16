@@ -7,14 +7,14 @@ class TemplateEngine
     protected $templateFile = false;
     protected $viewFilesPath;
 
-    public function __construct($viewFilesPath, $templateFile = false)
+    public function __construct(string $viewFilesPath, ?string $templateFile = null)
     {
         if (!is_dir($viewFilesPath)) {
             throw new \Exception('Invalid path for view files: ' . $viewFilesPath);
         }
         $this->viewFilesPath = $viewFilesPath;
 
-        if (!$templateFile) {
+        if ($templateFile === null) {
             $templateFile = 'Default';
         }
 
@@ -25,17 +25,17 @@ class TemplateEngine
         $this->templateFile = $templateFile;
     }
 
-    public function getVar($name)
+    public function getVar(string $name)
     {
         return $this->variables[$name];
     }
 
-    public function setVar($name, $content)
+    public function setVar(string $name, $content): void
     {
         $this->variables[$name] = $content;
     }
 
-    public function display($viewFile, $returnAsString = false)
+    public function display(string $viewFile, bool $returnAsString = false): ?string
     {
         // Validate viewFile
         if (!preg_match('/^[a-z0-9_\-\/]+$/i', $viewFile)) {
@@ -70,7 +70,7 @@ class TemplateEngine
             return ob_get_clean();
         }
 
-        return false;
+        return null;
     }
 
     protected function getTitle(string $siteName = ''): string

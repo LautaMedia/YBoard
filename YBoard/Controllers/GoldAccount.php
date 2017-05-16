@@ -5,7 +5,7 @@ use YBoard\BaseController;
 
 class GoldAccount extends BaseController
 {
-    public function index()
+    public function index(): void
     {
         $this->jsonMessage(json_encode([$_POST, $_SERVER["SERVER_PROTOCOL"]]));
         die();

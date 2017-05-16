@@ -5,7 +5,7 @@ use YBoard\BaseController;
 
 class InfoPages extends BaseController
 {
-    public function faq()
+    public function faq(): void
     {
         $view = $this->loadTemplateEngine();
 
@@ -14,7 +14,7 @@ class InfoPages extends BaseController
         $view->display('InfoPages/FAQ');
     }
 
-    public function rules()
+    public function rules(): void
     {
         $view = $this->loadTemplateEngine();
 
@@ -23,7 +23,7 @@ class InfoPages extends BaseController
         $view->display('InfoPages/Rules');
     }
 
-    public function about()
+    public function about(): void
     {
         $view = $this->loadTemplateEngine();
 
@@ -32,7 +32,7 @@ class InfoPages extends BaseController
         $view->display('InfoPages/About');
     }
 
-    public function advertising()
+    public function advertising(): void
     {
         $view = $this->loadTemplateEngine();
 

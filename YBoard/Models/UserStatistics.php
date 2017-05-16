@@ -74,7 +74,7 @@ class UserStatistics extends AbstractUserModel
         return true;
     }
 
-    protected function load(): bool
+    protected function load(): void
     {
         $q = $this->db->prepare("SELECT statistics_key, statistics_value FROM user_statistics WHERE user_id = :user_id");
         $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
@@ -94,7 +94,5 @@ class UserStatistics extends AbstractUserModel
         if ($this->totalPosts != 0) {
             $this->messageAverageLength = round($this->messageTotalCharacters / $this->totalPosts);
         }
-
-        return true;
     }
 }

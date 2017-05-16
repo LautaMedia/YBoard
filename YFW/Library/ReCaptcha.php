@@ -3,7 +3,7 @@ namespace YFW\Library;
 
 class ReCaptcha
 {
-    public static function verify($response, $secret)
+    public static function verify(string $response, string $secret): bool
     {
         $url = 'https://www.google.com/recaptcha/api/siteverify';
         $data = [

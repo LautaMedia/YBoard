@@ -6,7 +6,7 @@ use YBoard\Models\File;
 
 class FixThings extends AbstractCliDatabase
 {
-    public function filesizes()
+    public function filesizes(): void
     {
         $files = new File($this->db);
 

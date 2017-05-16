@@ -8,7 +8,7 @@ use YFW\Library\HttpResponse;
 
 class Thread extends BaseController
 {
-    public function index($boardUrl, $threadId)
+    public function index(string $boardUrl, int $threadId): void
     {
         // Get thread
         $thread = Models\Thread::get($this->db, $threadId);
@@ -25,7 +25,7 @@ class Thread extends BaseController
 
         // Clear unread count and update last seen reply
         $followedThread = $this->user->threadFollow->get($thread->id);
-        if ($followedThread !== false) {
+        if ($followedThread !== null) {
             if (!empty($thread->threadReplies)) {
                 $tmp = array_slice($thread->threadReplies, -1);
                 $lastReply = array_pop($tmp);
@@ -50,7 +50,7 @@ class Thread extends BaseController
         $view->display('Thread');
     }
 
-    public function getReplies()
+    public function getReplies(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -75,13 +75,13 @@ class Thread extends BaseController
 
         // Clear unread count and update last seen reply
         $followedThread = $this->user->threadFollow->get($_POST['threadId']);
-        if ($followedThread !== false) {
+        if ($followedThread !== null) {
             $followedThread->resetUnreadCount();
             $followedThread->setLastSeenReply($_POST['fromId']);
         }
     }
 
-    public function hide()
+    public function hide(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -89,14 +89,13 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['threadId'], false);
+        $thread = Models\Thread::get($this->db, $_POST['threadId'], false);
         $thread->updateStats('hideCount');
 
         $this->user->threadHide->add($_POST['threadId']);
     }
 
-    public function restore()
+    public function restore(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -104,34 +103,33 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['threadId'], false);
+        $thread = Models\Thread::get($this->db, $_POST['threadId'], false);
         $thread->updateStats('hideCount', -1);
 
         $this->user->threadHide->remove($_POST['threadId']);
     }
 
-    public function lock()
+    public function lock(): void
     {
-        $this->updateThread('lock', true);
+        $this->update('lock', true);
     }
 
-    public function unlock()
+    public function unlock(): void
     {
-        $this->updateThread('lock', false);
+        $this->update('lock', false);
     }
 
-    public function stick()
+    public function stick(): void
     {
-        $this->updateThread('stick', true);
+        $this->update('stick', true);
     }
 
-    public function unstick()
+    public function unstick(): void
     {
-        $this->updateThread('stick', false);
+        $this->update('stick', false);
     }
 
-    protected function update(string $do, bool $bool)
+    protected function update(string $do, bool $bool): bool
     {
         $this->modOnly();
         $this->validateAjaxCsrfToken();
@@ -140,22 +138,25 @@ class Thread extends BaseController
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['threadId'], false);
+        $thread = Models\Thread::get($this->db, $_POST['threadId'], false);
+        if (!$thread) {
+            $this->throwJsonError(404, _('Thread not found'));
+        }
 
         if ($do == 'stick') {
             if ($bool) {
-                $thread->setSticky(true);
+                return $thread->setSticky(true);
             } else {
-                $thread->setSticky(false);
+                return $thread->setSticky(false);
             }
         } elseif ($do == 'lock') {
-
             if ($bool) {
-                $thread->setLocked(true);
+                return $thread->setLocked(true);
             } else {
-                $thread->setLocked(false);
+                return $thread->setLocked(false);
             }
         }
+
+        return false;
     }
 }

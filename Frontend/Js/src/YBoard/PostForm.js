@@ -246,7 +246,6 @@ class PostForm
         fileNameElm.value = '';
         this.submitAfterFileUpload = false;
 
-
         this.updateFileProgressBar(1);
 
         // Calculate upload size and check it does not exceed the set maximum

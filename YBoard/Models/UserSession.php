@@ -75,7 +75,7 @@ class UserSession extends Model
         string $sessionId,
         string $verifyKey,
         bool $verifyValidity = true
-    ) {
+    ): ?self {
         $q = $db->prepare("SELECT id, user_id, verify_key, csrf_token, ip, login_time, last_active
             FROM user_session WHERE id = :id AND user_id = :user_id LIMIT 1");
         $q->bindValue(':id', $sessionId);
@@ -83,13 +83,13 @@ class UserSession extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $row = $q->fetch();
 
         if ($verifyValidity && !hash_equals($row->verify_key, $verifyKey)) {
-            return false;
+            return null;
         }
 
         return new self($db, $row);
@@ -110,7 +110,7 @@ class UserSession extends Model
         return $sessions;
     }
 
-    public static function create(Database $db, int $userId): UserSession
+    public static function create(Database $db, int $userId): self
     {
         $sessionId = random_bytes(32);
         $csrfToken = random_bytes(32);

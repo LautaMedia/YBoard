@@ -13,7 +13,7 @@ use YBoard\Models;
 
 class Post extends BaseController
 {
-    public function get()
+    public function get(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -42,9 +42,9 @@ class Post extends BaseController
         $view->display('Ajax/Post');
     }
 
-    public function redirect($postId)
+    public function redirect(int $postId): void
     {
-        $post = Models\Post::get($postId, false);
+        $post = Models\Post::get($this->db, $postId, false);
 
         if ($post === false) {
             $this->notFound(_('Not found'), _('Post does not exist'));
@@ -78,7 +78,7 @@ class Post extends BaseController
         HttpResponse::redirectExit('/' . $board->url . '/' . $thread . $hash, 302);
     }
 
-    public function submit()
+    public function submit(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -224,7 +224,7 @@ class Post extends BaseController
         // Check blacklist
         $wordBlacklist = new Models\WordBlacklist($this->db);
         $blacklistReason = $wordBlacklist->match($message);
-        if ($blacklistReason !== false) {
+        if ($blacklistReason !== null) {
             $this->throwJsonError(403, sprintf(_('Your message contained a blacklisted word: %s'), $blacklistReason));
         }
 
@@ -322,7 +322,7 @@ class Post extends BaseController
         }
     }
 
-    public function delete()
+    public function delete(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -366,7 +366,7 @@ class Post extends BaseController
         $post->delete();
     }
 
-    public function deleteFile()
+    public function deleteFile(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -394,7 +394,7 @@ class Post extends BaseController
         $post->removeFiles();
     }
 
-    public function report()
+    public function report(): void
     {
         $this->validateAjaxCsrfToken();
 

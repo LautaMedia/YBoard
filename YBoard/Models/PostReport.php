@@ -64,7 +64,7 @@ class PostReport extends Model
         return true;
     }
 
-    public function getUnchecked() : array
+    public function getUnchecked(): array
     {
         $q = $this->db->prepare("SELECT post_id, reason_id, additional_info, time, reported_by FROM posts_reports
             WHERE is_checked = 0 ORDER BY reason_id ASC, time ASC");
@@ -78,7 +78,7 @@ class PostReport extends Model
         return $reports;
     }
 
-    public function get(int $postId)
+    public function get(int $postId): ?self
     {
         $q = $this->db->prepare("SELECT post_id, reason_id, additional_info, time, reported_by FROM posts_reports
             WHERE post_id = :post_id LIMIT 1");
@@ -86,22 +86,23 @@ class PostReport extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $row = $q->fetch();
-        return new PostReport($this->db, $row);
+
+        return new self($this->db, $row);
     }
 
-    public function getUncheckedCount() : int
+    public function getUncheckedCount(): int
     {
         $q = $this->db->prepare("SELECT COUNT(*) AS count FROM posts_reports WHERE is_checked = 0 LIMIT 1");
         $q->execute();
 
-        return (int) $q->fetch()->count;
+        return (int)$q->fetch()->count;
     }
 
-    public function isReported(int $postId)
+    public function isReported(int $postId): bool
     {
         $q = $this->db->prepare("SELECT post_id FROM posts_reports WHERE post_id = :post_id AND is_checked = 0 LIMIT 1");
         $q->bindValue(':post_id', $postId);
@@ -110,7 +111,7 @@ class PostReport extends Model
         return $q->rowCount() != 0;
     }
 
-    public function add(int $postId, int $reasonId, $additionalInfo) : bool
+    public function add(int $postId, int $reasonId, string $additionalInfo): bool
     {
         $q = $this->db->prepare("REPLACE INTO posts_reports (post_id, reason_id, additional_info, reported_by)
             VALUES (:post_id, :reason_id, :additional_info, :reported_by)");

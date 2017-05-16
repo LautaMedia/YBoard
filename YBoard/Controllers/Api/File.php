@@ -8,7 +8,7 @@ use YFW\Library\TemplateEngine;
 
 class File Extends BaseController
 {
-    public function delete()
+    public function delete(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -37,7 +37,7 @@ class File Extends BaseController
         $file->delete();
     }
 
-    public function upload()
+    public function upload(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -88,7 +88,7 @@ class File Extends BaseController
         $this->jsonMessage($ids);
     }
 
-    public function getMediaPlayer()
+    public function getMediaPlayer(): void
     {
         $this->validateAjaxCsrfToken();
 

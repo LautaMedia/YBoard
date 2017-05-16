@@ -111,20 +111,19 @@ class Ban extends Model
         return true;
     }
 
-    public function getMessage()
+    public function getMessage(): ?Post
     {
         if ($this->postId === null) {
-            return false;
+            return null;
         }
 
-        $posts = new Post($this->db);
-        $post = $posts->get($this->postId);
+        $post = Post::get($this->db, $this->postId);
 
         if ($post !== false) {
             return $post->message;
         }
 
-        $post = $posts->getDeletedMessage($this->postId);
+        $post = Post::getDeleted($this->db, $this->postId);
 
         return $post;
     }
@@ -161,7 +160,7 @@ class Ban extends Model
         return $reasons;
     }
 
-    public static function get(Database $db, $ip, int $userId, $beginNow = true)
+    public static function get(Database $db, $ip, int $userId, $beginNow = true): ?self
     {
         $q = $db->prepare("SELECT id, user_id, ip, begin_time, end_time, reason_id, additional_info, post_id,
             banned_by, is_expired, is_appealed, appeal_text, appeal_is_checked
@@ -171,7 +170,7 @@ class Ban extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $data = $q->fetch();
@@ -207,7 +206,7 @@ class Ban extends Model
         return true;
     }
 
-    public function getUncheckedAppealCount()
+    public function getUncheckedAppealCount(): int
     {
         $q = $this->db->prepare("SELECT COUNT(*) AS count FROM ban
             WHERE is_appealed = 1 AND appeal_is_checked = 0 LIMIT 1");

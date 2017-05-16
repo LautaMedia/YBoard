@@ -92,7 +92,7 @@ class Board extends Model
         return false;
     }
 
-    public static function getUrlByAltUrl(Database $db, string $altUrl)
+    public static function getUrlByAltUrl(Database $db, string $altUrl): ?string
     {
         foreach (static::getAll($db) as $board) {
             if ($board->altUrl == $altUrl) {
@@ -100,7 +100,7 @@ class Board extends Model
             }
         }
 
-        return false;
+        return null;
     }
 
     public static function exists(Database $db, string $url): bool
@@ -114,7 +114,7 @@ class Board extends Model
         return false;
     }
 
-    public static function getByUrl(Database $db, string $url)
+    public static function getByUrl(Database $db, string $url): ?self
     {
         foreach (static::getAll($db) as $board) {
             if ($board->url == $url) {
@@ -122,10 +122,10 @@ class Board extends Model
             }
         }
 
-        return false;
+        return null;
     }
 
-    public static function getById(Database $db, int $boardId)
+    public static function getById(Database $db, int $boardId): ?self
     {
         foreach (static::getAll($db) as $board) {
             if ($board->id == $boardId) {
@@ -133,6 +133,6 @@ class Board extends Model
             }
         }
 
-        return false;
+        return null;
     }
 }

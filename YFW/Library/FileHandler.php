@@ -8,13 +8,13 @@ class FileHandler
     const PNGCRUSH_OPTIONS = '-reduce -fix -rem allb -l 9';
     const IMAGICK_FILTER = 'triangle';
 
-    public static function getVideoMeta(string $file)
+    public static function getVideoMeta(string $file): ?\stdClass
     {
         $probe = shell_exec('nice --adjustment=19 ffprobe -show_streams -of json ' . escapeshellarg($file) . ' -v quiet');
         $videoInfo = json_decode($probe);
 
         if (empty($videoInfo->streams) || count($videoInfo->streams) == 0) {
-            return false;
+            return null;
         }
 
         $videoInfo = $videoInfo->streams;
@@ -47,7 +47,7 @@ class FileHandler
                 return $video;
             }
 
-            return false;
+            return null;
         }
 
         if (isset($videoInfo[$streamNum]->duration)) {

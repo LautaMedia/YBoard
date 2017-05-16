@@ -7,7 +7,7 @@ class WordBlacklist extends Model
 {
     public $blacklist;
 
-    public function match($str)
+    public function match(string $str): ?string
     {
         foreach ($this->getAll() as $word => $description) {
             if (stripos($str, $word) !== false) {
@@ -15,10 +15,10 @@ class WordBlacklist extends Model
             }
         }
 
-        return false;
+        return null;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         if ($this->blacklist) {
             return $this->blacklist;
@@ -35,7 +35,7 @@ class WordBlacklist extends Model
         return $blacklist;
     }
 
-    protected function reasonToText($reasonId)
+    protected function reasonToText($reasonId): string
     {
         switch ($reasonId) {
             case 1:

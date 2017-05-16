@@ -1,6 +1,7 @@
 <?php
 namespace YBoard\Models;
 
+use YBoard\Controllers\Notification;
 use YFW\Library\Database;
 use YFW\Model;
 
@@ -30,7 +31,7 @@ class UserNotification extends Model
     public $isRead;
     public $text;
 
-    public function remove() : bool
+    public function remove(): bool
     {
         $q = $this->db->prepare("DELETE FROM user_notification WHERE id = :id LIMIT 1");
         $q->bindValue(':id', $this->id, Database::PARAM_INT);
@@ -39,7 +40,7 @@ class UserNotification extends Model
         return true;
     }
 
-    public function markRead() : bool
+    public function markRead(): bool
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE id = :id AND is_read = 0 LIMIT 1");
@@ -60,7 +61,7 @@ class UserNotification extends Model
         }
     }
 
-    public static function decrementCountByPostId(Database $db, $postId, $type = null)
+    public static function decrementCountByPostId(Database $db, int $postId, int $type = null): bool
     {
         if (!is_array($postId)) {
             $postId = [$postId];
@@ -89,15 +90,15 @@ class UserNotification extends Model
         return true;
     }
 
-    public static function clearInvalid(Database $db)
+    public static function clearInvalid(Database $db): bool
     {
-        $q = $db->prepare("DELETE FROM user_notification WHERE is_read = 0 and count = 0");
+        $q = $db->prepare("DELETE FROM user_notification WHERE is_read = 0 AND count = 0");
         $q->execute();
 
         return true;
     }
 
-    public static function add(Database $db, int $userId, int $type, string $customData = null, int $postId = null)
+    public static function add(Database $db, int $userId, int $type, string $customData = null, int $postId = null): bool
     {
         $q = $db->prepare("INSERT INTO user_notification (user_id, type, post_id, custom_data) 
             VALUES (:user_id, :type, :post_id, :custom_data)
@@ -112,7 +113,7 @@ class UserNotification extends Model
         return true;
     }
 
-    public function markReadByThread(int $threadId) : bool
+    public function markReadByThread(int $threadId): bool
     {
         $q = $this->db->prepare("UPDATE user_notification SET is_read = 1, count = 0
             WHERE user_id = :user_id AND post_id IN (SELECT id FROM post WHERE thread_id = :thread_id) AND is_read = 0");
@@ -123,7 +124,7 @@ class UserNotification extends Model
         return true;
     }
 
-    public function markReadByPost(int $postId) : bool
+    public function markReadByPost(int $postId): bool
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE post_id = :post_id AND user_id = :user_id AND is_read = 0 LIMIT 1");
@@ -134,7 +135,7 @@ class UserNotification extends Model
         return true;
     }
 
-    public function markAllRead() : bool
+    public function markAllRead(): bool
     {
         $q = $this->db->prepare("UPDATE user_notification SET count = 0, is_read = 1
             WHERE user_id = :user_id AND is_read = 0");
@@ -144,10 +145,10 @@ class UserNotification extends Model
         return true;
     }
 
-    public function get(int $id)
+    public function get(int $id): ?self
     {
         if (empty($this->list[$id])) {
-            return false;
+            return null;
         }
 
         $notification = $this->list[$id];
@@ -156,7 +157,7 @@ class UserNotification extends Model
         return $notification;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         foreach ($this->list as $notification) {
             $notification->text = $this->getText($notification);
@@ -165,7 +166,7 @@ class UserNotification extends Model
         return $this->list;
     }
 
-    protected function getText(UserNotification $notification) : string
+    protected function getText(self $notification): string
     {
         switch ($notification->type) {
             case static::NOTIFICATION_TYPE_POST_REPLY:
@@ -210,7 +211,7 @@ class UserNotification extends Model
         return $text;
     }
 
-    protected function load()
+    protected function load(): void
     {
         $params = [$this->userId];
         $notIn = '';
@@ -224,7 +225,7 @@ class UserNotification extends Model
         $q->execute($params);
 
         while ($row = $q->fetch()) {
-            $notification = new UserNotification($this->db);
+            $notification = new self($this->db);
             $notification->id = $row->id;
             $notification->time = $row->time;
             $notification->type = $row->type;
@@ -239,7 +240,5 @@ class UserNotification extends Model
 
             $this->list[$notification->id] = $notification;
         }
-
-        return true;
     }
 }

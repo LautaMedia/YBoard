@@ -2,16 +2,14 @@
 namespace YBoard\Controllers;
 
 use YBoard\BaseController;
-use YBoard\Models\Post;
-use YBoard\Models\User;
-use YBoard\Models\UserSession;
+use YBoard\Models;
 use YFW\Library\Text;
 
 class User extends BaseController
 {
-    public function profile($userId = false)
+    public function profile(?int $userId = null): void
     {
-        if (empty($userId)) {
+        if ($userId === null) {
             $user = $this->user;
             $pageTitle = _('Your profile');
         } else {
@@ -33,19 +31,17 @@ class User extends BaseController
             }
         }
 
-        $sessions = new UserSession($this->db);
-
         $view = $this->loadTemplateEngine();
         $view->pageTitle = $pageTitle;
         $view->profile = $user;
 
         if ($this->user->id !== null) {
-            $view->loginSessions = $sessions->getAll($this->user->id);
+            $view->loginSessions = Models\UserSession::getAll($this->db, $this->user->id);
         }
         $view->display('Profile');
     }
 
-    public function changeName()
+    public function changeName(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -61,8 +57,7 @@ class User extends BaseController
             $this->throwJsonError(400, _('This is your current username'));
         }
 
-        $users = new User($this->db);
-        if (!$users->usernameIsFree($_POST['newName'])) {
+        if (!Models\User::usernameIsFree($this->db, $_POST['newName'])) {
             $this->throwJsonError(400, _('This username is already taken, please choose another one'));
         }
 
@@ -75,7 +70,7 @@ class User extends BaseController
         $this->jsonPageReload();
     }
 
-    public function changePassword()
+    public function changePassword(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -96,7 +91,7 @@ class User extends BaseController
         $this->jsonMessage(_('Password changed'));
     }
 
-    public function destroySession()
+    public function destroySession(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -106,7 +101,7 @@ class User extends BaseController
 
         $sessionId = Text::filterHex($_POST['sessionId']);
 
-        $session = UserSession::get($this->db, $this->user->id, hex2bin($sessionId), null, false);
+        $session = Models\UserSession::get($this->db, $this->user->id, hex2bin($sessionId), null, false);
         if ($session !== false) {
             $session->destroy();
         }
@@ -114,7 +109,7 @@ class User extends BaseController
         $this->jsonMessage(_('Session destroyed'));
     }
 
-    public function delete()
+    public function delete(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -131,8 +126,7 @@ class User extends BaseController
         }
 
         if (!empty($_POST['deletePosts'])) {
-            $posts = new Post($this->db);
-            $posts->deleteByUser($this->user->id);
+            Models\Post::deleteByUser($this->db, $this->user->id);
         }
 
         $this->user->delete();

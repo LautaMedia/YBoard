@@ -125,20 +125,20 @@ class File extends Model
         return $q->rowCount() !== 0;
     }
 
-    public static function get(Database $db, int $fileId)
+    public static function get(Database $db, int $fileId): ?self
     {
         $q = $db->prepare('SELECT ' . static::$selectQuery . ' FROM file WHERE id = :file_id LIMIT 1');
         $q->bindValue(':file_id', $fileId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());
     }
 
-    public static function getByOrigName(Database $db, string $fileName)
+    public static function getByOrigName(Database $db, string $fileName): ?self
     {
         $q = $db->prepare('SELECT ' . static::$selectQuery . ' FROM post_file a
             LEFT JOIN file b ON a.file_id = b.id
@@ -147,33 +147,33 @@ class File extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());
     }
 
-    public static function getByName(Database $db, string $fileName)
+    public static function getByName(Database $db, string $fileName): ?self
     {
         $q = $db->prepare('SELECT ' . static::$selectQuery . ' FROM file WHERE name = :name LIMIT 1');
         $q->bindValue(':name', $fileName);
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());
     }
 
-    public static function getByMd5(Database $db, string $md5)
+    public static function getByMd5(Database $db, string $md5): ?self
     {
         $q = $db->prepare("SELECT file_id FROM file_md5 WHERE md5 = :md5 LIMIT 1");
         $q->bindValue(':md5', hex2bin($md5));
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $row = $q->fetch();

@@ -5,7 +5,7 @@ use YBoard\BaseController;
 
 class Preferences extends BaseController
 {
-    public function index()
+    public function index(): void
     {
         $view = $this->loadTemplateEngine();
 
@@ -13,7 +13,7 @@ class Preferences extends BaseController
         $view->display('Preferences');
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -26,13 +26,13 @@ class Preferences extends BaseController
         }
     }
 
-    public function toggleThemeVariation()
+    public function toggleThemeVariation(): void
     {
         $this->validateAjaxCsrfToken();
         $this->user->preferences->set('themeAlt', !$this->user->preferences->themeAlt);
     }
 
-    public function toggleSidebar()
+    public function toggleSidebar(): void
     {
         $this->validateAjaxCsrfToken();
         $this->user->preferences->set('hideSidebar', !$this->user->preferences->hideSidebar);

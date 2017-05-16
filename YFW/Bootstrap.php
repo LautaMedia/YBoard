@@ -37,7 +37,7 @@ class Bootstrap
         });
     }
 
-    public function setErrorPage(string $path)
+    public function setErrorPage(string $path): void
     {
         if (!is_file(ROOT_PATH . '/' . $path . '.phtml')) {
             throw new InternalException('Invalid error page: ' . $path);
@@ -46,9 +46,8 @@ class Bootstrap
         $this->errorPage = $path;
     }
 
-    public function run(string $appName)
+    public function run(string $appName): void
     {
-
         $routes = require(ROOT_PATH . '/' . $appName . '/Config/UrlRoutes.php');
 
         $router = new Router();
@@ -58,14 +57,14 @@ class Bootstrap
         $router->route($_SERVER['REQUEST_URI']);
     }
 
-    protected function setEncoding()
+    protected function setEncoding(): void
     {
         // Set the encoding
         mb_internal_encoding('UTF-8');
         date_default_timezone_set('UTC');
     }
 
-    protected function setExceptionHandlers()
+    protected function setExceptionHandlers(): void
     {
         set_exception_handler(function (\Throwable $e) {
             include(ROOT_PATH . '/' . $this->errorPage . '.phtml');

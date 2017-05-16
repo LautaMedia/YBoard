@@ -9,13 +9,13 @@ class GenerateFiles extends Controller
 {
     protected $config;
 
-    public function allJs()
+    public function allJs(): void
     {
         $this->jsLocales();
         $this->jsConfig();
     }
 
-    public function jsLocales()
+    public function jsLocales(): void
     {
         $i18n = new i18n(ROOT_PATH . '/YBoard/Locales');
 
@@ -35,7 +35,7 @@ class GenerateFiles extends Controller
         }
     }
 
-    public function jsConfig()
+    public function jsConfig(): void
     {
         // Load config
         $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
@@ -49,7 +49,7 @@ class GenerateFiles extends Controller
         echo "JS config file generated\n";
     }
 
-    protected function getJsMessages()
+    protected function getJsMessages(): string
     {
         $messages = [
             'loading' => _('Loading...'),
@@ -87,7 +87,7 @@ class GenerateFiles extends Controller
         return 'let messages=' . json_encode($messages);
     }
 
-    protected function getJsConfig()
+    protected function getJsConfig(): string
     {
         $config = [
             'staticUrl' => $this->config['app']['staticUrl'],

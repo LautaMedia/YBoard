@@ -3,17 +3,18 @@ DBNAME=yboard
 DBPASSWD=vagrant
 
 # Change apt server and update
-sed -i -e 's=//us.archive.ubuntu=//archive.ubuntu=g' /etc/apt/sources.list
+#sed -i -e 's=//us.archive.ubuntu=//archive.ubuntu=g' /etc/apt/sources.list
+add-apt-repository ppa:ondrej/php -y
 apt update
 
 # Install PHP7, Nginx, MySQL, PNGCrush, JpegOptim, ImageMagick
 debconf-set-selections <<< "mysql-server mysql-server/root_password password ${DBPASSWD}"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${DBPASSWD}"
 
-apt install -y jpegoptim libjpeg-turbo-progs pngcrush imagemagick nginx mysql-server-5.7 php7.0-fpm php7.0-mysql php7.0-mbstring php7.0-gd php-apcu php-xdebug php-imagick ffmpeg
+apt install -y jpegoptim libjpeg-turbo-progs pngcrush imagemagick nginx mysql-server-5.7 php7.1-fpm php7.1-mysql php7.1-mbstring php7.1-gd php-apcu php-xdebug php-imagick ffmpeg
 
 # Nginx config
-sed -i -e 's/^user .*;/user vagrant;/g' /etc/nginx/nginx.conf
+sed -i -e 's/^user .*;/user ubuntu;/g' /etc/nginx/nginx.conf
 sed -i -e 's/#\? \?use .*;//g' /etc/nginx/nginx.conf
 sed -i -e 's/#\? \?multi_accept .*;/multi_accept on; use epoll;/g' /etc/nginx/nginx.conf
 
@@ -21,7 +22,7 @@ sed -i -e 's/#\? \?multi_accept .*;/multi_accept on; use epoll;/g' /etc/nginx/ng
 # See also the commented-out ssl directives in nginx-config.
 #openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 
-cat > /etc/nginx/conf.d/90-setit.conf << EOM
+cat > /etc/nginx/conf.d/zz-setit.conf << EOM
 # Basic
 server_tokens off;
 
@@ -61,7 +62,7 @@ location ~ \.php\$ {
     # This is how YBoard knows it's being developed
     fastcgi_param APPLICATION_ENVIRONMENT development;
 
-    fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+    fastcgi_pass unix:/var/run/php/php7.1-fpm.sock;
 }
 EOM
 
@@ -117,19 +118,19 @@ EOM
 ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 # PHP config
-sed -i -e 's/;\?opcache.enable=.*/opcache.enable=1/g' /etc/php/7.0/fpm/php.ini
-sed -i -e 's/upload_max_filesize \?= \?.*/upload_max_filesize = 200M/g' /etc/php/7.0/fpm/php.ini
-sed -i -e 's/post_max_size \?= \?.*/post_max_size = 200M/g' /etc/php/7.0/fpm/php.ini
-sed -i -e 's/error_reporting \?= \?.*/error_reporting = E_ALL/g' /etc/php/7.0/fpm/php.ini
-sed -i -e 's/^user \?= \?.*/user = vagrant/g' /etc/php/7.0/fpm/pool.d/www.conf
-sed -i -e 's/^group \?= \?.*/group = vagrant/g' /etc/php/7.0/fpm/pool.d/www.conf
-sed -i -e 's/^listen.owner \?= \?.*/listen.owner = vagrant/g' /etc/php/7.0/fpm/pool.d/www.conf
-sed -i -e 's/^listen.group \?= \?.*/listen.group = vagrant/g' /etc/php/7.0/fpm/pool.d/www.conf
-echo 'xdebug.profiler_enable_trigger=1' >> /etc/php/7.0/fpm/conf.d/20-xdebug.ini
-echo 'xdebug.profiler_output_dir=/vagrant/profiler' >> /etc/php/7.0/fpm/conf.d/20-xdebug.ini
+sed -i -e 's/;\?opcache.enable=.*/opcache.enable=1/g' /etc/php/7.1/fpm/php.ini
+sed -i -e 's/upload_max_filesize \?= \?.*/upload_max_filesize = 200M/g' /etc/php/7.1/fpm/php.ini
+sed -i -e 's/post_max_size \?= \?.*/post_max_size = 200M/g' /etc/php/7.1/fpm/php.ini
+sed -i -e 's/error_reporting \?= \?.*/error_reporting = E_ALL/g' /etc/php/7.1/fpm/php.ini
+sed -i -e 's/^user \?= \?.*/user = ubuntu/g' /etc/php/7.1/fpm/pool.d/www.conf
+sed -i -e 's/^group \?= \?.*/group = ubuntu/g' /etc/php/7.1/fpm/pool.d/www.conf
+sed -i -e 's/^listen.owner \?= \?.*/listen.owner = ubuntu/g' /etc/php/7.1/fpm/pool.d/www.conf
+sed -i -e 's/^listen.group \?= \?.*/listen.group = ubuntu/g' /etc/php/7.1/fpm/pool.d/www.conf
+echo 'xdebug.profiler_enable_trigger=1' >> /etc/php/7.1/fpm/conf.d/20-xdebug.ini
+echo 'xdebug.profiler_output_dir=/vagrant/profiler' >> /etc/php/7.1/fpm/conf.d/20-xdebug.ini
 
 # MySQL config
-cat > /etc/mysql/mysql.conf.d/90-setit.cnf << EOM
+cat > /etc/mysql/mysql.conf.d/zz-setit.cnf << EOM
 [mysqld]
 skip-name-resolve
 
@@ -181,5 +182,5 @@ locale-gen
 
 # Restart configured services
 service nginx restart
-service php7.0-fpm restart
+service php7.1-fpm restart
 service mysql restart

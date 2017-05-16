@@ -35,7 +35,7 @@ class UploadedFile extends File
         }
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         if (!empty($this->thumbDestination) && is_file($this->thumbDestination)) {
             unlink($this->thumbDestination);
@@ -202,7 +202,7 @@ class UploadedFile extends File
                 $this->md5[] = md5(file_get_contents($this->thumbDestination));
 
                 // Get size of the final images
-                list($this->width, $this->height) = getimagesize($this->destination);
+                [$this->width, $this->height] = getimagesize($this->destination);
 
                 break;
             case 'm4a':
@@ -266,7 +266,7 @@ class UploadedFile extends File
         return true;
     }
 
-    protected function limitPixelCount(string $file)
+    protected function limitPixelCount(string $file): void
     {
         if ($this->getPixelCount($file) > $this->maxPixelCount) {
             throw new FileUploadException(sprintf(_('Uploaded file exceeds the max pixel count of %s MP'),

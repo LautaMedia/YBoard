@@ -3,7 +3,7 @@ namespace YFW\Library;
 
 class Text
 {
-    public static function truncate($str, $length)
+    public static function truncate(string $str, int $length): string
     {
         $curlength = mb_strlen($str);
 
@@ -17,14 +17,14 @@ class Text
         return $str;
     }
 
-    public static function limitEmptyLines($str, $maxLines = 1)
+    public static function limitEmptyLines(string $str, int $maxLines = 1): string
     {
         $str = str_replace("\r", '', $str);
 
         return preg_replace('/(\n){' . ($maxLines + 1) . ',}/', str_repeat("\n", $maxLines + 1), $str);
     }
 
-    public static function removeForbiddenUnicode($text)
+    public static function removeForbiddenUnicode(string $text): string
     {
         // Remove invisible characters and characters that mess up with the formatting.
         $unicode = [
@@ -51,7 +51,7 @@ class Text
         return $text;
     }
 
-    public static function strToUrlSafe($str)
+    public static function strToUrlSafe(string $str): string
     {
         $urlSafeStr = mb_strtolower($str);
         $urlSafeStr = str_ireplace('ä', 'a', $urlSafeStr);
@@ -66,7 +66,7 @@ class Text
         return $urlSafeStr;
     }
 
-    public static function randomStr($length = 8, $uppercase = true, $numbers = true)
+    public static function randomStr(int $length = 8, bool $uppercase = true, bool $numbers = true): string
     {
         $chars = 'abcdefghijklmnopqrstuvwxyz';
         if ($uppercase) {
@@ -168,7 +168,7 @@ class Text
         return preg_replace('/[^0-9a-f]/', '', strtolower($string));
     }
 
-    public static function formatDuration($duration)
+    public static function formatDuration(int $duration): string
     {
         return floor($duration / 60) . ':' . str_pad($duration % 60, 2, '0', STR_PAD_LEFT);
     }

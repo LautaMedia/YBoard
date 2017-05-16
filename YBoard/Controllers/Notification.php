@@ -5,7 +5,7 @@ use YBoard\BaseController;
 
 class Notification extends BaseController
 {
-    function get()
+    function get(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -15,7 +15,7 @@ class Notification extends BaseController
         $view->display('Ajax/NotificationList');
     }
 
-    function markRead()
+    function markRead(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -29,7 +29,7 @@ class Notification extends BaseController
         }
     }
 
-    function markAllRead()
+    function markAllRead(): void
     {
         $this->validateAjaxCsrfToken();
 

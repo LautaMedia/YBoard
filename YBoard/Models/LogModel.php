@@ -2,8 +2,9 @@
 namespace YBoard\Models;
 
 use YFW\Library\Database;
+use YFW\Model;
 
-class LogModel extends BaseModel
+class LogModel extends Model
 {
     const ACTION_ID_MOD_LOGIN = 1;
     const ACTION_ID_MOD_POST_DELETE = 2;
@@ -11,7 +12,7 @@ class LogModel extends BaseModel
     const ACTION_ID_MOD_ADD_BAN = 4;
     const ACTION_ID_MOD_REPORT_CHECKED = 5;
 
-    public function write(int $actionId, int $userId, $customData = null) : bool
+    public function write(int $actionId, int $userId, $customData = null): bool
     {
         $q = $this->db->prepare("INSERT INTO log (action_id, user_id, custom_data, ip)
             VALUES (:action_id, :user_id, :custom_data, :ip)");
@@ -24,7 +25,7 @@ class LogModel extends BaseModel
         return true;
     }
 
-    public function getActionTitle(int $actionId)
+    public function getActionTitle(int $actionId): ?string
     {
         switch ($actionId) {
             case static::ACTION_ID_MOD_LOGIN:
@@ -38,5 +39,7 @@ class LogModel extends BaseModel
             case static::ACTION_ID_MOD_REPORT_CHECKED:
                 return _('Checked a report');
         }
+
+        return null;
     }
 }

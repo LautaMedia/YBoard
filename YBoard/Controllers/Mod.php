@@ -11,7 +11,7 @@ use YBoard\Models\User;
 
 class Mod extends BaseController
 {
-    public function banForm()
+    public function banForm(): void
     {
         $this->modOnly();
         $this->validateAjaxCsrfToken();
@@ -40,7 +40,7 @@ class Mod extends BaseController
         $view->display('Mod/BanForm');
     }
 
-    public function addBan()
+    public function addBan(): void
     {
         $this->modOnly();
         $this->validateAjaxCsrfToken();

@@ -36,8 +36,6 @@ class Database extends PDO
             $this->query("SET PROFILING = 1");
             $this->query("SET profiling_history_size = 100");
         }
-
-        return true;
     }
 
     public function __destruct()

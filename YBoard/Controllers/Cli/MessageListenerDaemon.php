@@ -20,17 +20,17 @@ class MessageListenerDaemon
         $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
     }
 
-    protected function connectDb()
+    protected function connectDb(): void
     {
         $this->db = new Database(require(ROOT_PATH . '/YBoard/Config/Database.php'));
     }
 
-    protected function closeDb()
+    protected function closeDb(): void
     {
         $this->db = null;
     }
 
-    public function index()
+    public function index(): void
     {
         $mq = new MessageQueue();
 
@@ -211,7 +211,7 @@ class MessageListenerDaemon
         }
 
         UserNotification::decrementCountByPostId($this->db, $message['posts'], $message['types']);
-        UserNotification::clearInvalid();
+        UserNotification::clearInvalid($this->db);
 
         return true;
     }

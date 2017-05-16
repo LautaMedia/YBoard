@@ -5,7 +5,7 @@ class Profiler
 {
     protected static $startTime;
 
-    public static function start()
+    public static function start(): void
     {
         static::$startTime = microtime(true);
     }

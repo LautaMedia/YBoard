@@ -3,7 +3,7 @@ namespace YFW\Library;
 
 class HttpResponse
 {
-    public static function redirectExit($url, $type = 302)
+    public static function redirectExit(string $url, int $type = 302): void
     {
         if (!in_array($type, [301, 302, 303])) {
             $type = 302;
@@ -13,9 +13,9 @@ class HttpResponse
         die();
     }
 
-    public static function setCookie($name, $value, $ttlDays = 365): bool
+    public static function setCookie(string $name, string $value, ?int $ttlDays = 365): bool
     {
-        if ($ttlDays !== false) {
+        if ($ttlDays !== null) {
             $expire = time() + ((int)$ttlDays * 86400);
         } else {
             $expire = 1;
@@ -24,7 +24,7 @@ class HttpResponse
         return setcookie($name, $value, $expire, '/', null, false, true) !== false;
     }
 
-    public static function setStatusCode($statusCode, $additionalHeaders = false)
+    public static function setStatusCode(int $statusCode, ?array $additionalHeaders = null): void
     {
         if (!isset($statusCode) || !is_numeric($statusCode)) {
             throw new \InvalidArgumentException('Invalid status code ' . $statusCode . ' for method ' . __METHOD__);
@@ -91,7 +91,7 @@ class HttpResponse
                 break;
         }
 
-        if ($additionalHeaders && is_array($additionalHeaders)) {
+        if ($additionalHeaders !== null) {
             foreach ($additionalHeaders AS $header => $value) {
                 header($header . ': ' . $value);
             }
@@ -100,7 +100,5 @@ class HttpResponse
         if ($fail) {
             throw new \InvalidArgumentException('Unsupported or invalid status code for method ' . __METHOD__);
         }
-
-        return true;
     }
 }

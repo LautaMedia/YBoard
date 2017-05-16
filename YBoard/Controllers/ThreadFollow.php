@@ -6,7 +6,7 @@ use YBoard\Models\Post;
 
 class ThreadFollow extends BaseController
 {
-    public function add()
+    public function add(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -24,7 +24,7 @@ class ThreadFollow extends BaseController
         }
     }
 
-    public function remove()
+    public function remove(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -42,7 +42,7 @@ class ThreadFollow extends BaseController
         }
     }
 
-    public function markAllRead()
+    public function markAllRead(): void
     {
         $this->validateAjaxCsrfToken();
 

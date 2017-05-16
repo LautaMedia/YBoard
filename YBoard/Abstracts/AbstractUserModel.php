@@ -18,5 +18,5 @@ abstract class AbstractUserModel extends Model
         }
     }
 
-    abstract protected function load();
+    abstract protected function load(): void;
 }

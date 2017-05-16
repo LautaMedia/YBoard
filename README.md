@@ -53,7 +53,7 @@ They can be opened for example with PhpStorm (Tools -> Analyze Xdebug Profiler S
         2. JavaScript -> Set from... -> Language -> PHP
     2. Languages & Frameworks
         1. JavaScript -> JavaScript language version: ECMAScript 6
-        2. PHP -> PHP language level: 7
+        2. PHP -> PHP language level: 7.1
     3. Tools -> File Watchers
         1. Add new: SCSS
             * Name: SCSS
@@ -116,7 +116,7 @@ You need to generate locales to the server in order for i18n translations to wor
 They use native gettext for maximum performance.
 1. Uncomment the required ones in /etc/locale.gen
 2. Run `locale-gen`
-3. Restart PHP `service php7.0-fpm restart`
+3. Restart PHP `service php7.1-fpm restart`
 
 If you edit the config or locales, please regenerate the javascripts with `php RunCommand.php GenerateFiles allJs`.
 

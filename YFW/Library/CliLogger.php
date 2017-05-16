@@ -3,9 +3,9 @@ namespace YFW\Library;
 
 class CliLogger
 {
-    public static function write(string $str, $logFile = false)
+    public static function write(string $str, ?string $logFile = null): void
     {
-        if (!$logFile) {
+        if ($logFile === null) {
             $logFile = ROOT_PATH . '/Logs/cli.log';
         }
 

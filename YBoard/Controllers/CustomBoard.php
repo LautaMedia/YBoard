@@ -6,7 +6,7 @@ use YBoard\Models;
 
 class CustomBoard extends BaseController
 {
-    public function myThreads($pageNum = 1)
+    public function myThreads(int $pageNum = 1): void
     {
         Models\Thread::setHidden($this->user->threadHide->getAll());
         $threads = Models\Thread::getIdsByUser($this->db, $this->user->id,
@@ -17,7 +17,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'mythreads', (int)$pageNum);
     }
 
-    public function repliedThreads($pageNum = 1)
+    public function repliedThreads(int $pageNum = 1): void
     {
         Models\Thread::setHidden($this->user->threadHide->getAll());
         $threads = Models\Thread::getIdsRepliedByUser($this->db, $this->user->id,
@@ -28,7 +28,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'repliedthreads', (int)$pageNum);
     }
 
-    public function followedThreads($pageNum = 1)
+    public function followedThreads(int $pageNum = 1): void
     {
         $threads = Models\Thread::getCustom($this->db, array_keys($this->user->threadFollow->getAll()), $pageNum,
             $this->user->preferences->threadsPerPage, $this->user->preferences->repliesPerThread, true);
@@ -36,7 +36,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'followedthreads', (int)$pageNum);
     }
 
-    public function hiddenThreads($pageNum = 1)
+    public function hiddenThreads(int $pageNum = 1): void
     {
         $threads = Models\Thread::getCustom($this->db, $this->user->threadHide->getAll(), $pageNum,
             $this->user->preferences->threadsPerPage, $this->user->preferences->repliesPerThread);
@@ -44,7 +44,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'hiddenthreads', (int)$pageNum);
     }
 
-    public function myThreadsCatalog($pageNum = 1)
+    public function myThreadsCatalog(int $pageNum = 1): void
     {
         Models\Thread::setHidden($this->user->threadHide->getAll());
         $threads = Models\Thread::getIdsByUser($this->db, $this->user->id,
@@ -54,7 +54,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'mythreads', (int)$pageNum, true);
     }
 
-    public function repliedThreadsCatalog($pageNum = 1)
+    public function repliedThreadsCatalog(int $pageNum = 1): void
     {
         Models\Thread::setHidden($this->user->threadHide->getAll());
         $threads = Models\Thread::getIdsRepliedByUser($this->db, $this->user->id,
@@ -64,7 +64,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'repliedthreads', (int)$pageNum, true);
     }
 
-    public function followedThreadsCatalog($pageNum = 1)
+    public function followedThreadsCatalog(int $pageNum = 1): void
     {
         $threads = Models\Thread::getCustom($this->db, array_keys($this->user->threadFollow->getAll()), $pageNum,
             $this->user->preferences->threadsPerCatalogPage);
@@ -72,7 +72,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'followedthreads', (int)$pageNum, true);
     }
 
-    public function hiddenThreadsCatalog($pageNum = 1)
+    public function hiddenThreadsCatalog(int $pageNum = 1): void
     {
         $threads = Models\Thread::getCustom($this->db, $this->user->threadHide->getAll(), $pageNum,
             $this->user->preferences->threadsPerCatalogPage);
@@ -80,7 +80,7 @@ class CustomBoard extends BaseController
         $this->showCustomBoard($threads, 'hiddenthreads', (int)$pageNum, true);
     }
 
-    protected function showCustomBoard(array $threads, string $boardName, int $pageNum, bool $catalog = false)
+    protected function showCustomBoard(array $threads, string $boardName, int $pageNum, bool $catalog = false): void
     {
         if (!$catalog) {
             $maxPages = $this->config['view']['maxPages'];

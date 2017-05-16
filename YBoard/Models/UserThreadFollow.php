@@ -28,33 +28,33 @@ class UserThreadFollow extends AbstractUserModel
         return array_key_exists($threadId, $this->threads);
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         return $this->threads;
     }
 
-    public function get(int $threadId)
+    public function get(int $threadId): ?Thread
     {
         if (empty($this->threads[$threadId])) {
-            return false;
+            return null;
         }
 
         return $this->threads[$threadId];
     }
 
-    public function getThreadUnreadCount(int $threadId)
+    public function getThreadUnreadCount(int $threadId): ?int
     {
         if (empty($this->threads[$threadId])) {
-            return false;
+            return null;
         }
 
         return $this->threads[$threadId]->unreadCount;
     }
 
-    public function getThreadLastSeenReply(int $threadId)
+    public function getThreadLastSeenReply(int $threadId): ?int
     {
         if (empty($this->threads[$threadId]) || empty($this->threads[$threadId]->lastSeenReply)) {
-            return false;
+            return null;
         }
 
         return $this->threads[$threadId]->lastSeenReply;
@@ -71,7 +71,7 @@ class UserThreadFollow extends AbstractUserModel
         return true;
     }
 
-    protected function load(): bool
+    protected function load(): void
     {
         $q = $this->db->prepare("SELECT thread_id, last_seen_reply, unread_count
             FROM user_thread_follow WHERE user_id = :user_id ORDER BY unread_count DESC");
@@ -92,8 +92,6 @@ class UserThreadFollow extends AbstractUserModel
 
             $this->unreadCount = $q->fetch(Database::FETCH_COLUMN);
         }
-
-        return true;
     }
 
     public function remove(): bool

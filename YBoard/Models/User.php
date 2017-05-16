@@ -89,7 +89,7 @@ class User extends Model
         }
     }
 
-    protected function resetGoldSettings()
+    protected function resetGoldSettings(): void
     {
         if ($this->goldLevel >= 1) {
             return;
@@ -154,10 +154,10 @@ class User extends Model
         return true;
     }
 
-    public function getBan()
+    public function getBan(): ?Ban
     {
         if ($this->id === null) {
-            return false;
+            return null;
         }
 
         return Ban::get($this->db, $_SERVER['REMOTE_ADDR'], $this->id);
@@ -175,7 +175,7 @@ class User extends Model
         return true;
     }
 
-    public static function getById(Database $db, int $userId)
+    public static function getById(Database $db, int $userId): ?self
     {
         $q = $db->prepare("SELECT id, username, password, class, gold_level, account_created, last_active, last_ip
             FROM user WHERE id = :user_id LIMIT 1");
@@ -183,13 +183,13 @@ class User extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());
     }
 
-    public static function getByUsername(Database $db, string $username)
+    public static function getByUsername(Database $db, string $username): ?self
     {
         $q = $db->prepare("SELECT id, username, password, class, gold_level, account_created, last_active, last_ip
             FROM user WHERE username = :username LIMIT 1");
@@ -197,20 +197,20 @@ class User extends Model
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         return new self($db, $q->fetch());
     }
 
-    public static function getByLogin(Database $db, string $username, string $password)
+    public static function getByLogin(Database $db, string $username, string $password): ?self
     {
         $q = $db->prepare("SELECT id, username, password, class FROM user WHERE username = :username LIMIT 1");
         $q->bindValue(':username', $username);
         $q->execute();
 
         if ($q->rowCount() == 0) {
-            return false;
+            return null;
         }
 
         $user = new self($db, $q->fetch());
@@ -218,10 +218,10 @@ class User extends Model
             return $user;
         }
 
-        return false;
+        return null;
     }
 
-    public static function createTemporary(Database $db): User
+    public static function createTemporary(Database $db): self
     {
         $user = new self($db, null, true);
         $user->lastActive = $user->accountCreated = date('Y-m-d H:i:s');
@@ -229,7 +229,7 @@ class User extends Model
         return $user;
     }
 
-    public static function create(Database $db): User
+    public static function create(Database $db): self
     {
         $q = $db->prepare("INSERT INTO user (last_ip) VALUES (:last_ip)");
         $q->bindValue(':last_ip', inet_pton($_SERVER['REMOTE_ADDR']));

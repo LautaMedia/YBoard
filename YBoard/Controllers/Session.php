@@ -9,7 +9,7 @@ use YBoard\Models\UserSession;
 
 class Session extends BaseController
 {
-    public function logIn()
+    public function logIn(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -37,7 +37,7 @@ class Session extends BaseController
         $this->jsonPageReload();
     }
 
-    public function logOut()
+    public function logOut(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -50,7 +50,7 @@ class Session extends BaseController
         $this->jsonPageReload();
     }
 
-    public function signUp()
+    public function signUp(): void
     {
         $this->validateAjaxCsrfToken();
 
