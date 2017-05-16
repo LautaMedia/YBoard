@@ -6,7 +6,7 @@ class CliLogger
     public static function write(string $str, ?string $logFile = null): void
     {
         if ($logFile === null) {
-            $logFile = ROOT_PATH . '/Logs/cli.log';
+            $logFile = ROOT_PATH . '/Log/cli.log';
         }
 
         $str = '[' . date('r') . '] ' . $str . "\n";

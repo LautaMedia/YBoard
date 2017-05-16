@@ -1,7 +1,7 @@
 <?php
 namespace YFW\Library;
 
-use YFW\Exceptions\RouterException;
+use YFW\Exception\RouterException;
 
 class Router
 {
@@ -25,7 +25,7 @@ class Router
         foreach ($this->routes AS $routeUrl => $routeTo) {
             if (preg_match($routeUrl, rawurldecode($rawRequestUrl), $routeMatches)) {
                 array_shift($routeMatches);
-                $controller = '\\' . $this->appName . '\Controllers\\' . $routeTo[0];
+                $controller = '\\' . $this->appName . '\Controller\\' . $routeTo[0];
                 $controller = new $controller();
                 call_user_func_array([$controller, $routeTo[1]], $routeMatches);
 

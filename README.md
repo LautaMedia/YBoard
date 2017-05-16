@@ -86,7 +86,6 @@ You should be able to use `webpack --watch` and some similar command for node-sa
 * ImageMagick
 * PNGCrush
 * Jpegoptim
-* Jpegtran (for exif rotation, might be redundant)
 
 Why not Windows? PHP message queue only works on *NIX. That's why.
 Replace the whole message queue with your own stuff if you want it to run on Windows.

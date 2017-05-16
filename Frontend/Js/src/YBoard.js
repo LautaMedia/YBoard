@@ -7,6 +7,7 @@ import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
 import Modal from './YBoard/Modal';
+import Tooltip from './YBoard/Tooltip';
 
 class YBoard
 {
@@ -21,6 +22,7 @@ class YBoard
         this.Post = new Post();
         this.PostForm = new PostForm();
         this.Modal = new Modal();
+        this.Tooltip = new Tooltip();
 
         if (this.isBadBrowser()) {
             this.browserWarning();

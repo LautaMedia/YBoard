@@ -11,7 +11,7 @@ apt update
 debconf-set-selections <<< "mysql-server mysql-server/root_password password ${DBPASSWD}"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${DBPASSWD}"
 
-apt install -y jpegoptim libjpeg-turbo-progs pngcrush imagemagick nginx mysql-server-5.7 php7.1-fpm php7.1-mysql php7.1-mbstring php7.1-gd php-apcu php-xdebug php-imagick ffmpeg
+apt install -y jpegoptim pngcrush imagemagick nginx mysql-server-5.7 php7.1-fpm php7.1-mysql php7.1-mbstring php7.1-gd php-apcu php-xdebug php-imagick ffmpeg
 
 # Nginx config
 sed -i -e 's/^user .*;/user ubuntu;/g' /etc/nginx/nginx.conf
@@ -184,3 +184,5 @@ locale-gen
 service nginx restart
 service php7.1-fpm restart
 service mysql restart
+
+php /vagrant/RunCommand.php GenerateFiles allJs

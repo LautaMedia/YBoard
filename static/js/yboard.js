@@ -316,6 +316,10 @@ var _Modal = __webpack_require__(8);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
+var _Tooltip = __webpack_require__(18);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -333,6 +337,7 @@ var YBoard = function () {
         this.Post = new _Post2.default();
         this.PostForm = new _PostForm2.default();
         this.Modal = new _Modal2.default();
+        this.Tooltip = new _Tooltip2.default();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -848,20 +853,21 @@ var Catalog = function () {
 
     _createClass(Catalog, [{
         key: 'search',
-        value: function search(elm) {
-            var word = elm.getAttribute('value');
-            console.log(word);
+        value: function search(e) {
+            var elm = e.target;
+            var word = elm.value;
             var threads = document.querySelectorAll('.thread-box');
+
             if (word.length === 0) {
                 threads.show();
             } else {
                 threads.hide();
                 threads.forEach(function (elm) {
-                    if (elm.find('h3').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+                    if (elm.querySelector('h3').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
                         elm.show();
                         return true;
                     }
-                    if (elm.find('.post').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+                    if (elm.querySelector('.post').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
                         elm.show();
                         return true;
                     }
@@ -2308,6 +2314,13 @@ var Toast = function () {
 }();
 
 exports.default = Toast;
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 /***/ })
 /******/ ]);

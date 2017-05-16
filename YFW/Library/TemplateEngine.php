@@ -18,7 +18,7 @@ class TemplateEngine
             $templateFile = 'Default';
         }
 
-        $template = $this->viewFilesPath . '/Templates/' . $templateFile . '.phtml';
+        $template = $this->viewFilesPath . '/Template/' . $templateFile . '.phtml';
         if (!file_exists($template)) {
             throw new \Exception('Error loading the template file ' . $template . ': file does not exist.');
         }
@@ -41,7 +41,7 @@ class TemplateEngine
         if (!preg_match('/^[a-z0-9_\-\/]+$/i', $viewFile)) {
             throw new \Exception('Invalid view file: ' . $viewFile . '.');
         }
-        $viewFile = $this->viewFilesPath . '/Pages/' . $viewFile . '.phtml';
+        $viewFile = $this->viewFilesPath . '/Page/' . $viewFile . '.phtml';
 
         if (!file_exists($viewFile)) {
             throw new \Exception('Error loading the view file ' . $viewFile . ': file does not exist.');
@@ -64,7 +64,7 @@ class TemplateEngine
             header('Content-Type: text/html; charset=utf-8');
         }
 
-        require($this->viewFilesPath . '/Templates/' . $this->templateFile . '.phtml');
+        require($this->viewFilesPath . '/Template/' . $this->templateFile . '.phtml');
 
         if ($returnAsString) {
             return ob_get_clean();

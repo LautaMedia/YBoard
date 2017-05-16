@@ -1,7 +1,7 @@
 <?php
 namespace YFW;
 
-use YFW\Exceptions\InternalException;
+use YFW\Exception\InternalException;
 use YFW\Library\Router;
 
 class Bootstrap

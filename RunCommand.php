@@ -41,7 +41,7 @@ mb_internal_encoding('UTF-8');
 date_default_timezone_set('UTC');
 
 // Run
-$className = '\YBoard\Controllers\Cli\\' . $controller;
+$className = '\YBoard\Controller\Cli\\' . $controller;
 $cron = new $className();
 $cron->$command();
 

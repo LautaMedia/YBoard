@@ -14,7 +14,7 @@ define('PUBLIC_PATH', __DIR__);
 require('../YFW/Bootstrap.php');
 
 $bootstrap = new \YFW\Bootstrap();
-$bootstrap->setErrorPage('YBoard/Views/BasicError');
+$bootstrap->setErrorPage('YBoard/View/BasicError');
 $bootstrap->run('YBoard');
 
 // -->

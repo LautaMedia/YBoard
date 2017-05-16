@@ -1,5 +1,3 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
 Vagrant.configure(2) do |config|
     # Base box
     config.vm.box = "ubuntu/zesty64"
@@ -16,7 +14,6 @@ Vagrant.configure(2) do |config|
         vb.customize [ "modifyvm", :id, "--bioslogofadein", "off" ]
         vb.customize [ "modifyvm", :id, "--bioslogofadeout", "off" ]
         vb.customize [ "modifyvm", :id, "--bioslogodisplaytime", "0" ]
-        #vb.customize [ "modifyvm", :id, "--uart1", "off" ]
         vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
     end
 
