@@ -77,8 +77,8 @@ class AutoUpdate
             let data = document.createElement('template');
             data.innerHTML = xhr.responseText;
 
-            // Update timestamps
-            data.content.querySelectorAll('.datetime').forEach(YBoard.localizeDatetime);
+            // Do all JS magic
+            YBoard.initElement(data.content);
 
             that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
             that.newReplies += that.lastUpdateNewReplies;

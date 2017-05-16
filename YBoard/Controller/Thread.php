@@ -12,7 +12,7 @@ class Thread extends Controller
     {
         // Get thread
         $thread = Model\Thread::get($this->db, $threadId);
-        if ($thread === false) {
+        if ($thread === null) {
             $this->notFound(_('Not found'), _('The thread you are looking for does not exist.'));
         }
 
@@ -61,7 +61,7 @@ class Thread extends Controller
         $newest = empty($_POST['newest']) ? false : true;
 
         $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
-        if ($thread === false) {
+        if ($thread === null) {
             $this->throwJsonError(404, _('Thread does not exist'));
         }
 

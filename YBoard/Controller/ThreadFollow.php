@@ -19,7 +19,7 @@ class ThreadFollow extends Controller
         $thread->updateStats('followCount');
 
         $followedThread = $this->user->threadFollow->get($_POST['thread_id']);
-        if ($followedThread === false) {
+        if ($followedThread === null) {
             $this->user->threadFollow->add($_POST['thread_id']);
         }
     }

@@ -17,7 +17,7 @@ class File Extends Controller
         }
 
         $file = Model\File::get($this->db, $_POST['fileId']);
-        if ($file === false) {
+        if ($file === null) {
             $this->throwJsonError(404, _('File does not exist'));
         }
 
@@ -99,7 +99,7 @@ class File Extends Controller
         $files = new File($this->db);
         $file = $files->get($_POST['fileId']);
 
-        if ($file === false) {
+        if ($file === null) {
             $this->throwJsonError(404);
         }
         if ($file->inProgress) {

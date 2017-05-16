@@ -7,7 +7,7 @@ import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
 import Modal from './YBoard/Modal';
-import Tooltip from './YBoard/Tooltip';
+import Tooltip from './Tooltip';
 
 class YBoard
 {
@@ -22,7 +22,6 @@ class YBoard
         this.Post = new Post();
         this.PostForm = new PostForm();
         this.Modal = new Modal();
-        this.Tooltip = new Tooltip();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -78,6 +77,48 @@ class YBoard
         document.getElementById('reload-page').addEventListener('click', function()
         {
             that.pageReload()
+        });
+
+        this.initElement(document);
+    }
+
+    initElement(elm)
+    {
+        let that = this;
+
+        // Localize dates, numbers and currencies
+        elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
+        elm.querySelectorAll('.number').forEach(this.localizeNumber);
+        elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
+
+        elm.querySelectorAll('.tip, .ref').forEach(function(elm)
+        {
+            elm.addEventListener('mouseover', function(e)
+            {
+                let postId = null;
+                if (typeof e.target.dataset.id !== 'undefined') {
+                    postId = e.target.dataset.id;
+                }
+                new Tooltip(e, {
+                    'openDelay': 100,
+                    'position': 'bottom',
+                    'content': that.spinnerHtml(),
+                    'onOpen': function(tip)
+                    {
+                        YQuery.post('/api/post/get', {
+                            'postId': postId,
+                        }).onLoad(function(xhr)
+                        {
+                            tip.setContent(xhr.responseText);
+                            tip.position();
+                        }).onError(function(xhr)
+                        {
+                            tip.setContent(messages.errorOccurred);
+                            tip.position();
+                        });
+                    },
+                });
+            });
         });
     }
 

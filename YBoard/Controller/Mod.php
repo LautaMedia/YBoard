@@ -61,7 +61,7 @@ class Mod extends Controller
         if (!empty($banUser)) {
             $users = new User($this->db);
             $user = $users->getById($_POST['ban_user']);
-            if ($user === false) {
+            if ($user === null) {
                 $this->throwJsonError(400, _('User does not exist, maybe add the ban without the user?'));
             }
         }

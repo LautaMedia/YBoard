@@ -68,16 +68,16 @@ abstract class Controller extends \YFW\Controller
     protected function loadUser(): bool
     {
         $cookie = $this->getLoginCookie();
-        if ($cookie !== false) {
+        if ($cookie !== null) {
             // Load session
             $session = UserSession::get($this->db, $cookie['userId'], $cookie['sessionId'], $cookie['verifyKey']);
-            if ($session === false) {
+            if ($session === null) {
                 $this->deleteLoginCookie(true);
             }
 
             // Load user
             $this->user = User::getById($this->db, $session->userId);
-            if ($this->user === false) {
+            if ($this->user === null) {
                 $this->deleteLoginCookie(true);
             }
 

@@ -21,7 +21,7 @@ class Post extends Controller
         }
 
         $post = Model\Post::get($this->db, $_POST['postId']);
-        if ($post === false) {
+        if ($post === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
 
@@ -45,14 +45,14 @@ class Post extends Controller
     {
         $post = Model\Post::get($this->db, $postId, false);
 
-        if ($post === false) {
+        if ($post === null) {
             $this->notFound(_('Not found'), _('Post does not exist'));
         }
 
         if (!$post->boardId) {
             $thread = Model\Thread::get($this->db, $post->threadId, false);
 
-            if ($thread === false) {
+            if ($thread === null) {
                 $this->internalError();
             }
 
@@ -113,7 +113,7 @@ class Post extends Controller
         // Verify file
         if ($hasFile) {
             $file = Model\File::get($this->db, $_POST['file_id']);
-            if ($file === false) {
+            if ($file === null) {
                 $this->throwJsonError(400, _('Invalid file'));
             }
         }
@@ -152,7 +152,7 @@ class Post extends Controller
             $thread = Model\Thread::get($this->db, $_POST['thread'], false);
 
             // Verify thread
-            if ($thread === false) {
+            if ($thread === null) {
                 $this->throwJsonError(400, _('Invalid thread'));
             }
 
@@ -331,7 +331,7 @@ class Post extends Controller
 
         $posts = new Post($this->db);
         $post = $posts->get($_POST['postId'], false);
-        if ($post === false) {
+        if ($post === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
 
@@ -375,7 +375,7 @@ class Post extends Controller
 
         $posts = new Post($this->db);
         $post = $posts->get($_POST['post_id'], false);
-        if ($post === false) {
+        if ($post === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
 
@@ -406,7 +406,7 @@ class Post extends Controller
         }
 
         $posts = new Post($this->db);
-        if ($posts->get($_POST['post_id'], false) === false) {
+        if ($posts->get($_POST['post_id'], false) === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
 

@@ -139,7 +139,7 @@ class Text
         }
 
         $search = '/(&gt;&gt;)([0-9]+)/is';
-        $replace = '<a href="/scripts/posts/redirect/$2" data-id="$2" class="reflink">$1$2</a>';
+        $replace = '<a href="/scripts/posts/redirect/$2" data-id="$2" class="ref">$1$2</a>';
 
         return preg_replace($search, $replace, $message);
     }

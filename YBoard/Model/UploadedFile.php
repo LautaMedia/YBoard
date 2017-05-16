@@ -117,7 +117,7 @@ class UploadedFile extends File
                     $this->destinationFormat = 'jpg';
                 } else {
                     $videoMeta = FileHandler::getVideoMeta($this->tmpName);
-                    if ($videoMeta === false) {
+                    if ($videoMeta === null) {
                         throw new FileUploadException(_('Invalid or corrupted media'));
                     }
 
@@ -138,7 +138,7 @@ class UploadedFile extends File
             case 'mp4':
             case 'webm':
                 $videoMeta = FileHandler::getVideoMeta($this->tmpName);
-                if ($videoMeta === false) {
+                if ($videoMeta === null) {
                     throw new FileUploadException(_('Invalid or corrupted media'));
                 }
 

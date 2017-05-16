@@ -284,39 +284,39 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Captcha = __webpack_require__(6);
+var _Captcha = __webpack_require__(7);
 
 var _Captcha2 = _interopRequireDefault(_Captcha);
 
-var _Theme = __webpack_require__(12);
+var _Theme = __webpack_require__(13);
 
 var _Theme2 = _interopRequireDefault(_Theme);
 
-var _Toast = __webpack_require__(17);
+var _Toast = __webpack_require__(18);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Catalog = __webpack_require__(7);
+var _Catalog = __webpack_require__(8);
 
 var _Catalog2 = _interopRequireDefault(_Catalog);
 
-var _Thread = __webpack_require__(13);
+var _Thread = __webpack_require__(14);
 
 var _Thread2 = _interopRequireDefault(_Thread);
 
-var _Post = __webpack_require__(9);
+var _Post = __webpack_require__(10);
 
 var _Post2 = _interopRequireDefault(_Post);
 
-var _PostForm = __webpack_require__(10);
+var _PostForm = __webpack_require__(11);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
 
-var _Modal = __webpack_require__(8);
+var _Modal = __webpack_require__(9);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
-var _Tooltip = __webpack_require__(18);
+var _Tooltip = __webpack_require__(6);
 
 var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
@@ -337,7 +337,6 @@ var YBoard = function () {
         this.Post = new _Post2.default();
         this.PostForm = new _PostForm2.default();
         this.Modal = new _Modal2.default();
-        this.Tooltip = new _Tooltip2.default();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -387,9 +386,46 @@ var YBoard = function () {
         document.getElementById('reload-page').addEventListener('click', function () {
             that.pageReload();
         });
+
+        this.initElement(document);
     }
 
     _createClass(YBoard, [{
+        key: 'initElement',
+        value: function initElement(elm) {
+            var that = this;
+
+            // Localize dates, numbers and currencies
+            elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
+            elm.querySelectorAll('.number').forEach(this.localizeNumber);
+            elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
+
+            elm.querySelectorAll('.tip, .ref').forEach(function (elm) {
+                elm.addEventListener('mouseover', function (e) {
+                    var postId = null;
+                    if (typeof e.target.dataset.id !== 'undefined') {
+                        postId = e.target.dataset.id;
+                    }
+                    new _Tooltip2.default(e, {
+                        'openDelay': 100,
+                        'position': 'bottom',
+                        'content': that.spinnerHtml(),
+                        'onOpen': function onOpen(tip) {
+                            _YQuery2.default.post('/api/post/get', {
+                                'postId': postId
+                            }).onLoad(function (xhr) {
+                                tip.setContent(xhr.responseText);
+                                tip.position();
+                            }).onError(function (xhr) {
+                                tip.setContent(messages.errorOccurred);
+                                tip.position();
+                            });
+                        }
+                    });
+                });
+            });
+        }
+    }, {
         key: 'localizeDatetime',
         value: function localizeDatetime(elm) {
             elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
@@ -696,6 +732,12 @@ NodeList.prototype.show = function () {
     });
 };
 
+NodeList.prototype.remove = function () {
+    this.forEach(function (elm) {
+        elm.remove();
+    });
+};
+
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -760,13 +802,237 @@ _YQuery2.default.ajaxSetup({
 window.YBoard = _YBoard2.default;
 window.YQuery = _YQuery2.default;
 
-// Localize dates, numbers and currencies
-document.querySelectorAll('.datetime').forEach(_YBoard2.default.localizeDatetime);
-document.querySelectorAll('.number').forEach(_YBoard2.default.localizeNumber);
-document.querySelectorAll('.currency').forEach(_YBoard2.default.localizeCurrency);
-
 /***/ }),
 /* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Tooltip = function () {
+    function Tooltip(e) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        _classCallCheck(this, Tooltip);
+
+        this.options = Object.assign({
+            'openDelay': 100,
+            'offset': 10,
+            'content': '',
+            'onOpen': null,
+            'close': 'mouseout',
+            'position': 'bottom'
+        }, options);
+
+        // Placeholders for tip position
+        this.x = 0;
+        this.y = 0;
+        this.spaceAvailable = {
+            'top': 0,
+            'right': 0,
+            'bottom': 0,
+            'left': 0
+        };
+
+        // Other
+        this.overflows = false;
+        this.event = e;
+        this.id = 0;
+
+        this.open();
+    }
+
+    _createClass(Tooltip, [{
+        key: 'open',
+        value: function open() {
+            var that = this;
+
+            this.elm = document.createElement('div');
+            this.elm.classList.add('tooltip');
+
+            var lastTip = document.querySelector('.tooltip:last-of-type');
+            if (lastTip !== null) {
+                this.id = parseInt(document.querySelector('.tooltip:last-of-type').dataset.id) + 1;
+            }
+            this.elm.dataset.id = this.id;
+
+            this.setContent(this.options.content);
+            if (typeof this.options.onOpen === 'function') {
+                this.options.onOpen(this);
+            }
+
+            this.event.target.addEventListener('mouseout', function () {
+                that.close(that);
+            });
+
+            if (this.options.openDelay !== 0) {
+                setTimeout(function () {
+                    if (that.elm === null) {
+                        return;
+                    }
+
+                    document.body.appendChild(that.elm);
+                    that.position();
+                }, this.options.openDelay);
+            } else {
+                document.body.appendChild(this.elm);
+                this.position();
+            }
+        }
+    }, {
+        key: 'setContent',
+        value: function setContent(content) {
+            if (this.elm === null) {
+                return;
+            }
+
+            this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
+        }
+    }, {
+        key: 'close',
+        value: function close(tooltip) {
+            tooltip.elm = null;
+
+            var tip = document.querySelector('.tooltip[data-id="' + tooltip.id + '"]');
+
+            if (tip !== null) {
+                tip.remove();
+            }
+        }
+    }, {
+        key: 'position',
+        value: function position() {
+            if (this.elm === null) {
+                return;
+            }
+
+            this.targetRect = this.event.target.getBoundingClientRect();
+            this.tipRect = this.elm.getBoundingClientRect();
+
+            this.spaceAvailable = {
+                'top': this.targetRect.top,
+                'right': window.innerWidth - this.targetRect.right,
+                'bottom': window.innerHeight - this.targetRect.bottom,
+                'left': this.targetRect.left
+            };
+
+            var x = void 0,
+                y = void 0;
+
+            this.calculatePosition(this.options.position);
+
+            this.setPosition();
+        }
+    }, {
+        key: 'calculatePosition',
+        value: function calculatePosition(position) {
+            this.options.position = position;
+
+            // Calculate X
+            switch (position) {
+                case 'top':
+                case 'bottom':
+                    this.x = this.targetRect.right - this.targetRect.width / 2 - this.tipRect.width / 2;
+                    if (this.x < 0) {
+                        this.x = 0;
+                    }
+
+                    break;
+                case 'right':
+                    this.x = this.targetRect.right + this.options.offset;
+                    if (this.tipRect.width + this.options.offset > this.spaceAvailable.right) {
+                        if (this.overflows || this.spaceAvailable.left < this.spaceAvailable.right) {
+                            // Fits better to right than to left
+                            this.elm.style.maxWidth = this.spaceAvailable.right - this.options.offset + 'px';
+                        } else {
+                            // Overflows, position on left
+                            return this.recalculatePosition('left');
+                        }
+                    }
+
+                    break;
+                case 'left':
+                    this.x = this.targetRect.left - this.tipRect.width - this.options.offset;
+                    if (this.x < 0) {
+                        if (this.overflows || this.spaceAvailable.right < this.spaceAvailable.left) {
+                            // Fits better to left than to right
+                            this.elm.style.maxWidth = this.spaceAvailable.left - this.options.offset + 'px';
+                        } else {
+                            // Overflows, position on right
+                            return this.recalculatePosition('right');
+                        }
+                    }
+
+                    break;
+            }
+
+            // Calculate Y
+            switch (position) {
+                case 'top':
+                    this.y = this.targetRect.top - this.tipRect.height - this.options.offset;
+                    if (this.y < 0) {
+                        // Tip is larger than available space
+                        if (this.overflows || this.spaceAvailable.bottom < this.spaceAvailable.top) {
+                            // Fits better to top than to bottom
+                            this.y = 0;
+                            this.elm.style.maxHeight = this.spaceAvailable.top - this.options.offset + 'px';
+                        } else {
+                            // Overflows, position on bottom
+                            return this.recalculatePosition('bottom');
+                        }
+                    }
+                    break;
+                case 'bottom':
+                    this.y = this.targetRect.bottom + this.options.offset;
+                    if (this.tipRect.height + this.options.offset > this.spaceAvailable.bottom) {
+                        // Tip is larger than available space
+                        if (this.overflows || this.spaceAvailable.top < this.spaceAvailable.bottom) {
+                            // Fits better to bottom than to top
+                            this.elm.style.maxHeight = this.spaceAvailable.bottom - this.options.offset + 'px';
+                        } else {
+                            // Overflows, position on top
+                            return this.recalculatePosition('top');
+                        }
+                    }
+                    break;
+                case 'right':
+                case 'left':
+                    this.y = this.targetRect.bottom - this.targetRect.height / 2 - this.tipRect.height / 2;
+                    if (this.y < 0) {
+                        this.y = 0;
+                    }
+                    break;
+            }
+        }
+    }, {
+        key: 'recalculatePosition',
+        value: function recalculatePosition(position) {
+            this.overflows = true;
+            this.calculatePosition(position);
+        }
+    }, {
+        key: 'setPosition',
+        value: function setPosition() {
+            this.elm.style.left = this.x + 'px';
+            this.elm.style.top = this.y + 'px';
+        }
+    }]);
+
+    return Tooltip;
+}();
+
+exports.default = Tooltip;
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -827,7 +1093,7 @@ var Captcha = function () {
 exports.default = Captcha;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -882,7 +1148,7 @@ var Catalog = function () {
 exports.default = Catalog;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -987,7 +1253,7 @@ var Modal = function () {
 exports.default = Modal;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1007,7 +1273,7 @@ var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _File = __webpack_require__(11);
+var _File = __webpack_require__(12);
 
 var _File2 = _interopRequireDefault(_File);
 
@@ -1076,7 +1342,7 @@ var Post = function () {
 exports.default = Post;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1560,7 +1826,7 @@ var PostForm = function () {
 exports.default = PostForm;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1702,7 +1968,7 @@ var File = function () {
 exports.default = File;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1820,7 +2086,7 @@ var Theme = function () {
 exports.default = Theme;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1832,15 +2098,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _AutoUpdate = __webpack_require__(14);
+var _AutoUpdate = __webpack_require__(15);
 
 var _AutoUpdate2 = _interopRequireDefault(_AutoUpdate);
 
-var _Hide = __webpack_require__(16);
+var _Hide = __webpack_require__(17);
 
 var _Hide2 = _interopRequireDefault(_Hide);
 
-var _Follow = __webpack_require__(15);
+var _Follow = __webpack_require__(16);
 
 var _Follow2 = _interopRequireDefault(_Follow);
 
@@ -1926,7 +2192,7 @@ var Thread = function () {
 exports.default = Thread;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2026,8 +2292,8 @@ var AutoUpdate = function () {
                 var data = document.createElement('template');
                 data.innerHTML = xhr.responseText;
 
-                // Update timestamps
-                data.content.querySelectorAll('.datetime').forEach(_YBoard2.default.localizeDatetime);
+                // Do all JS magic
+                _YBoard2.default.initElement(data.content);
 
                 that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
                 that.newReplies += that.lastUpdateNewReplies;
@@ -2130,7 +2396,7 @@ var AutoUpdate = function () {
 exports.default = AutoUpdate;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2206,7 +2472,7 @@ var Follow = function () {
 exports.default = Follow;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2255,7 +2521,7 @@ var Hide = function () {
 exports.default = Hide;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2314,13 +2580,6 @@ var Toast = function () {
 }();
 
 exports.default = Toast;
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 /***/ })
 /******/ ]);

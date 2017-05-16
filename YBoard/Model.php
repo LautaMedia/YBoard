@@ -1,6 +1,6 @@
 <?php
 namespace YBoard;
 
-class Model extends \YFW\Model
+abstract class Model extends \YFW\Model
 {
 }

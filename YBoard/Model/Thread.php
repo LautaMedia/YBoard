@@ -150,7 +150,8 @@ class Thread extends Post
             $limit = '';
         }
 
-        $q = $this->db->prepare($this->getPostQuery('WHERE a.thread_id = :thread_id' . $from . ' ORDER BY a.id ' . $order . $limit));
+        $q = $this->db->prepare(static::POST_QUERY . 'WHERE a.thread_id = :thread_id' . $from . '
+            ORDER BY a.id ' . $order . $limit);
         $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         if ($from) {
             $q->bindValue(':from', $fromId, Database::PARAM_INT);
@@ -217,7 +218,7 @@ class Thread extends Post
     public static function get(Database $db, int $threadId, bool $allData = true): ?self
     {
         if ($allData) {
-            $q = $db->prepare(static::getPostQuery("WHERE a.id = :id AND a.thread_id IS NULL LIMIT 1"));
+            $q = $db->prepare(static::POST_QUERY . 'WHERE a.id = :id AND a.thread_id IS NULL LIMIT 1');
         } else {
             $q = $db->prepare("SELECT id, board_id, user_id, ip, country_code, time, locked, sticky
             FROM post WHERE id = :id AND thread_id IS NULL LIMIT 1");
@@ -311,8 +312,8 @@ class Thread extends Post
             $threadIds = array_merge($threadIds, $threadIds);
         }
 
-        $q = $db->prepare(static::getPostQuery("WHERE a.id IN (" . $in . ")
-            ORDER BY" . $order . " bump_time DESC LIMIT " . (int)$limitStart . ', ' . (int)$count));
+        $q = $db->prepare(static::POST_QUERY . "WHERE a.id IN (" . $in . ")
+            ORDER BY" . $order . " bump_time DESC LIMIT " . (int)$limitStart . ', ' . (int)$count);
         $q->execute($threadIds);
 
         if ($q->rowCount() == 0) {
@@ -334,9 +335,9 @@ class Thread extends Post
     {
         $limitStart = ($page - 1) * $count;
 
-        $q = $db->prepare(static::getPostQuery("WHERE a.board_id = ? AND a.thread_id IS NULL
+        $q = $db->prepare(static::POST_QUERY . "WHERE a.board_id = ? AND a.thread_id IS NULL
             " . static::getHiddenNotIn('a.id') . "
-            ORDER BY sticky DESC, bump_time DESC LIMIT " . (int)$limitStart . ', ' . (int)$count));
+            ORDER BY sticky DESC, bump_time DESC LIMIT " . (int)$limitStart . ', ' . (int)$count);
 
         $queryVars = static::$hiddenIds;
         array_unshift($queryVars, $boardId);
@@ -405,25 +406,5 @@ class Thread extends Post
         }
 
         return $notIn;
-    }
-
-    protected static function getPostQuery(string $append = ''): string
-    {
-        $query = "SELECT
-            a.id, a.board_id, a.thread_id, a.user_id, a.ip, a.country_code, a.time, a.locked, a.sticky, a.username, a.subject, a.message,
-            b.file_name AS file_display_name, c.id AS file_id, c.folder AS file_folder, c.name AS file_name,
-            c.extension AS file_extension, c.size AS file_size, c.width AS file_width, c.height AS file_height,
-            c.duration AS file_duration, c.has_thumbnail AS file_has_thumbnail, c.has_sound AS file_has_sound,
-            c.is_gif AS file_is_gif, c.in_progress AS file_in_progress, d.read_count, d.reply_count,
-            d.distinct_reply_count, e.url AS board_url,
-            (SELECT GROUP_CONCAT(post_id) FROM post_reply WHERE post_id_replied = a.id) AS post_replies
-            FROM post a
-            LEFT JOIN post_file b ON a.id = b.post_id
-            LEFT JOIN file c ON b.file_id = c.id
-            LEFT JOIN post_statistics d ON a.id = d.thread_id
-            LEFT JOIN board e ON e.id = a.board_id
-            ";
-
-        return $query . $append;
     }
 }

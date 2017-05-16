@@ -47,8 +47,3 @@ YQuery.ajaxSetup({
 
 window.YBoard = YBoard;
 window.YQuery = YQuery;
-
-// Localize dates, numbers and currencies
-document.querySelectorAll('.datetime').forEach(YBoard.localizeDatetime);
-document.querySelectorAll('.number').forEach(YBoard.localizeNumber);
-document.querySelectorAll('.currency').forEach(YBoard.localizeCurrency);

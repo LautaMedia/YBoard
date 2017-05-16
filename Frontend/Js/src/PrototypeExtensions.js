@@ -78,3 +78,9 @@ NodeList.prototype.show = function() {
         elm.show();
     });
 };
+
+NodeList.prototype.remove = function() {
+    this.forEach(function(elm) {
+        elm.remove();
+    });
+};

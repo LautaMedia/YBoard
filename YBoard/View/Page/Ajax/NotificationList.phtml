@@ -18,7 +18,7 @@
         <div class="notification-meta">
             <span class="datetime"><?= $notification->time ?></span>
             <?php if (!empty($notification->postId)) : ?>
-                <a href="/scripts/posts/redirect/<?= $notification->postId ?>" class="reflink"
+                <a href="/scripts/posts/redirect/<?= $notification->postId ?>" class="ref"
                    <?php if (!$notification->isRead) :
                        ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
                     endif ?>
