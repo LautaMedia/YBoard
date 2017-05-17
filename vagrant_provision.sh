@@ -36,14 +36,13 @@ client_max_body_size 200M;
 #ssl_dhparam /etc/ssl/certs/dhparam.pem;
 #ssl_session_cache shared:SSL:50m;
 #ssl_session_timeout 1d;
-#resolver 8.8.8.8 8.8.4.4
 
 # Gzip
 gzip_vary on;
 gzip_proxied any;
 gzip_comp_level 6;
 gzip_types image/svg+xml text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
-gzip_min_length 1024;
+gzip_min_length 512;
 
 # Limit req
 limit_req_zone \$binary_remote_addr zone=reqs:10m rate=10r/s;

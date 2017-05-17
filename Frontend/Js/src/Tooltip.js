@@ -7,7 +7,7 @@ class Tooltip
             'offset': 10,
             'content': '',
             'onOpen': null,
-            'close': 'mouseout',
+            'closeEvent': 'mouseout',
             'position': 'bottom',
         }, options);
 
@@ -43,11 +43,8 @@ class Tooltip
         this.elm.dataset.id = this.id;
 
         this.setContent(this.options.content);
-        if (typeof this.options.onOpen === 'function') {
-            this.options.onOpen(this);
-        }
 
-        this.event.target.addEventListener('mouseout', function()
+        this.event.target.addEventListener(this.options.closeEvent, function()
         {
             that.close(that);
         });
@@ -64,6 +61,10 @@ class Tooltip
         } else {
             document.body.appendChild(this.elm);
             this.position();
+        }
+
+        if (typeof this.options.onOpen === 'function') {
+            this.options.onOpen(this);
         }
     }
 
@@ -103,9 +104,8 @@ class Tooltip
             'left': this.targetRect.left,
         };
 
-        let x, y;
-
         this.calculatePosition(this.options.position);
+        this.elm.classList.add(this.options.position);
 
         this.setPosition();
     }
@@ -130,6 +130,7 @@ class Tooltip
                     if (this.overflows || this.spaceAvailable.left < this.spaceAvailable.right) {
                         // Fits better to right than to left
                         this.elm.style.maxWidth = this.spaceAvailable.right - this.options.offset + 'px';
+                        this.tipRect = this.elm.getBoundingClientRect();
                     } else {
                         // Overflows, position on left
                         return this.recalculatePosition('left');
@@ -143,12 +144,12 @@ class Tooltip
                     if (this.overflows || this.spaceAvailable.right < this.spaceAvailable.left) {
                         // Fits better to left than to right
                         this.elm.style.maxWidth = this.spaceAvailable.left - this.options.offset + 'px';
+                        this.tipRect = this.elm.getBoundingClientRect();
                     } else {
                         // Overflows, position on right
                         return this.recalculatePosition('right');
                     }
                 }
-
                 break;
         }
 
@@ -162,6 +163,7 @@ class Tooltip
                         // Fits better to top than to bottom
                         this.y = 0;
                         this.elm.style.maxHeight = this.spaceAvailable.top - this.options.offset + 'px';
+                        this.tipRect = this.elm.getBoundingClientRect();
                     } else {
                         // Overflows, position on bottom
                         return this.recalculatePosition('bottom');
@@ -175,6 +177,7 @@ class Tooltip
                     if (this.overflows || this.spaceAvailable.top < this.spaceAvailable.bottom) {
                         // Fits better to bottom than to top
                         this.elm.style.maxHeight = this.spaceAvailable.bottom - this.options.offset + 'px';
+                        this.tipRect = this.elm.getBoundingClientRect();
                     } else {
                         // Overflows, position on top
                         return this.recalculatePosition('top');
