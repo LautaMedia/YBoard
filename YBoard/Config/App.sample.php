@@ -15,7 +15,7 @@ return [
         'defaultTheme' => 'ylilauta',
     ],
     'themes' => [
-        'default' => [
+        'ylilauta' => [
             'name' => 'Ylilauta',
             'light' => '/css/ylilauta.css', // relative to staticUrl
             'dark' => '/css/ylilauta_dark.css', // relative to staticUrl
@@ -49,7 +49,7 @@ return [
         'enabled' => false,
         'gCsePartnerPub' => 'partner-pub-1234567890:1234567890', // Google CSE
     ],
-    'reCaptcha' => [
+    'captcha' => [
         'enabled' => false,
         'publicKey' => 'xxx',
         'privateKey' => 'xxx',

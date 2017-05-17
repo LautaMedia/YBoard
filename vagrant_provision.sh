@@ -3,7 +3,6 @@ DBNAME=yboard
 DBPASSWD=vagrant
 
 # Change apt server and update
-#sed -i -e 's=//us.archive.ubuntu=//archive.ubuntu=g' /etc/apt/sources.list
 add-apt-repository ppa:ondrej/php -y
 apt update
 
