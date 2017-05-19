@@ -4,59 +4,23 @@ namespace YBoard\Controller;
 use YBoard\Controller;
 use YBoard\Model;
 use YFW\Library\HttpResponse;
+use YFW\Library\TemplateEngine;
 
 class Board extends Controller
 {
-    public function index(string $boardUrl, int $pageNum = 1): void
+    public function index(string $boardUrl, int $negativePageNum = -1, int $pageNum = 1): void
     {
-        $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config['view']['maxPages']);
-
-        Model\Thread::setHidden($this->user->threadHide->getAll());
-
-        $board = Model\Board::getByUrl($this->db, $boardUrl);
-        $threads = Model\Thread::getByBoard($this->db, $board->id, $pageNum, $this->user->preferences->threadsPerPage,
-            $this->user->preferences->repliesPerThread);
-
-        $isLastPage = count($threads) < $this->user->preferences->threadsPerPage;
-
-        $view = $this->loadTemplateEngine();
-
-        $view->setVar('pageTitle', $board->name);
-        $view->setVar('bodyClass', 'board-page');
-        $view->setVar('threads', $threads);
-
-        $this->initializePagination($view, $pageNum, $this->config['view']['maxPages'], $isLastPage);
-
-        $view->setVar('board', $board);
+        $view = $this->loadView($boardUrl, $pageNum, false);
         $view->display('Board');
     }
 
-    public function catalog(string $boardUrl, int $pageNum = 1): void
+    public function catalog(string $boardUrl, int $negativePageNum = -1, int $pageNum = 1): void
     {
-        $this->verifyBoard($boardUrl);
-        $this->limitPages($pageNum, $this->config['view']['maxCatalogPages']);
-
-        Model\Thread::setHidden($this->user->threadHide->getAll());
-
-        $board = Model\Board::getByUrl($this->db, $boardUrl);
-        $threads = Model\Thread::getByBoard($this->db, $board->id, $pageNum, $this->user->preferences->threadsPerCatalogPage);
-
-        $isLastPage = count($threads) < $this->user->preferences->threadsPerCatalogPage;
-
-        $view = $this->loadTemplateEngine();
-
-        $view->setVar('pageTitle', $board->name);
-        $view->setVar('bodyClass', 'board-catalog');
-
-        $this->initializePagination($view, $pageNum, $this->config['view']['maxCatalogPages'], $isLastPage, '/catalog');
-
-        $view->setVar('board', $board);
-        $view->setVar('threads', $threads);
+        $view = $this->loadView($boardUrl, $pageNum, true);
         $view->display('BoardCatalog');
     }
 
-    public function redirect(string $boardUrl, int $boardPage = 1, string $catalog = '', int $catalogPage = 1): void
+    public function redirect(string $boardUrl, int $negativePageNum = -1, int $pageNum = 1): void
     {
         // Verify board exists
         $redirTo = false;
@@ -64,28 +28,54 @@ class Board extends Controller
             $redirTo = Model\Board::getByUrl($this->db, $boardUrl)->url;
         } elseif (Model\Board::isAltUrl($this->db, $boardUrl)) {
             $redirTo = Model\Board::getUrlByAltUrl($this->db, $boardUrl);
+        } else {
+            $this->notFound(null, sprintf(_('There\'s no such thing as a board called "%s" here.'), $boardUrl));
         }
 
-        if (!empty($catalog)) {
-            $redirTo .= '/catalog';
+        if ($pageNum !== 1) {
+            $redirTo .= '-' . $pageNum;
         }
 
-        if ($redirTo) {
-            HttpResponse::redirectExit('/' . $redirTo . '/', 302);
-        }
-
-        $this->notFound();
+        HttpResponse::redirectExit('/' . $redirTo . '/', 301);
     }
 
-    protected function verifyBoard(string $boardUrl): void
+    protected function loadView(string $boardUrl, int $pageNum, bool $catalog): TemplateEngine
     {
         if (!Model\Board::exists($this->db, $boardUrl)) {
             if (Model\Board::isAltUrl($this->db, $boardUrl)) {
-                HttpResponse::redirectExit('/' . Model\Board::getUrlByAltUrl($this->db, $boardUrl) . '/', 302);
+                HttpResponse::redirectExit('/' . Model\Board::getUrlByAltUrl($this->db, $boardUrl) . '/', 301);
             }
             // Board does not exist and no alt_url match
-            $this->notFound(_('Not found'),
-                sprintf(_('There\'s no such thing as a board called "%s" here.'), $boardUrl));
+            $this->notFound(null, sprintf(_('There\'s no such thing as a board called "%s" here.'), $boardUrl));
         }
+
+        $this->limitPages($pageNum,
+            $catalog ? $this->config['view']['maxCatalogPages'] : $this->config['view']['maxPages']);
+
+        Model\Thread::setHidden($this->user->threadHide->getAll());
+
+        $board = Model\Board::getByUrl($this->db, $boardUrl);
+        $threads = Model\Thread::getByBoard($this->db, $board->id, $pageNum,
+            $catalog ? $this->user->preferences->threadsPerCatalogPage : $this->user->preferences->threadsPerPage,
+            $catalog ? 0 : $this->user->preferences->repliesPerThread);
+
+        if (empty($threads) && $pageNum !== 1) {
+            $this->notFound(null, _('This board does not have this many threads!'));
+        }
+
+        $isLastPage = count($threads) < ($catalog ? $this->user->preferences->threadsPerCatalogPage : $this->user->preferences->threadsPerPage);
+
+        $view = $this->loadTemplateEngine();
+
+        $view->setVar('pageTitle', $board->name);
+        $view->setVar('bodyClass', 'board-page');
+        $view->setVar('threads', $threads);
+        $view->setVar('board', $board);
+
+        $this->initializePagination($view, $pageNum,
+            $catalog ? $this->config['view']['maxCatalogPages'] : $this->config['view']['maxPages'], $isLastPage,
+            $catalog ? '/catalog' : null);
+
+        return $view;
     }
 }

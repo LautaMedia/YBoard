@@ -24,7 +24,7 @@ class UserPreferences extends AbstractUserModel
 
     protected $keyToName = [
         1 => 'theme',
-        2 => 'themeAlt',
+        2 => 'darkTheme',
         3 => 'locale',
         4 => 'hideSidebar',
         5 => 'threadsPerPage',

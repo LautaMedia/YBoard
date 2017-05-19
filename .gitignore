@@ -7,3 +7,4 @@ static/js/config.js
 static/file/*
 YBoard/Config/Database.php
 YBoard/Config/App.php
+Profiler/*

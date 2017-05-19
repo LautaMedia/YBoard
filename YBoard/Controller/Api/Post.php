@@ -77,7 +77,7 @@ class Post extends Controller
         HttpResponse::redirectExit('/' . $board->url . '/' . $thread . $hash, 302);
     }
 
-    public function submit(): void
+    public function create(): void
     {
         $this->validateAjaxCsrfToken();
 
@@ -167,7 +167,7 @@ class Post extends Controller
             }
         }
 
-        if ($this->user->requireCaptcha) {
+        if ($this->config['captcha']['enabled'] && $this->user->requireCaptcha) {
             if (empty($_POST["g-recaptcha-response"])) {
                 $this->throwJsonError(400, _('Empty CAPTCHA response. Please try again.'));
             }

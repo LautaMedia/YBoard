@@ -5,7 +5,7 @@ class HttpResponse
 {
     public static function redirectExit(string $url, int $type = 302): void
     {
-        if (!in_array($type, [301, 302, 303])) {
+        if (!in_array($type, [301, 302, 303, 307, 308])) {
             $type = 302;
         }
         static::setStatusCode($type);
@@ -21,7 +21,7 @@ class HttpResponse
             $expire = 1;
         }
 
-        return setcookie($name, $value, $expire, '/', null, false, true) !== false;
+        return setcookie($name, $value, $expire, '/', null, isset($_SERVER['HTTPS']), true) !== false;
     }
 
     public static function setStatusCode(int $statusCode, ?array $additionalHeaders = null): void

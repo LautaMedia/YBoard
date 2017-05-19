@@ -170,6 +170,23 @@ class YQuery
 
         return this;
     }
+
+    benchmark(fn, iterations) {
+        if (typeof iterations === 'undefined') {
+            iterations = 100000;
+        }
+        let iterationCount = iterations;
+
+        let start = new Date;
+        while (iterations--) {
+            fn();
+        }
+        let totalTime = new Date - start;
+        let msPerOp = totalTime / iterationCount;
+        let opsPerSec = (1000 / msPerOp).toFixed(2);
+
+        return totalTime + ' ms, ' + msPerOp.toFixed(2) + ' ms per op, ' + opsPerSec + ' ops/sec';
+    }
 }
 
 export default new YQuery();

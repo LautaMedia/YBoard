@@ -12,6 +12,12 @@ class Post
         document.addEventListener('hashchange', function() {
             this.removeHighlights();
         });
+
+        [].forEach.call(document.getElementsByClassName('e-post-delete'), function(elm) {
+            elm.addEventListener('click', function(e) {
+                console.log(e.target);
+            });
+        });
     }
 
     getElm(id)
@@ -26,7 +32,7 @@ class Post
         }
 
         let that = this;
-        YQuery.post('/scripts/posts/delete', {'postId': id}, {
+        YQuery.post('/api/post/delete', {'postId': id}, {
             'loadFunction': function()
             {
                 that.getElm(id).remove();

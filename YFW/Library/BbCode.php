@@ -55,7 +55,7 @@ class BbCode
             '<span class="line-through">$1</span>',
             '<span class="spoiler">$1</span>',
             '<span class="quote">$1</span>',
-            '<pre>$1</pre>',
+            '<code>$1</code>',
             '<sup>$1</sup>',
             '<sub>$1</sub>',
             '<span class="big">$1</span>',

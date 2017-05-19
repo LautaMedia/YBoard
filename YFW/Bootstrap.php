@@ -31,9 +31,7 @@ class Bootstrap
         spl_autoload_register(function ($className) {
             // Not quite working on Linux, so we need some bubble gum.
             $className = str_replace('\\', DIRECTORY_SEPARATOR, $className);
-            if (is_file(ROOT_PATH . '/' . $className . '.php')) {
-                require(ROOT_PATH . '/' . $className . '.php');
-            }
+            require(ROOT_PATH . '/' . $className . '.php');
         });
     }
 

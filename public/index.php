@@ -9,7 +9,6 @@
 
 <!-- */
 
-putenv('APPLICATION_ENVIRONMENT=development');
 define('PUBLIC_PATH', __DIR__);
 require('../YFW/Bootstrap.php');
 

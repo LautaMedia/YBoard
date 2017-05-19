@@ -17,7 +17,7 @@ class File
             return false;
         }
 
-        YQuery.post('/scripts/posts/deletefile', {
+        YQuery.post('/api/post/deletefile', {
             'post_id': id,
             'loadFunction': function()
             {
@@ -86,7 +86,7 @@ class File
             img.after('<div class="overlay bottom left">' + YB.spinnerHtml() + '</div>');
         }, 200);
 
-        $.post('/scripts/files/getmediaplayer', {'fileId': fileId}).done(function(data)
+        $.post('/api/file/getmediaplayer', {'fileId': fileId}).done(function(data)
         {
             elm.removeClass('thumbnail').addClass('media-player-container');
             post.addClass('full');

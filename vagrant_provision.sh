@@ -72,21 +72,17 @@ server {
     server_name _;
     listen 80 default_server;
     listen [::]:80 default_server;
-
-    # SSL example
-    #listen 443 ssl http2 default_server;
-    #listen [::]:443 ssl http2 default_server;
-    #ssl_trusted_certificate /path/to/chain.pem
-    #ssl_certificate_key /path/to/key.pem
-    #ssl_certificate /path/to/fullchain.pem
-    #add_header Strict-Transport-Security max-age=31536000;
-    #ssl_stapling on;
-    #ssl_stapling_verify on;
-
     root /vagrant/public;
+
+    index index.php;
+    try_files \$uri /index.php?\$args;
+
+    include snippets/security.conf;
+    include snippets/php-upstream.conf;
 
     location /static/ {
         root /vagrant;
+        try_files \$uri =404;
 
         location ~ ^/static/files/([a-z0-9]+)/o/([a-z0-9]+)(\.\w+)\$ { return 404; }
         location ~ \.php\$ { return 404; }
@@ -100,12 +96,6 @@ server {
         }
 
     }
-
-    index index.php;
-    try_files \$uri /index.php?\$args;
-
-    include snippets/security.conf;
-    include snippets/php-upstream.conf;
 
     location /phpmyadmin/ {
         root /usr/share;

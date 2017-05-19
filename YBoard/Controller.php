@@ -169,7 +169,7 @@ abstract class Controller extends \YFW\Controller
         $this->stopExecution();
     }
 
-    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, string $base = ''): void
+    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, ?string $base = null): void
     {
         if ($isLastPage) {
             $maxPages = $pageNum;
@@ -254,6 +254,14 @@ abstract class Controller extends \YFW\Controller
 
         $templateEngine->setVar('user', $this->user);
         $templateEngine->setVar('boardList', $this->boards);
+
+        // Preload hints, TODO: fix locale and theme hints
+        header('Link: <' . $this->config['app']['staticUrl'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/js/config.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/fi_FI.UTF-8.default.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/css/ylilauta.css>; rel=preload; as=style; nopush', false);
 
         return $templateEngine;
     }
@@ -355,11 +363,13 @@ abstract class Controller extends \YFW\Controller
             return null;
         }
 
-        if (strlen($_COOKIE['user']) <= 130 || substr_count($_COOKIE['user'], '-') !== 2) {
+        if (strlen($_COOKIE['user']) <= 128) {
             return null;
         }
 
-        list($userId, $sessionId, $verifyKey) = explode('-', $_COOKIE['user']);
+        $sessionKey = substr($_COOKIE['user'], 0, 128);
+        $userId = substr($_COOKIE['user'], 128);
+        [$sessionId, $verifyKey] = str_split($_COOKIE['user'], 64);
 
         return ['userId' => (int)$userId, 'sessionId' => hex2bin($sessionId), 'verifyKey' => hex2bin($verifyKey)];
     }
@@ -368,7 +378,7 @@ abstract class Controller extends \YFW\Controller
     {
         $sessionId = bin2hex($sessionId);
         $verifyKey = bin2hex($verifyKey);
-        HttpResponse::setCookie('user', $userId . '-' . $sessionId . '-' . $verifyKey);
+        HttpResponse::setCookie('user', $sessionId . $verifyKey . $userId);
 
         return true;
     }
@@ -409,7 +419,22 @@ abstract class Controller extends \YFW\Controller
         $errorTitle = empty($errorTitle) ? _('Page not found') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. Probably never did.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/public/static/img/404/*.*');
+        $images = glob(ROOT_PATH . '/static/img/404/*.*');
+        if (!empty($images)) {
+            $image = $this->imagePathToUrl($images[array_rand($images)]);
+        } else {
+            $image = null;
+        }
+
+        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
+    }
+
+    public function gone(?string $errorTitle = null, ?string $errorMessage = null): void
+    {
+        $errorTitle = empty($errorTitle) ? _('Gone') : $errorTitle;
+        $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. It did once, however.') : $errorMessage;
+
+        $images = glob(ROOT_PATH . '/static/img/404/*.*');
         if (!empty($images)) {
             $image = $this->imagePathToUrl($images[array_rand($images)]);
         } else {
@@ -424,7 +449,7 @@ abstract class Controller extends \YFW\Controller
         $errorTitle = empty($errorTitle) ? _('Oh noes!') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('We\'re terribly sorry. An internal error occurred when we tried to complete your request.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/public/static/img/500/*.*');
+        $images = glob(ROOT_PATH . '/static/img/500/*.*');
         if (!empty($images)) {
             $image = $this->imagePathToUrl($images[array_rand($images)]);
         } else {

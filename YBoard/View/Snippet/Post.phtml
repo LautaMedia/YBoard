@@ -12,7 +12,7 @@
         <?php if (!isset($tooltip)) : ?>
         <a href="/<?= $thread->boardUrl ?>/<?= $thread->id ?>#post-<?= $post->id ?>" class="post-id add-post-reply"><?= _('No.') ?> <?= $post->id ?></a>
         <?php else : ?>
-        <a href="/scripts/posts/redirect/<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
+        <a href="/api/post/<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
         <?php endif ?>
     </div>
 </div>
@@ -67,7 +67,7 @@
 <div class="post-replies">
     <span><?= _('Replies') ?>:</span>
     <?php foreach ($post->postReplies as $postReply) : ?>
-        <a href="/scripts/posts/redirect/<?= $postReply ?>" data-id="<?= $postReply ?>" class="ref">&gt;&gt;<?= $postReply ?></a>
+        <a href="/api/post/<?= $postReply ?>" data-id="<?= $postReply ?>" class="ref">&gt;&gt;<?= $postReply ?></a>
     <?php endforeach ?>
 </div>
 <?php endif ?>

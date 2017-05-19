@@ -274,7 +274,7 @@ class PostForm
         fileNameElm.value = fileName.join('.');
 
         let that = this;
-        let fileUpload = YQuery.post('/api/file/upload', fd, {
+        let fileUpload = YQuery.post('/api/file/create', fd, {
             'contentType': null,
             'xhr': function(xhr) {
                 if (!xhr.upload) {
@@ -442,7 +442,7 @@ class PostForm
             }
 
             if (thread !== null) {
-                YBoard.Toast.success(messages.postSent);
+                //YBoard.Toast.success(messages.postSent);
                 YBoard.Thread.AutoUpdate.runOnce(thread);
             } else {
                 if (xhr.responseText.length === 0) {

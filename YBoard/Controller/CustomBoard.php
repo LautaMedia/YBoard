@@ -6,82 +6,70 @@ use YBoard\Model;
 
 class CustomBoard extends Controller
 {
-    public function myThreads(int $pageNum = 1): void
+    protected $board;
+    protected $threadIds;
+
+    public function index(string $fullName, string $shortName, int $negativePageNum = -1, int $pageNum = 1): void
     {
-        Model\Thread::setHidden($this->user->threadHide->getAll());
-        $threads = Model\Thread::getIdsByUser($this->db, $this->user->id,
-            $this->user->preferences->threadsPerPage * $this->config['view']['maxPages']);
-        $threads = Model\Thread::getCustom($this->db, $threads, $pageNum, $this->user->preferences->threadsPerPage,
+        $this->load($fullName, $shortName);
+
+        $threads = Model\Thread::getCustom($this->db, $this->threadIds, $pageNum, $this->user->preferences->threadsPerPage,
             $this->user->preferences->repliesPerThread);
 
-        $this->showCustomBoard($threads, 'mythreads', (int)$pageNum);
+        $this->show($threads, $pageNum);
     }
 
-    public function repliedThreads(int $pageNum = 1): void
+    public function catalog(string $fullName, string $shortName, int $negativePageNum = -1, int $pageNum = 1): void
+    {
+        $this->load($fullName, $shortName);
+
+        $threads = Model\Thread::getCustom($this->db, $this->threadIds, $pageNum, $this->user->preferences->threadsPerCatalogPage);
+
+        $this->show($threads, $pageNum, true);
+    }
+
+    protected function load(string $fullName, string $shortName): void
     {
         Model\Thread::setHidden($this->user->threadHide->getAll());
-        $threads = Model\Thread::getIdsRepliedByUser($this->db, $this->user->id,
-            $this->user->preferences->threadsPerPage * $this->config['view']['maxPages']);
-        $threads = Model\Thread::getCustom($this->db, $threads, $pageNum, $this->user->preferences->threadsPerPage,
-            $this->user->preferences->repliesPerThread);
 
-        $this->showCustomBoard($threads, 'repliedthreads', (int)$pageNum);
+        $this->board = new Model\Board($this->db);
+        $this->board->url = $fullName;
+        switch ($shortName) {
+            case 'my':
+                $this->board->name = _('My threads');
+                $this->board->description = _('All the great threads you have created');
+                $this->threadIds = Model\Thread::getIdsByUser($this->db, $this->user->id,
+                    $this->user->preferences->threadsPerPage * $this->config['view']['maxPages']);
+                break;
+            case 'replied':
+                $this->board->name = _('Replied threads');
+                $this->board->description = _('Threads that may even have some interesting content');
+                $this->threadIds = Model\Thread::getIdsRepliedByUser($this->db, $this->user->id,
+                    $this->user->preferences->threadsPerPage * $this->config['view']['maxPages']);
+                break;
+            case 'followed':
+                $this->board->name = _('Followed threads');
+                $this->board->description = _('Threads you have marked as interesting');
+                $this->threadIds = array_keys($this->user->threadFollow->getAll());
+                break;
+            case 'hidden':
+                $this->board->name = _('Hidden threads');
+                $this->board->description = _('Why are you even reading these?');
+                $this->threadIds = $this->user->threadHide->getAll();
+                break;
+            default:
+                $this->notFound();
+                die();
+                break;
+        }
     }
 
-    public function followedThreads(int $pageNum = 1): void
+    protected function show(array $threads, int $pageNum, bool $catalog = false): void
     {
-        $threads = Model\Thread::getCustom($this->db, array_keys($this->user->threadFollow->getAll()), $pageNum,
-            $this->user->preferences->threadsPerPage, $this->user->preferences->repliesPerThread, true);
+        if (empty($threads) && $pageNum !== 1) {
+            $this->notFound(null, _('You don\'t have this many threads here!'));
+        }
 
-        $this->showCustomBoard($threads, 'followedthreads', (int)$pageNum);
-    }
-
-    public function hiddenThreads(int $pageNum = 1): void
-    {
-        $threads = Model\Thread::getCustom($this->db, $this->user->threadHide->getAll(), $pageNum,
-            $this->user->preferences->threadsPerPage, $this->user->preferences->repliesPerThread);
-
-        $this->showCustomBoard($threads, 'hiddenthreads', (int)$pageNum);
-    }
-
-    public function myThreadsCatalog(int $pageNum = 1): void
-    {
-        Model\Thread::setHidden($this->user->threadHide->getAll());
-        $threads = Model\Thread::getIdsByUser($this->db, $this->user->id,
-            $this->user->preferences->threadsPerCatalogPage * $this->config['view']['maxCatalogPages']);
-        $threads = Model\Thread::getCustomThreads($this->db, $threads, $pageNum, $this->user->preferences->threadsPerCatalogPage);
-
-        $this->showCustomBoard($threads, 'mythreads', (int)$pageNum, true);
-    }
-
-    public function repliedThreadsCatalog(int $pageNum = 1): void
-    {
-        Model\Thread::setHidden($this->user->threadHide->getAll());
-        $threads = Model\Thread::getIdsRepliedByUser($this->db, $this->user->id,
-            $this->user->preferences->threadsPerCatalogPage * $this->config['view']['maxCatalogPages']);
-        $threads = Model\Thread::getCustom($this->db, $threads, $pageNum, $this->user->preferences->threadsPerCatalogPage);
-
-        $this->showCustomBoard($threads, 'repliedthreads', (int)$pageNum, true);
-    }
-
-    public function followedThreadsCatalog(int $pageNum = 1): void
-    {
-        $threads = Model\Thread::getCustom($this->db, array_keys($this->user->threadFollow->getAll()), $pageNum,
-            $this->user->preferences->threadsPerCatalogPage);
-
-        $this->showCustomBoard($threads, 'followedthreads', (int)$pageNum, true);
-    }
-
-    public function hiddenThreadsCatalog(int $pageNum = 1): void
-    {
-        $threads = Model\Thread::getCustom($this->db, $this->user->threadHide->getAll(), $pageNum,
-            $this->user->preferences->threadsPerCatalogPage);
-
-        $this->showCustomBoard($threads, 'hiddenthreads', (int)$pageNum, true);
-    }
-
-    protected function showCustomBoard(array $threads, string $boardName, int $pageNum, bool $catalog = false): void
-    {
         if (!$catalog) {
             $maxPages = $this->config['view']['maxPages'];
             $bodyClass = 'board-page';
@@ -99,43 +87,16 @@ class CustomBoard extends Controller
         $this->limitPages($pageNum, $maxPages);
 
         $view = $this->loadTemplateEngine();
-        $board = $this->getCustomBoard($boardName);
 
-        $view->setVar('pageTitle', $board->name);
+        $view->setVar('pageTitle', $this->board->name);
         $view->setVar('bodyClass', $bodyClass);
 
         $this->initializePagination($view, $pageNum, $maxPages, $isLastPage, $paginationBase);
 
-        $view->setVar('board', $board);
+        $view->setVar('board', $this->board);
         $view->setVar('threads', $threads);
         $view->setVar('pageNum', $pageNum);
 
         $view->display($viewFile);
-    }
-
-    protected function getCustomBoard(string $name): Model\Board
-    {
-        $board = new Model\Board($this->db);
-        $board->url = $name;
-        switch ($name) {
-            case 'mythreads':
-                $board->name = _('My threads');
-                $board->description = _('All the great threads you have created');
-                break;
-            case 'repliedthreads':
-                $board->name = _('Replied threads');
-                $board->description = _('Threads that may even have some interesting content');
-                break;
-            case 'followedthreads':
-                $board->name = _('Followed threads');
-                $board->description = _('Threads you have marked as interesting');
-                break;
-            case 'hiddenthreads':
-                $board->name = _('Hidden threads');
-                $board->description = _('Why are you even reading these?');
-                break;
-        }
-
-        return $board;
     }
 }

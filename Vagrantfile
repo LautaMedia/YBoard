@@ -11,9 +11,6 @@ Vagrant.configure(2) do |config|
         vb.cpus = 2
         vb.memory = 1024
         vb.name = "YBoard"
-        vb.customize [ "modifyvm", :id, "--bioslogofadein", "off" ]
-        vb.customize [ "modifyvm", :id, "--bioslogofadeout", "off" ]
-        vb.customize [ "modifyvm", :id, "--bioslogodisplaytime", "0" ]
         vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
     end
 

@@ -41,7 +41,7 @@ class Theme
             document.getElementById('sidebar').classList.remove('visible');
 
             YQuery.post('/api/user/preferences/set', {
-                'sidebarHidden': 'false',
+                'hideSidebar': 'false',
             });
         } else {
             let hideSidebarCss = document.createElement('link');
@@ -51,7 +51,7 @@ class Theme
             document.querySelector('head').appendChild(hideSidebarCss);
 
             YQuery.post('/api/user/preferences/set', {
-                'sidebarHidden': 'true',
+                'hideSidebar': 'true',
             });
         }
 

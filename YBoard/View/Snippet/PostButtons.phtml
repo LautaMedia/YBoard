@@ -1,26 +1,26 @@
-<div class="post-buttons">
+<div class="post-buttons" data-id="<?= $post->id ?>">
     <?php if (!$thread->locked || $user->isMod) : ?>
-        <button class="button square icon-bubbles add-post-reply" title="<?= _('Reply') ?>"></button>
+        <button class="icon-bubbles e-post-reply" title="<?= _('Reply') ?>"></button>
     <?php endif ?>
     <!--
     <a href="#"><?= _('Donate gold') ?></a>
     -->
     <?php if (!$post->threadId) : ?>
         <?php if (!$user->threadHide->exists($post->id)) : ?>
-            <button class="button square icon-eye-crossed" onclick="hideThread(<?= $post->id ?>)" title="<?= _('Hide') ?>"></button>
+            <button class="icon-eye-crossed e-thread-hide" title="<?= _('Hide') ?>"></button>
         <?php else : ?>
-            <button class="button square icon-eye" onclick="restoreThread(<?= $post->id ?>)" title="<?= _('Restore') ?>"></button>
+            <button class="icon-eye act e-thread-hide" title="<?= _('Restore') ?>"></button>
         <?php endif ?>
         <?php if (!$user->threadFollow->exists($post->id)) : ?>
-            <button class="button square icon-bookmark-add followbutton" onclick="followThread(<?= $post->id ?>)" title="<?= _('Follow') ?>"></button>
+            <button class="icon-bookmark-add e-thread-follow" title="<?= _('Follow') ?>"></button>
         <?php else : ?>
-            <button class="button square icon-bookmark-remove followbutton" onclick="unfollowThread(<?= $post->id ?>)" title="<?= _('Unfollow') ?>"></button>
+            <button class="icon-bookmark-remove act e-thread-follow" title="<?= _('Unfollow') ?>"></button>
         <?php endif ?>
     <?php endif ?>
-    <button class="button square icon-flag2" onclick="reportPost(<?= $post->id?>)" title="<?= _('Report') ?>"></button>
+    <button class="icon-flag2 e-thread-report" title="<?= _('Report') ?>"></button>
 
     <?php if ($user->isMod) : ?>
-        <button class="mod-menu button square icon-wrench" data-ip="<?= $post->ip ?>" data-uid="<?= $post->userId ?>"
+        <button class="mod-menu icon-wrench" data-ip="<?= $post->ip ?>" data-uid="<?= $post->userId ?>"
                 data-is-reply="<?= (!empty($post->threadId)?'true':'false') ?>"
                 onclick="openModMenu(this, <?= $post->id ?>)" title="<?= _('Moderation') ?>"></button>
         <div class="mod-menu-html">
@@ -37,7 +37,7 @@
     <?php else : ?>
         <?php if ($post->userId != $user->id) : ?>
         <?php else : ?>
-            <button class="button square icon-trash2" onclick="deletePost(<?= $post->id ?>)" title="<?= _('Delete') ?>"></button>
+            <button class="icon-trash2 e-post-delete" title="<?= _('Delete') ?>"></button>
         <?php endif ?>
     <?php endif ?>
 </div>

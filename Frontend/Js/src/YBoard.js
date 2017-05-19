@@ -86,12 +86,26 @@ class YBoard
     {
         let that = this;
 
-        // Localize dates, numbers and currencies
-        elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
-        elm.querySelectorAll('.number').forEach(this.localizeNumber);
-        elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
+        // Performance gains are huge (like 98%), if "elm" is not a document fragment.
+        // So let's take the advantage of that for the initial page load.
+        let tooltips;
+        if (typeof elm.getElementsByClassName === 'function') {
+            // Localize dates, numbers and currencies
+            [].forEach.call(elm.getElementsByClassName('datetime'), this.localizeDatetime);
+            [].forEach.call(elm.getElementsByClassName('number'), this.localizeNumber);
+            [].forEach.call(elm.getElementsByClassName('currency'), this.localizeCurrency);
 
-        elm.querySelectorAll('.tip, .ref').forEach(function(elm)
+            tooltips = Array.prototype.concat.apply([], elm.getElementsByClassName("tip"));
+            tooltips = Array.prototype.concat.apply(tooltips, elm.getElementsByClassName("ref"));
+        } else {
+            elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
+            elm.querySelectorAll('.number').forEach(this.localizeNumber);
+            elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
+
+            tooltips = elm.querySelectorAll('.tip, .ref');
+        }
+
+        tooltips.forEach(function(elm)
         {
             elm.addEventListener('mouseover', function(e)
             {

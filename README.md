@@ -17,7 +17,8 @@ Requirements:
 2. Copy YBoard/Config/Database.sample.php to YBoard/Config/Database.php and edit if needed
 3. Copy YBoard/Config/App.sample.php to YBoard/Config/App.php and edit if needed
 4. Open a command prompt in the project root folder and run `vagrant up`
-5. After the (maybe lengthy) vagrant initialization, you can now open http://localhost:9001/ in your browser
+5. After the (maybe lengthy) vagrant initialization, you can now open https://127.90.0.1/ in your browser.
+    * Ignore the certificate warning, we are using a self-signed certificate.
 
 To access the shell of the virtual machine (eg. for error logs), use `vagrant ssh` in the project folder.
 
@@ -26,8 +27,8 @@ To access the shell of the virtual machine (eg. for error logs), use `vagrant ss
 * Server password: vagrant
 * MySQL username: root
 * MySQL password: vagrant
-* Project public URL: http://localhost:9001/
-* PHPMyAdmin: http://localhost:9001/phpmyadmin/
+* Project public URL: https://127.90.0.1/
+* PHPMyAdmin: https://127.90.0.1/phpmyadmin/
 * Project path on the server: /vagrant/
 
 As the development environment is local and it can only be accessed from your computer,
@@ -37,7 +38,7 @@ there's no need to change the usernames or passwords. But you may if you wish.
 To profile the code, Xdebug is enabled by default by the Vagrantfile.  
 Do not use Xdebug in production, it's a DoS risk.
 To get a profile of the code, append XDEBUG_PROFILE to any GET or POST.  
-For example http://localhost:9001/?XDEBUG_PROFILE
+For example https://127.90.0.1/?XDEBUG_PROFILE
 
 Profiler output files (cachegrind.out.xxx) are stored in Logs/.  
 They can be opened for example with PhpStorm (Tools -> Analyze Xdebug Profiler Snapshot...).
