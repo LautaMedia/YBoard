@@ -19,16 +19,16 @@
 
 <blockquote class="message">
     <?php if (!empty($post->file)) : ?>
-    <?php $fileUrl = $config['files']['url'] . '/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
+    <?php $fileUrl = $config['file']['url'] . '/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
     <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>">
         <?php if (in_array($post->file->extension, ['m4a', 'mp4'])) : ?>
             <a href="<?= $fileUrl ?>" class="media" target="_blank">
                 <?php if ($post->file->hasThumbnail) : ?>
-                <img src="<?= $config['files']['url'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
+                <img src="<?= $config['file']['url'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
                 <?php else : ?>
-                <span class="no-thumbnail icon-music-note3"></span>
+                <span class="no-thumbnail icon-music-note"></span>
                 <?php endif ?>
-                <span class="overlay center icon-play4"></span>
+                <span class="overlay center icon-play"></span>
                 <?php if ($post->file->isGif) : ?>
                 <span class="overlay bottom right">GIF</span>
                 <?php else : ?>
@@ -42,7 +42,7 @@
             <button class="button primary stop-media"><?= _('Hide media') ?></button>
         <?php else : ?>
             <a href="<?= $fileUrl ?>" class="image" target="_blank">
-                <img src="<?= $config['files']['url'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
+                <img src="<?= $config['file']['url'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
             </a>
         <?php endif ?>
         <figcaption>

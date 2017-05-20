@@ -1,17 +1,15 @@
 <?php
 namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 use YBoard\Model;
 use YFW\Exception\FileUploadException;
 use YFW\Library\TemplateEngine;
 
-class File Extends Controller
+class File Extends ApiController
 {
     public function delete(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['fileId'])) {
             $this->throwJsonError(400);
         }
@@ -25,8 +23,8 @@ class File Extends Controller
             $this->throwJsonError(403, _('This isn\'t your file!'));
         }
 
-        $thumbnail = $this->config['files']['savePath'] . '/' . $file->folder . '/t/' . $file->name . '.jpg';
-        $full = $this->config['files']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
+        $thumbnail = $this->config['file']['savePath'] . '/' . $file->folder . '/t/' . $file->name . '.jpg';
+        $full = $this->config['file']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
         if (is_file($thumbnail)) {
             unlink($thumbnail);
         }
@@ -39,18 +37,16 @@ class File Extends Controller
 
     public function upload(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_FILES['file'])) {
             $this->throwJsonError(400, _('No file uploaded'));
         }
 
-        if (!is_dir($this->config['files']['savePath'])) {
+        if (!is_dir($this->config['file']['savePath'])) {
             $this->throwJsonError(500, _('File uploads are temporarily disabled due to a configuration error'));
         }
 
         // Check that we have enough free space for files
-        if (disk_free_space($this->config['files']['savePath']) <= $this->config['files']['diskMinFree']) {
+        if (disk_free_space($this->config['file']['savePath']) <= $this->config['file']['diskMinFree']) {
             $this->throwJsonError(403, _('File uploads are temporarily disabled'));
         }
 
@@ -64,7 +60,7 @@ class File Extends Controller
             $uploadSize += $file['size'];
         }
 
-        if ($uploadSize >= $this->config['files']['maxSize']) {
+        if ($uploadSize >= $this->config['file']['maxSize']) {
             $this->throwJsonError(400, _('Your files exceed the maximum upload size'));
         }
 
@@ -85,15 +81,13 @@ class File Extends Controller
             break;
         }
 
-        $this->jsonMessage($ids);
+        $this->sendJsonMessage($ids);
     }
 
     public function getMediaPlayer(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['fileId'])) {
-            $this->invalidAjaxData();
+            $this->throwJsonError(400, _('Invalid file ID'));
         }
 
         $files = new File($this->db);

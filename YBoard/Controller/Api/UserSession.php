@@ -1,16 +1,44 @@
 <?php
-namespace YBoard\Controller;
+namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 use YBoard\Model;
 use YFW\Library\Text;
 
-class UserSession extends Controller
+class UserSession extends ApiController
 {
+    public function create(): void
+    {
+        if (empty($_POST['username']) || empty($_POST['password'])) {
+            $this->throwJsonError(401, _('Invalid username or password'), _('Login failed'));
+        }
+
+        $newUser = Model\User::getByLogin($this->db, $_POST['username'], $_POST['password']);
+        if (!$newUser) {
+            $this->throwJsonError(403, _('Invalid username or password'), _('Login failed'));
+        }
+
+        $this->user->session->destroy();
+
+        $newUser->session = Model\UserSession::create($this->db, $newUser->id);
+
+        $this->setLoginCookie($newUser->id, $newUser->session->id, $newUser->session->verifyKey);
+
+        // Log mod logins
+        if ($newUser->class !== 0) {
+            Model\Log::write($this->db, Model\Log::ACTION_MOD_LOGIN, $newUser->id);
+        }
+
+        // Delete old user if it has no sessions and there's no password set.
+        if (Model\User::isUnusable($this->db, $this->user->id)) {
+            $this->user->delete();
+        }
+
+        $this->sendJsonPageReload();
+    }
+
     public function delete(): void
     {
-        $this->validateAjaxCsrfToken();
-
         $session = null;
         if (empty($_POST['sessionId'])) {
             $session = $this->user->session;
@@ -29,10 +57,15 @@ class UserSession extends Controller
         }
 
         if ($session === null) {
-            $this->throwJsonError('404', _('Invalid session'));
+            $this->throwJsonError(404, _('Session does not exist'));
         }
 
         $session->destroy();
-        $this->jsonMessage(_('Session destroyed'));
+
+        if (empty($_POST['sessionId'])) {
+            $this->sendJsonPageReload();
+        } else {
+            $this->sendJsonMessage(_('Session destroyed'));
+        }
     }
 }

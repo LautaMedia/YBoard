@@ -15,11 +15,11 @@ class Follow
 
     markAllRead()
     {
-        $('.icon-bookmark2 .unread-count').hide();
+        $('.icon-bookmark .unread-count').hide();
         $('h3 .notification-count').hide();
         $.post('/api/thread/follow/markallread').fail(function()
         {
-            $('.icon-bookmark2 .unread-count').show();
+            $('.icon-bookmark .unread-count').show();
             $('h3 .notification-count').show();
         });
     }

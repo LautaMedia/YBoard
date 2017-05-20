@@ -276,4 +276,16 @@ class User extends Model
 
         return $q->fetchAll(Database::FETCH_COLUMN);
     }
+
+    // User cannot be logged in and has no active sessions
+    public static function isUnusable(Database $db, int $userId): bool
+    {
+        $q = $db->prepare("SELECT a.id FROM user a
+            LEFT JOIN user_session b ON b.user_id = a.id
+            WHERE b.id IS NULL AND a.id = :userId AND a.username IS NULL AND a.gold_level = 0 LIMIT 1");
+        $q->bindValue(':userId', $userId, Database::PARAM_INT);
+        $q->execute();
+
+        return $q->rowCount() === 1;
+    }
 }

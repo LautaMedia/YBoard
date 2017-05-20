@@ -60,17 +60,16 @@ class UserPreferences extends AbstractUserModel
 
     public function set(string $keyName, $value): bool
     {
-        if (!array_search($keyName, $this->keyToName)) {
+        $key = array_search($keyName, $this->keyToName);
+        if (!$key) {
             return false;
         }
-
-        $key = array_search($keyName, $this->keyToName);
 
         // Verify and filter values if needed
         switch ($key) {
             case 2:
             case 4:
-                $value = (int)$value;
+                $value = $value === 'true' ? 1 : 0;
                 break;
             case 5:
                 if ($value > 50) {
@@ -106,8 +105,8 @@ class UserPreferences extends AbstractUserModel
 
     public function reset($keyName): bool
     {
-        if (array_search($keyName, $this->keyToName)) {
-            $key = array_search($keyName, $this->keyToName);
+        $key = array_search($keyName, $this->keyToName);
+        if ($key) {
             $defaults = new self($this->db);
             $this->{$keyName} = $defaults->{$keyName};
         } else {

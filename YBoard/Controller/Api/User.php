@@ -1,21 +1,58 @@
 <?php
-namespace YBoard\Controller;
+namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 use YBoard\Model;
-use YFW\Library\Text;
+use YFW\Library\ReCaptcha;
 
-class User extends Controller
+class User extends ApiController
 {
+    public function create(): void
+    {
+        if ($this->user->loggedIn) {
+            $this->throwJsonError(400, _('You are already logged in'), _('Signup failed'));
+        }
+
+        if (empty($_POST['username']) || empty($_POST['password']) || empty($_POST['repassword'])) {
+            $this->throwJsonError(400, _('Missing username or password'), _('Signup failed'));
+        }
+
+        if ($_POST['password'] !== $_POST['repassword']) {
+            $this->throwJsonError(400, _('The two passwords do not match'), _('Signup failed'));
+        }
+
+        if ($this->config['captcha']['enabled'] && $this->user->requireCaptcha) {
+            if (empty($_POST["g-recaptcha-response"])) {
+                $this->throwJsonError(400, _('Please fill the CAPTCHA'), _('Signup failed'));
+            }
+
+            $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['reCaptcha']['privateKey']);
+            if (!$captchaOk) {
+                $this->throwJsonError(400, _('Invalid CAPTCHA response, please try again'), _('Signup failed'));
+            }
+        }
+
+        if (mb_strlen($_POST['username']) > $this->config['user']['usernameMaxLength']) {
+            $this->throwJsonError(400, _('Username is too long'), _('Signup failed'));
+        }
+
+        if (!Model\User::usernameIsFree($this->db, $_POST['username'])) {
+            $this->throwJsonError(400, _('This username is already taken, please choose another one'), _('Signup failed'));
+        }
+
+        $this->user->setUsername($_POST['username']);
+        $this->user->setPassword($_POST['password']);
+
+        $this->sendJsonPageReload();
+    }
+
     public function changeName(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['newName']) || empty($_POST['password'])) {
             $this->throwJsonError(400, _('Please fill all of the required fields'));
         }
 
-        if (mb_strlen($_POST['newName']) > $this->config['view']['usernameMaxLength']) {
+        if (mb_strlen($_POST['newName']) > $this->config['user']['usernameMaxLength']) {
             $this->throwJsonError(400, _('Username is too long'));
         }
 
@@ -33,13 +70,11 @@ class User extends Controller
 
         $this->user->setUsername($_POST['newName']);
 
-        $this->jsonPageReload();
+        $this->sendJsonPageReload();
     }
 
     public function changePassword(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['newPassword']) || empty($_POST['newPasswordAgain']) || empty($_POST['password'])) {
             $this->throwJsonError(400, _('Please fill all of the required fields'));
         }
@@ -54,13 +89,11 @@ class User extends Controller
 
         $this->user->setPassword($_POST['newPassword']);
 
-        $this->jsonMessage(_('Password changed'));
+        $this->sendJsonMessage(_('Password changed'));
     }
 
     public function delete(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['password'])) {
             $this->throwJsonError(401, _('Please type your current password'));
         }
@@ -80,6 +113,6 @@ class User extends Controller
         $this->user->delete();
 
         $this->deleteLoginCookie(false);
-        $this->jsonPageReload('/');
+        $this->sendJsonPageReload('/');
     }
 }

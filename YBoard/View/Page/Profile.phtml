@@ -36,7 +36,7 @@
             <h4><?= _('Change username') ?></h4>
             <p><?= _('Current username') ?>: <?= htmlspecialchars($user->username) ?></p>
             <form action="/scripts/user/changename" method="post" class="ajax">
-                <input type="text" name="newName" placeholder="<?= _('New name') ?>" maxlength="<?= $usernameMaxLength ?>" required>
+                <input type="text" name="newName" placeholder="<?= _('New name') ?>" maxlength="<?= $config['user']['usernameMaxLength'] ?>" required>
                 <input type="text" name="preventautocomplete" style="display:none">
                 <input type="password" name="password" placeholder="<?= _('Current password') ?>" required>
                 <input type="submit" class="button primary" value="<?= _('Change username') ?>">

@@ -7,7 +7,7 @@ class GoldAccount extends Controller
 {
     public function index(): void
     {
-        $this->jsonMessage(json_encode([$_POST, $_SERVER["SERVER_PROTOCOL"]]));
+        $this->sendJsonMessage(json_encode([$_POST, $_SERVER["SERVER_PROTOCOL"]]));
         die();
         $view = $this->loadTemplateEngine();
         $view->pageTitle = _('Gold account');

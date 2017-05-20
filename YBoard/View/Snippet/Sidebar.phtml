@@ -25,16 +25,16 @@
     <nav id="user">
         <?php if (!$user->loggedIn) : ?>
             <h3><?= _('Log in') ?></h3>
-            <form id="login" class="ajax" action="/api/user/login" method="post">
-                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['users']['usernameMaxLength'] ?>" required>
+            <form id="login" class="ajax" action="/api/user/session/create" method="post">
+                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['user']['usernameMaxLength'] ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
                 <div>
                     <button type="submit" class="button primary" name="login"><?= _('Log_in') ?></button>
                     <button type="button" class="button transparent signup"><?= _('Sign up') ?></button>
                 </div>
             </form>
-            <form id="signup" class="ajax" action="/api/user/signup" method="post">
-                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['users']['usernameMaxLength'] ?>" required>
+            <form id="signup" class="ajax" action="/api/user/create" method="post">
+                <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['user']['usernameMaxLength'] ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
                 <input type="password" name="repassword" placeholder="<?= _('Password again') ?>" required>
                 <div>
@@ -51,13 +51,13 @@
             <button class="button square icon-alarm open-notifications" title="<?= _('Notifications') ?>"
             ><span class="unread-notifications unread-count red<?= ($user->notifications->unreadCount==0?' none':'') ?>"
                 ><?= $user->notifications->unreadCount ?></span></button>
-            <a href="/followedthreads/" class="button square icon-bookmark2" title="<?= _('Followed threads') ?>"><?php
+            <a href="/followedthreads/" class="button square icon-bookmark" title="<?= _('Followed threads') ?>"><?php
                 if($user->threadFollow->unreadCount != 0) :
                     ?><span class="unread-count green"><?= $user->threadFollow->unreadCount ?></span><?php
                 endif
                 ?></a>
             <?php if ($user->isMod) : ?>
-                <a class="button square icon-flag2" href="/mod/reports" title="<?= _('Reports') ?>"><?php
+                <a class="button square icon-flag" href="/mod/reports" title="<?= _('Reports') ?>"><?php
                     if ($uncheckedReports != 0) :
                         ?><span class="unread-count red"><?= $uncheckedReports ?></span><?php
                     endif ?></a>
@@ -70,7 +70,7 @@
             <a class="button square icon-cog" href="/preferences" title="<?= _('Preferences') ?>"></a>
             <button class="button square icon-lamp switch-theme" title="<?= _('Switch theme colors') ?>"></button>
             <?php if ($user->loggedIn) : ?>
-                <form id="logout" class="ajax" action="/scripts/session/logout" method="post">
+                <form id="logout" class="ajax" action="/api/user/session/delete" method="post">
                     <button type="submit" class="button square icon-exit" title="<?= _('Log out') ?>"
                             onclick="if(!confirm(messages.logOutConfirm)){return false}"></button>
                 </form>

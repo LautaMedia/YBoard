@@ -85,7 +85,7 @@ class MessageListenerDaemon
             return false;
         }
 
-        $filePath = $this->config['files']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
+        $filePath = $this->config['file']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
         FileHandler::pngCrush($filePath);
         $md5 = md5(file_get_contents($filePath));
 
@@ -112,7 +112,7 @@ class MessageListenerDaemon
             return false;
         }
 
-        $filePath = $this->config['files']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
+        $filePath = $this->config['file']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
 
         // Convert
         $convert = FileHandler::convertVideo($filePath);
@@ -146,7 +146,7 @@ class MessageListenerDaemon
             return false;
         }
 
-        $filePath = $this->config['files']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
+        $filePath = $this->config['file']['savePath'] . '/' . $file->folder . '/o/' . $file->name . '.' . $file->extension;
 
         // Convert
         $convert = FileHandler::convertAudio($filePath);

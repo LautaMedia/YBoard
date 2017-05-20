@@ -17,7 +17,7 @@
             <button class="icon-bookmark-remove act e-thread-follow" title="<?= _('Unfollow') ?>"></button>
         <?php endif ?>
     <?php endif ?>
-    <button class="icon-flag2 e-thread-report" title="<?= _('Report') ?>"></button>
+    <button class="icon-flag e-thread-report" title="<?= _('Report') ?>"></button>
 
     <?php if ($user->isMod) : ?>
         <button class="mod-menu icon-wrench" data-ip="<?= $post->ip ?>" data-uid="<?= $post->userId ?>"
@@ -29,7 +29,7 @@
         <?php if(!empty($post->file)) : ?>
             <button onclick="deleteFile(<?= $post->id ?>)" class="button square icon-file-minus" title="<?= _('Delete file from post') ?>"></button>
         <?php endif ?>
-            <button onclick="deletePost(<?= $post->id ?>)" class="button square icon-trash2" title="<?= _('Delete post') ?>"></button>
+            <button onclick="deletePost(<?= $post->id ?>)" class="button square icon-trash" title="<?= _('Delete post') ?>"></button>
             <button onclick="toggleThreadSticky(<?= $post->id ?>)" class="button square icon-pushpin" title="<?= _('Toggle sticky') ?>"></button>
             <button onclick="toggleThreadLock(<?= $post->id ?>)" class="button square icon-lock" title="<?= _('Toggle lock') ?>"></button>
             <button onclick="$.modal.open('/scripts/mod/banform', {postData: {postId: <?= $post->id ?>}})" class="button square icon-prohibited" title="<?= _('Ban user') ?>"></button>
@@ -37,7 +37,7 @@
     <?php else : ?>
         <?php if ($post->userId != $user->id) : ?>
         <?php else : ?>
-            <button class="icon-trash2 e-post-delete" title="<?= _('Delete') ?>"></button>
+            <button class="icon-trash e-post-delete" title="<?= _('Delete') ?>"></button>
         <?php endif ?>
     <?php endif ?>
 </div>

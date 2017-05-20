@@ -1,7 +1,7 @@
 <?php
 namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 use YBoard\MessageQueue;
 use YFW\Library\BbCode;
 use YFW\Library\Cache;
@@ -10,12 +10,10 @@ use YFW\Library\ReCaptcha;
 use YFW\Library\Text;
 use YBoard\Model;
 
-class Post extends Controller
+class Post extends ApiController
 {
     public function get(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
@@ -79,8 +77,6 @@ class Post extends Controller
 
     public function create(): void
     {
-        $this->validateAjaxCsrfToken();
-
         // Check bans
         if ($this->user->ban) {
             $this->throwJsonError(403, _('You are banned!'));
@@ -212,7 +208,7 @@ class Post extends Controller
         if (!empty($message)) {
             $message = Text::removeForbiddenUnicode($message);
             $message = Text::limitEmptyLines($message);
-            $message = mb_substr($message, 0, $this->config['posts']['messageMaxLength']);
+            $message = mb_substr($message, 0, $this->config['post']['messageMaxLength']);
         }
 
         // Only most basic text formatting for non-golds.
@@ -229,7 +225,7 @@ class Post extends Controller
 
         $subject = null;
         if (!$isReply && isset($_POST['subject'])) {
-            $subject = trim(mb_substr($_POST['subject'], 0, $this->config['posts']['subjectMaxLength']));
+            $subject = trim(mb_substr($_POST['subject'], 0, $this->config['post']['subjectMaxLength']));
         }
 
         $username = null;
@@ -251,7 +247,7 @@ class Post extends Controller
             $this->user->statistics->increment('createdThreads');
 
             // Enable flood limit
-            Cache::add('SpamLimit-thread-' . $_SERVER['REMOTE_ADDR'], 1, $this->config['posts']['threadIntervalLimit']);
+            Cache::add('SpamLimit-thread-' . $_SERVER['REMOTE_ADDR'], 1, $this->config['post']['threadIntervalLimit']);
         } else {
             // Check flood limit
             if (Cache::exists('SpamLimit-reply-' . $_SERVER['REMOTE_ADDR'])) {
@@ -268,7 +264,7 @@ class Post extends Controller
             Model\UserThreadFollow::incrementUnreadCount($this->db, $thread->id, $this->user->id);
 
             // Enable flood limit
-            Cache::add('SpamLimit-reply-' . $_SERVER['REMOTE_ADDR'], 1, $this->config['posts']['replyIntervalLimit']);
+            Cache::add('SpamLimit-reply-' . $_SERVER['REMOTE_ADDR'], 1, $this->config['post']['replyIntervalLimit']);
 
             if (!$sage) {
                 $thread->bump();
@@ -317,14 +313,12 @@ class Post extends Controller
         }
 
         if (!$isReply) {
-            $this->jsonMessage($post->id);
+            $this->sendJsonMessage($post->id);
         }
     }
 
     public function delete(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['postId'])) {
             $this->throwJsonError(400);
         }
@@ -341,8 +335,7 @@ class Post extends Controller
 
         if ($post->userId != $this->user->id) {
             // Log post deletions by mods
-            $log = new LogModel($this->db);
-            $log->write(LogModel::ACTION_ID_MOD_POST_DELETE, $this->user->id, $post->id);
+            Model\Log::write($this->db, Model\Log::ACTION_MOD_POST_DELETE, $this->user->id, $post->id);
         }
 
         if (!empty($post->threadId)) {
@@ -367,14 +360,11 @@ class Post extends Controller
 
     public function deleteFile(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['post_id'])) {
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $post = $posts->get($_POST['post_id'], false);
+        $post = Model\Post::get($this->db, $_POST['post_id'], false);
         if ($post === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
@@ -385,8 +375,7 @@ class Post extends Controller
 
         if ($post->userId != $this->user->id) {
             // Log file deletions by mods
-            $log = new LogModel($this->db);
-            $log->write(LogModel::ACTION_ID_MOD_POST_FILE_DELETE, $this->user->id, $post->id);
+            Model\Log::write($this->db, Model\Log::ACTION_MOD_POST_FILE_DELETE, $this->user->id, $post->id);
         }
 
         // Delete file
@@ -395,8 +384,6 @@ class Post extends Controller
 
     public function report(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if ($this->user->ban) {
             $this->throwJsonError(403, _('You are banned!'));
         }

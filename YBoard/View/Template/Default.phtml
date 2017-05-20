@@ -36,12 +36,12 @@
         ><button id="notifications-button" class="icon-alarm" title="<?= _('Notifications') ?>"
             ><span class="unread-notifications unread-count red<?= ($user->notifications->unreadCount==0?' none':'') ?>"
             ><?= $user->notifications->unreadCount ?></span></button
-        ><a href="/followedthreads/" class="icon-bookmark2" title="<?= _('Followed threads') ?>"><?php
+        ><a href="/followedthreads/" class="icon-bookmark" title="<?= _('Followed threads') ?>"><?php
             if($user->threadFollow->unreadCount != 0) :
                 ?><span class="unread-count green"><?= $user->threadFollow->unreadCount ?></span><?php
             endif ?></a
-        ><button id="scroll-to-bottom" class="icon-enter-down2" title="<?= _('Go to bottom') ?>"></button
-        ><button id="scroll-to-top" class="icon-enter-up2" title="<?= _('Back to top') ?>"></button
+        ><button id="scroll-to-bottom" class="icon-enter-down" title="<?= _('Go to bottom') ?>"></button
+        ><button id="scroll-to-top" class="icon-enter-up" title="<?= _('Back to top') ?>"></button
         ><button id="reload-page" class="icon-sync" title="<?= _('Refresh page') ?>"></button
     ></div>
 </div>

@@ -21,16 +21,16 @@ return [
             'dark' => '/css/ylilauta_dark.css', // relative to staticUrl
         ],
     ],
-    'users' => [
+    'user' => [
         'usernameMaxLength' => 30,
     ],
-    'posts' => [
+    'post' => [
         'subjectMaxLength' => 60,
         'messageMaxLength' => 12000,
         'replyIntervalLimit' => 5,
         'threadIntervalLimit' => 30,
     ],
-    'files' => [
+    'file' => [
         'url' => '//localhost:9001/static/files', // no trailing slash
         'savePath' => ROOT_PATH . '/public/static/files', // no trailing slash
         'diskMinFree' => 1073741824,

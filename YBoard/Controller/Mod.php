@@ -4,7 +4,7 @@ namespace YBoard\Controller;
 use YBoard\Controller;
 use YBoard\Model\Ban;
 use YBoard\Model\Board;
-use YBoard\Model\LogModel;
+use YBoard\Model\Log;
 use YBoard\Model\PostReport;
 use YBoard\Model\Post;
 use YBoard\Model\User;
@@ -75,8 +75,7 @@ class Mod extends Controller
             $this->throwJsonError(400, _('Please fill all the required fields'));
         }
 
-        $log = new LogModel($this->db);
-        $log->write(LogModel::ACTION_ID_MOD_ADD_BAN, $this->user->id, json_encode(['ip' => $banIp, 'userId' => $banUser]));
+        Log::write($this->db, Log::ACTION_MOD_ADD_BAN, $this->user->id, json_encode(['ip' => $banIp, 'userId' => $banUser]));
 
         $bans = new Ban($this->db);
         $bans->add($banIp, $banUser, $banLength, $banReason, $additionalInfo, $postId, $this->user->id);

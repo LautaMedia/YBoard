@@ -1,15 +1,13 @@
 <?php
 namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 Use YBoard\Model;
 
-class Thread extends Controller
+class Thread extends ApiController
 {
     public function getReplies(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['threadId']) || !isset($_POST['fromId'])) {
             $this->throwJsonError(400);
         }
@@ -39,8 +37,6 @@ class Thread extends Controller
 
     public function hide(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
@@ -53,8 +49,6 @@ class Thread extends Controller
 
     public function restore(): void
     {
-        $this->validateAjaxCsrfToken();
-
         if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
@@ -88,7 +82,6 @@ class Thread extends Controller
     protected function update(string $do, bool $bool): bool
     {
         $this->modOnly();
-        $this->validateAjaxCsrfToken();
 
         if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);

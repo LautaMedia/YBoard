@@ -40,7 +40,7 @@ class Modal
         });
 
         this.$container = $(
-            '<div class="modal"><button class="modal-close"><span class="icon-cross2"></span></button></div>');
+            '<div class="modal"><button class="modal-close"><span class="icon-cross"></span></button></div>');
         this.$blocker.append(this.$container);
         this.$elm = $('<div class="modal-content"></div>');
         this.$container.append(this.$elm);

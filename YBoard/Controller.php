@@ -1,5 +1,4 @@
 <?php
-
 namespace YBoard;
 
 use YBoard\Model\Ban;
@@ -7,6 +6,7 @@ use YBoard\Model\Board;
 use YBoard\Model\PostReport;
 use YBoard\Model\User;
 use YBoard\Model\UserSession;
+use YFW\Library\BotDetection;
 use YFW\Library\Database;
 use YFW\Library\HttpResponse;
 use YFW\Library\i18n;
@@ -37,6 +37,7 @@ abstract class Controller extends \YFW\Controller
         $this->i18n = new i18n(ROOT_PATH . '/YBoard/Locale');
 
         // Load user
+        BotDetection::setUserAgents(require(ROOT_PATH . '/YBoard/Config/Bots.php'));
         $this->loadUser();
 
         // Get locale
@@ -88,7 +89,7 @@ abstract class Controller extends \YFW\Controller
             $this->user->session->updateLastActive();
         } else {
             // Session does not exist
-            if ($this->userMaybeBot()) {
+            if (BotDetection::isBot('user')) {
                 $this->user = User::createTemporary($this->db);
                 $this->user->session = new UserSession($this->db);
 
@@ -104,28 +105,6 @@ abstract class Controller extends \YFW\Controller
         return true;
     }
 
-    protected function userMaybeBot(): bool
-    {
-        if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            // Great way of detecting crawlers!
-            return true;
-        }
-
-        if (empty($_SERVER['HTTP_USER_AGENT'])) {
-            return true;
-        }
-
-        if (preg_match('/Baiduspider/i', $_SERVER['HTTP_USER_AGENT'])) {
-            return true;
-        }
-
-        if (preg_match('/msnbot/i', $_SERVER['HTTP_USER_AGENT'])) {
-            return true;
-        }
-
-        return false;
-    }
-
     protected function dieWithMessage(
         string $errorTitle,
         string $errorMessage,
@@ -138,6 +117,7 @@ abstract class Controller extends \YFW\Controller
                 $httpStatus = 500;
             }
             $this->throwJsonError($httpStatus, $errorMessage, $errorTitle);
+
             return;
         }
 
@@ -169,8 +149,13 @@ abstract class Controller extends \YFW\Controller
         $this->stopExecution();
     }
 
-    protected function initializePagination(TemplateEngine $view, int $pageNum, int $maxPages, bool $isLastPage, ?string $base = null): void
-    {
+    protected function initializePagination(
+        TemplateEngine $view,
+        int $pageNum,
+        int $maxPages,
+        bool $isLastPage,
+        ?string $base = null
+    ): void {
         if ($isLastPage) {
             $maxPages = $pageNum;
         }
@@ -222,7 +207,7 @@ abstract class Controller extends \YFW\Controller
                 $bans = new Ban($this->db);
                 $templateEngine->setVar('moderation', [
                     'uncheckedReports' => $reports->getUncheckedCount(),
-                    'uncheckedBanAppeals' => $bans->getUncheckedAppealCount()
+                    'uncheckedBanAppeals' => $bans->getUncheckedAppealCount(),
                 ]);
             }
         }
@@ -239,8 +224,7 @@ abstract class Controller extends \YFW\Controller
         }
 
         $templateEngine->setVar('stylesheet', [
-            'active' => !$this->user->preferences->darkTheme ? $this->config['themes'][$theme]['light']
-                : $this->config['themes'][$theme]['dark'],
+            'active' => !$this->user->preferences->darkTheme ? $this->config['themes'][$theme]['light'] : $this->config['themes'][$theme]['dark'],
             'color' => $this->config['themes'][$theme]['color'],
             'light' => $this->config['themes'][$theme]['light'],
             'dark' => $this->config['themes'][$theme]['dark'],
@@ -256,12 +240,16 @@ abstract class Controller extends \YFW\Controller
         $templateEngine->setVar('boardList', $this->boards);
 
         // Preload hints, TODO: fix locale and theme hints
-        header('Link: <' . $this->config['app']['staticUrl'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush',
+            false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
+            false);
         header('Link: <' . $this->config['app']['staticUrl'] . '/js/config.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/fi_FI.UTF-8.default.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/fi_FI.UTF-8.default.js>; rel=preload; as=script; nopush',
+            false);
         header('Link: <' . $this->config['app']['staticUrl'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/css/ylilauta.css>; rel=preload; as=style; nopush', false);
+        header('Link: <' . $this->config['app']['staticUrl'] . '/css/ylilauta.css>; rel=preload; as=style; nopush',
+            false);
 
         return $templateEngine;
     }
@@ -273,25 +261,9 @@ abstract class Controller extends \YFW\Controller
         }
     }
 
-    protected function validateCsrfToken(string $token): bool
-    {
-        if (empty($token) || empty($this->user->session->csrfToken)) {
-            return false;
-        }
-
-        if ($token == $this->user->session->csrfToken) {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function validatePostCsrfToken(): void
-    {
-        if (!$this->isPostRequest() || empty($_POST['csrf_token']) || !$this->validateCsrfToken($_POST['csrf_token'])) {
-            $this->badRequest();
-        }
-    }
+    /*
+     * AJAX
+     */
 
     protected function validateAjaxCsrfToken(): bool
     {
@@ -299,7 +271,7 @@ abstract class Controller extends \YFW\Controller
             $this->ajaxCsrfValidationFail();
         }
 
-        if (!$this->isPostRequest()) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->ajaxCsrfValidationFail();
         }
 
@@ -307,7 +279,7 @@ abstract class Controller extends \YFW\Controller
             $this->ajaxCsrfValidationFail();
         }
 
-        if ($_SERVER['HTTP_X_CSRF_TOKEN'] == $this->user->session->csrfToken) {
+        if (hash_equals($this->user->session->csrfToken, $_SERVER['HTTP_X_CSRF_TOKEN'])) {
             return true;
         }
 
@@ -322,19 +294,12 @@ abstract class Controller extends \YFW\Controller
         $this->stopExecution();
     }
 
-    protected function invalidAjaxData(): void
-    {
-        HttpResponse::setStatusCode(400);
-        $this->jsonMessage(_('Invalid request'));
-        $this->stopExecution();
-    }
-
-    protected function jsonPageReload(string $url = null): void
+    protected function sendJsonPageReload(string $url = null): void
     {
         echo json_encode(['reload' => true, 'url' => $url]);
     }
 
-    protected function jsonMessage($message, string $title = null, bool $reload = false, string $url = null): void
+    protected function sendJsonMessage($message, string $title = null, bool $reload = false, string $url = null): void
     {
         $args = [
             'title' => $title,
@@ -351,11 +316,15 @@ abstract class Controller extends \YFW\Controller
         HttpResponse::setStatusCode($statusCode);
 
         if ($message) {
-            $this->jsonMessage($message, $title);
+            $this->sendJsonMessage($message, $title);
         }
 
         $this->stopExecution();
     }
+
+    /*
+     * LOGIN COOKIE
+     */
 
     protected function getLoginCookie(): ?array
     {
@@ -367,7 +336,6 @@ abstract class Controller extends \YFW\Controller
             return null;
         }
 
-        $sessionKey = substr($_COOKIE['user'], 0, 128);
         $userId = substr($_COOKIE['user'], 128);
         [$sessionId, $verifyKey] = str_split($_COOKIE['user'], 64);
 
@@ -393,10 +361,15 @@ abstract class Controller extends \YFW\Controller
         return true;
     }
 
+    /*
+     * ERROR PAGES
+     */
+
     protected function badRequest(?string $errorTitle = null, ?string $errorMessage = null): void
     {
         $errorTitle = empty($errorTitle) ? _('Bad request') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Your request did not complete because it contained invalid information.') : $errorMessage;
+
         $this->dieWithMessage($errorTitle, $errorMessage, 400);
     }
 
@@ -404,6 +377,7 @@ abstract class Controller extends \YFW\Controller
     {
         $errorTitle = empty($errorTitle) ? _('Unauthorized') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('You are not authorized to perform this operation') : $errorMessage;
+
         $this->dieWithMessage($errorTitle, $errorMessage, 401);
     }
 
@@ -411,6 +385,7 @@ abstract class Controller extends \YFW\Controller
     {
         $errorTitle = empty($errorTitle) ? _('Forbidden') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Thou shalt not access this resource!') : $errorMessage;
+
         $this->dieWithMessage($errorTitle, $errorMessage, 403);
     }
 
@@ -419,14 +394,7 @@ abstract class Controller extends \YFW\Controller
         $errorTitle = empty($errorTitle) ? _('Page not found') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. Probably never did.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/static/img/404/*.*');
-        if (!empty($images)) {
-            $image = $this->imagePathToUrl($images[array_rand($images)]);
-        } else {
-            $image = null;
-        }
-
-        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
+        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $this->getErrorImage(404));
     }
 
     public function gone(?string $errorTitle = null, ?string $errorMessage = null): void
@@ -434,14 +402,7 @@ abstract class Controller extends \YFW\Controller
         $errorTitle = empty($errorTitle) ? _('Gone') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('Whatever you were looking for does not exist here. It did once, however.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/static/img/404/*.*');
-        if (!empty($images)) {
-            $image = $this->imagePathToUrl($images[array_rand($images)]);
-        } else {
-            $image = null;
-        }
-
-        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $image);
+        $this->dieWithMessage($errorTitle, $errorMessage, 404, 'notfound', $this->getErrorImage(404));
     }
 
     protected function internalError(?string $errorTitle = null, ?string $errorMessage = null): void
@@ -449,35 +410,17 @@ abstract class Controller extends \YFW\Controller
         $errorTitle = empty($errorTitle) ? _('Oh noes!') : $errorTitle;
         $errorMessage = empty($errorMessage) ? _('We\'re terribly sorry. An internal error occurred when we tried to complete your request.') : $errorMessage;
 
-        $images = glob(ROOT_PATH . '/static/img/500/*.*');
+        $this->dieWithMessage($errorTitle, $errorMessage, 500, 'internalerror', $this->getErrorImage(500));
+    }
+
+    protected function getErrorImage(int $errorCode): ?string
+    {
+        $images = glob(ROOT_PATH . '/static/img/' . $errorCode . '/*.*');
         if (!empty($images)) {
-            $image = $this->imagePathToUrl($images[array_rand($images)]);
-        } else {
-            $image = null;
+            return $this->config['app']['staticUrl'] . str_replace(ROOT_PATH . '/static', '',
+                    $images[array_rand($images)]);
         }
 
-        $this->dieWithMessage($errorTitle, $errorMessage, 500, 'internalerror', $image);
-    }
-
-    protected function imagePathToUrl(string $path): string
-    {
-        return $this->config['app']['staticUrl'] . str_replace(ROOT_PATH . '/static', '', $path);
-    }
-
-    protected function disallowNonPost(): void
-    {
-        if (!$this->isPostRequest()) {
-            HttpResponse::setStatusCode(405, ['Allowed' => 'POST']);
-            $this->stopExecution();
-        }
-    }
-
-    protected function isPostRequest(): bool
-    {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            return true;
-        }
-
-        return false;
+        return null;
     }
 }

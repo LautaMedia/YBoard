@@ -14,7 +14,7 @@ class Cleanup extends AbstractCliDatabase
     {
         File::deleteOrphans($this->db);
 
-        $glob = glob($this->config['files']['savePath'] . '/*/*/*.*');
+        $glob = glob($this->config['file']['savePath'] . '/*/*/*.*');
         $i = 1;
         $count = 0;
         foreach ($glob AS $file) {

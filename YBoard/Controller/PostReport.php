@@ -33,8 +33,7 @@ class PostReport extends Controller
             $this->throwJsonError(404, _('Report does not exist'));
         }
 
-        $log = new LogModel($this->db);
-        $log->write(LogModel::ACTION_ID_MOD_REPORT_CHECKED, $this->user->id, $report->id);
+        Model\Log::write($this->db, Model\Log::ACTION_MOD_REPORT_CHECKED, $this->user->id, $report->id);
         $report->setChecked($this->user->id);
     }
 

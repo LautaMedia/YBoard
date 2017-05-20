@@ -46,14 +46,17 @@ class YBoard
         });
 
         // Sidebar signup & login
-        document.getElementById('login').querySelector('.signup').addEventListener('click', function(e)
-        {
-            that.signup(e, true);
-        });
-        document.getElementById('signup').querySelector('.cancel').addEventListener('click', function(e)
-        {
-            that.signup(e, false);
-        });
+        let loginForm = document.getElementById('login');
+        if (loginForm !== null) {
+            loginForm.querySelector('.signup').addEventListener('click', function(e)
+            {
+                that.signup(e, true);
+            });
+            document.getElementById('signup').querySelector('.cancel').addEventListener('click', function(e)
+            {
+                that.signup(e, false);
+            });
+        }
 
         // Hide sidebar
         document.getElementById('sidebar-hide-button').addEventListener('click', function()
@@ -138,17 +141,24 @@ class YBoard
 
     localizeDatetime(elm)
     {
-        elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
+        elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString('ca');
     }
 
     localizeNumber(elm)
     {
-        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString();
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('nu', {
+            minimumFractionDigits: 0
+        });
     }
 
     localizeCurrency(elm, currency = 'eur')
     {
-        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('', {
+        // I think this is a bug with Babel?
+        if (currency === 0) {
+            currency = 'eur';
+        }
+
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('nu', {
             'style': 'currency',
             'currency': currency
         });
@@ -216,6 +226,8 @@ class YBoard
 
     submitForm(e, form = false)
     {
+        let that = this;
+
         if (e !== null) {
             e.preventDefault();
             form = e.target;
@@ -232,8 +244,9 @@ class YBoard
         overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
         form.append(overlay);
 
-        YQuery.post(form.getAttribute('action'), fd).onLoad(function(data)
+        YQuery.post(form.getAttribute('action'), fd).onLoad(function(xhr)
         {
+            let data = JSON.parse(xhr.responseText);
             if (data.reload) {
                 if (data.url) {
                     window.location = data.url;
@@ -242,10 +255,10 @@ class YBoard
                 }
             } else {
                 overlay.remove();
-                this.Toast.success(data.message);
+                that.Toast.success(data.message);
                 form.reset();
             }
-        }).onError(function()
+        }).onError(function(xhr)
         {
             overlay.remove();
         });

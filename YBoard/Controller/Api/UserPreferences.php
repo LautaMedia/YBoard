@@ -1,19 +1,17 @@
 <?php
 namespace YBoard\Controller\Api;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 
-class UserPreferences extends Controller
+class UserPreferences extends ApiController
 {
-    public function save(): void
+    public function set(): void
     {
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['set']) || !is_array($_POST['set'])) {
+        if (empty($_POST)) {
             $this->throwJsonError(400);
         }
 
-        foreach ($_POST['set'] as $key => $val) {
+        foreach ($_POST as $key => $val) {
             $this->user->preferences->set($key, $val);
         }
     }

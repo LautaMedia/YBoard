@@ -25,18 +25,18 @@
     <div class="input-row" id="label-subject">
         <label>
             <span class="label"><?= _('Subject') ?></span>
-            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $config['posts']['subjectMaxLength'] ?>">
+            <input type="text" name="subject" placeholder="<?= _('Subject') ?>" maxlength="<?= $config['post']['subjectMaxLength'] ?>">
         </label>
     </div>
 <?php endif ?>
     <div class="input-row">
         <label id="label-file">
-            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config['files']['maxSize']) ?></span></span>
-            <input type="file" name="files" id="post-files" accept="<?= $config['files']['acceptedTypes'] ?>" data-maxsize="<?= $config['files']['maxSize'] ?>">
+            <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config['file']['maxSize']) ?></span></span>
+            <input type="file" name="files" id="post-files" accept="<?= $config['file']['acceptedTypes'] ?>" data-maxsize="<?= $config['file']['maxSize'] ?>">
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">
-        <button type="button" id="remove-file" class="button gray icon-trash2"></button>
+        <button type="button" id="remove-file" class="button gray icon-trash"></button>
     </div>
     <div class="file-progress progressbar"><div></div></div>
 
@@ -51,8 +51,8 @@
             <a class="icon-font-big bb-code" title="<?= _('Big text') ?>" data-code="big"></a>
             <a class="icon-bubble-quote bb-code" title="<?= _('Quote') ?>" data-code="quote"></a>
             <a class="icon-code bb-code" title="<?= _('Code') ?>" data-code="code"></a>
-            <a class="icon-superscript bb-code" title="<?= _('Superscript') ?>" data-code="sup"></a>
-            <a class="icon-subscript bb-code" title="<?= _('Subscript') ?>" data-code="sub"></a>
+            <a class="icon-sup bb-code" title="<?= _('Superscript') ?>" data-code="sup"></a>
+            <a class="icon-sub bb-code" title="<?= _('Subscript') ?>" data-code="sub"></a>
             <a class="icon-palette bb-color-bar" title="<?= _('Colors') ?>"></a>
             <div id="color-buttons">
                 <a class="icon-palette black bb-code" title="<?= _('Black') ?>" data-code="black"></a>
@@ -68,7 +68,7 @@
                 <a class="icon-palette pink bb-code" title="<?= _('Pink') ?>" data-code="pink"></a>
             </div>
         </div>
-        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config['posts']['messageMaxLength'] ?>"></textarea>
+        <textarea id="post-message" class="no-style" name="message" placeholder="<?= _('Message') ?>" maxlength="<?= $config['post']['messageMaxLength'] ?>"></textarea>
     </div>
     <div class="buttons">
         <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
