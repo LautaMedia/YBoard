@@ -36,7 +36,7 @@
         <div>
             <h4><?= _('Change username') ?></h4>
             <p><?= _('Current username') ?>: <?= htmlspecialchars($user->username) ?></p>
-            <form action="/scripts/user/changename" method="post" class="ajax">
+            <form action="/api/user/changename" method="post" class="ajax">
                 <input type="text" name="newName" placeholder="<?= _('New name') ?>" maxlength="<?= $config['user']['usernameMaxLength'] ?>" required>
                 <input type="text" name="preventautocomplete" style="display:none">
                 <input type="password" name="password" placeholder="<?= _('Current password') ?>" required>
@@ -45,7 +45,7 @@
         </div>
         <div>
             <h4><?= _('Change password') ?></h4>
-            <form action="/scripts/user/changepassword" method="post" class="ajax">
+            <form action="/api/user/changepassword" method="post" class="ajax">
                 <input type="password" name="newPassword" placeholder="<?= _('New password') ?>" required>
                 <input type="password" name="newPasswordAgain" placeholder="<?= _('New password again') ?>" required>
                 <input type="password" name="password" placeholder="<?= _('Current password') ?>" required>
@@ -67,7 +67,7 @@
                 <?php if ($session->id == $user->session->id) : ?>
                 <em><?= _('Current session') ?></em>
                 <?php else : ?>
-                <form action="/scripts/user/destroysession" class="sessiondestroy ajax" method="post">
+                <form action="/api/user/session/delete" class="sessiondestroy ajax" method="post">
                     <input type="hidden" name="sessionId" value="<?= bin2hex($session->id) ?>">
                     <button class="button primary"><?= _('Log out') ?></button>
                 </form>
@@ -88,7 +88,7 @@
     </p>
     <p><strong><?= _('Please note that the deletion is permanent &mdash; all data associated with your account will be permanently lost and cannot be restored!') ?></strong></p>
 
-    <form action="/scripts/user/delete" method="post" class="ajax" onsubmit="if(!window.confirm('<?= _('Are you sure? You will lose everything. Everything!') ?>')){event.stopPropagation();return false}">
+    <form action="/api/user/delete" method="post" class="ajax" onsubmit="if(!window.confirm('<?= _('Are you sure? You will lose everything. Everything!') ?>')){event.stopPropagation();return false}">
         <input type="password" name="password" placeholder="<?= _('Type your current password...') ?>" required>
         <label>
             <input type="checkbox" name="confirm" required>

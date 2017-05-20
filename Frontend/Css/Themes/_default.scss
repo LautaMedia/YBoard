@@ -26,9 +26,9 @@ $sidebarLinkColor: #eeeeee;
     -webkit-column-gap: $gap;
 }
 
-@mixin input-shadow($color: #dddddd) {
-    border: 1px solid rgba($color, 0.5);
-    box-shadow: 0 1px 5px -1px $color inset;
+@mixin input-shadow($color: #cccccc) {
+    border: 0;
+    box-shadow: 0 0 3px 0 $color inset;
 }
 
 @keyframes spin {

@@ -2,7 +2,6 @@
 
 <div id="inner">
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
-
 <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
 
 <?php if (!empty($threads)) : ?>
@@ -22,9 +21,9 @@
                         <figure class="post-file thumbnail">
                             <a href="/<?= $board->url ?>/<?= $thread->id ?>">
                                 <?php if (!empty($post->file)) : ?>
-                                    <?php $src = $staticUrl . '/files/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
+                                    <?php $src = $config['file']['url']. '/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
                                 <?php else : ?>
-                                    <?php $src = $staticUrl . '/img/norppa_ylilauta.svg' ?>
+                                    <?php $src = $config['app']['staticUrl'] . '/img/norppa_ylilauta.svg' ?>
                                 <?php endif ?>
                                 <img src="<?= $src ?>" alt="">
                             </a>

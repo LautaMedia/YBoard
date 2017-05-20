@@ -6,7 +6,7 @@
     <?php foreach ($notifications as $notification) : ?>
     <div class="notification <?= (!$notification->isRead?'not-read':'is-read') ?>" id="n-<?= $notification->id ?>">
         <?php if (!empty($notification->postId)) : ?>
-            <a href="/api/post/<?= $notification->postId ?>"
+            <a href="/post-<?= $notification->postId ?>"
                 <?php if (!$notification->isRead) :
                     ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
                 endif ?>>
@@ -18,7 +18,7 @@
         <div class="notification-meta">
             <span class="datetime"><?= $notification->time ?></span>
             <?php if (!empty($notification->postId)) : ?>
-                <a href="/api/post/<?= $notification->postId ?>" class="ref"
+                <a href="/post-<?= $notification->postId ?>" class="ref"
                    <?php if (!$notification->isRead) :
                        ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
                     endif ?>

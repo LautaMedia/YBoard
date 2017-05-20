@@ -202,8 +202,8 @@ class Tooltip
 
     setPosition()
     {
-        this.elm.style.left = this.x + 'px';
-        this.elm.style.top = this.y + 'px';
+        this.elm.style.left = window.scrollX + this.x + 'px';
+        this.elm.style.top = window.scrollY + this.y + 'px';
     }
 }
 

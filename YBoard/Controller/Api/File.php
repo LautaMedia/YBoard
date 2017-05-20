@@ -35,9 +35,9 @@ class File Extends ApiController
         $file->delete();
     }
 
-    public function upload(): void
+    public function create(): void
     {
-        if (empty($_FILES['file'])) {
+        if (empty($_FILES['files']) || !is_array($_FILES['files'])) {
             $this->throwJsonError(400, _('No file uploaded'));
         }
 
@@ -54,9 +54,17 @@ class File Extends ApiController
         $uploadedFile = new Model\UploadedFile($this->db);
         $uploadedFile->setConfig($this->config['file']);
 
+        // The default array ordering is stupid...
+        $files = [];
+        foreach ($_FILES['files'] as $key => $file) {
+            foreach ($file as $i => $val) {
+                $files[$i][$key] = $val;
+            }
+        }
+
         // Calculate file sizes
         $uploadSize = 0;
-        foreach ($_FILES as $file) {
+        foreach ($files as $file) {
             $uploadSize += $file['size'];
         }
 
@@ -65,7 +73,7 @@ class File Extends ApiController
         }
 
         $ids = [];
-        foreach ($_FILES as $file) {
+        foreach ($files as $file) {
             try {
                 $uploadedFile->processUpload($file, $this->user->id, true);
             } catch (FileUploadException $e) {
@@ -78,7 +86,7 @@ class File Extends ApiController
             $ids[] = $uploadedFile->id;
 
             // Limit to one file per upload for now
-            break;
+            //break;
         }
 
         $this->sendJsonMessage($ids);
@@ -90,8 +98,7 @@ class File Extends ApiController
             $this->throwJsonError(400, _('Invalid file ID'));
         }
 
-        $files = new File($this->db);
-        $file = $files->get($_POST['fileId']);
+        $file = Model\File::get($this->db, $_POST['fileId']);
 
         if ($file === null) {
             $this->throwJsonError(404);
@@ -101,10 +108,9 @@ class File Extends ApiController
         }
 
         $view = new TemplateEngine(ROOT_PATH . '/YBoard/View/', 'Blank');
-        $view->fileUrl = $this->config['view']['staticUrl'] . '/files/' . $file->folder . '/o/' . $file->name . '/' . '1.' . $file->extension;
-        $view->poster = $this->config['view']['staticUrl'] . '/files/' . $file->folder . '/t/' . $file->name . '.jpg';
-
-        $view->loop = $file->isGif;
+        $view->setVar('fileUrl', $this->config['file']['url'] . '/' . $file->folder . '/o/' . $file->name . '/' . '1.' . $file->extension);
+        $view->setVar('poster', $this->config['file']['url'] . '/' . $file->folder . '/t/' . $file->name . '.jpg');
+        $view->setVar('loop', $file->isGif);
 
         $view->display('Ajax/MediaPlayer');
     }

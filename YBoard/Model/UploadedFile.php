@@ -76,7 +76,7 @@ class UploadedFile extends File
 
         // Rename uploaded file
         if (!move_uploaded_file($file['tmp_name'], $this->tmpName)) {
-            throw new FileUploadException(_('Cannot move uploaded file'));
+            throw new InternalException(_('Cannot move uploaded file'));
         }
 
         $md5 = md5(file_get_contents($this->tmpName));
@@ -108,7 +108,7 @@ class UploadedFile extends File
             case 'gif':
                 $frames = FileHandler::getGifFrameCount($this->tmpName);
                 if ($frames === 0) {
-                    throw new InternalException(_('Cannot get the number of GIF frames'));
+                    throw new FileUploadException(_('Cannot get the number of GIF frames. The file may be corrupted.'));
                 } elseif ($frames > 4000) {
                     throw new FileUploadException(_('The GIF you uploaded is too long, please upload a video file instead'));
                 }

@@ -33,6 +33,7 @@ return [
 
     // Post reporting
     '#^/scripts/report/getform$#' => ['PostReport', 'getForm'],
+    '#^/post-([0-9]+)$#' => ['Post', 'redirect'],
 
     // API
     //-----
@@ -47,12 +48,11 @@ return [
     '#^/api/user/session/delete$#' => ['Api\UserSession', 'delete'],
 
     // File scripts
-    '#^/api/file/create#' => ['Api\File', 'upload'],
+    '#^/api/file/create#' => ['Api\File', 'create'],
     '#^/api/file/delete$#' => ['Api\File', 'delete'],
     '#^/api/file/getmediaplayer$#' => ['Api\File', 'getMediaPlayer'],
 
     // Posts
-    '#^/api/post/([0-9]+)$#' => ['Api\Post', 'redirect'],
     '#^/api/post/get$#' => ['Api\Post', 'get'],
     '#^/api/post/create$#' => ['Api\Post', 'create'],
     '#^/api/post/delete$#' => ['Api\Post', 'delete'],

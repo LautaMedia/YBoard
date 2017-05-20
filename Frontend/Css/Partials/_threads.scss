@@ -22,8 +22,17 @@ $postMetaHeight: 24px;
     }
 
     #post-form {
+        display: block;
+        box-shadow: none;
         margin: 10px 0 0 0;
         padding: 20px;
+    }
+    .thread-content > #post-form {
+        margin: 20px 0;
+        padding: 0;
+    }
+    .replies #post-form {
+        padding: 5px;
     }
 
     > h3 {
@@ -126,7 +135,7 @@ $postMetaHeight: 24px;
     .reply {
         padding: 5px 10px;
         overflow: hidden;
-        border-top: 5px solid #fff;
+        border-top: 5px solid $contentBgColor;
         $borderColor: darken($contentBgColor, 10%);
         @if (lightness($contentBgColor) < 50) {
             $borderColor: lighten($contentBgColor, 10%);
@@ -264,14 +273,14 @@ $postMetaHeight: 24px;
             background-color: #ddd;
             color: #444;
         }
-        &:not(.media-player-container) .stop-media {
+        &:not(.media-player-container) .e-stop-media {
             display: none;
         }
         &.media-player-container {
             > a {
                 display: none;
             }
-            .stop-media {
+            .e-stop-media {
                 display: block;
             }
         }
@@ -308,10 +317,9 @@ $postMetaHeight: 24px;
 
     .thread-buttons {
         margin: 5px 0 0 0;
-        button {
-            &:not(:first-of-type) {
-                margin-left: 10px
-            }
+        display: flex;
+        * {
+            margin-right: 10px
         }
     }
 

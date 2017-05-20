@@ -237,3 +237,10 @@ form.ajax .form-overlay .loading,
     color: #fff;
     vertical-align: top;
 }
+
+code {
+    white-space: pre-wrap;
+    br {
+        display: none;
+    }
+}

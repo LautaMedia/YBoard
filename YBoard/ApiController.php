@@ -7,6 +7,6 @@ class ApiController extends Controller
     {
         parent::__construct();
 
-        $this->validateAjaxCsrfToken();
+        //$this->validateAjaxCsrfToken();
     }
 }

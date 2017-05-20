@@ -164,7 +164,7 @@ class Post extends Model
             $q = $db->prepare(static::POST_QUERY . 'WHERE a.id IN (' . $in . ')');
         } else {
             $q = $db->prepare("SELECT id, board_id, thread_id, user_id, ip, country_code, time, username
-            FROM posts WHERE id IN (" . $in . ")");
+            FROM post WHERE id IN (" . $in . ")");
         }
         $q->execute($postId);
 

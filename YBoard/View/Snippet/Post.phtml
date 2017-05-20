@@ -10,9 +10,9 @@
     <div class="post-info">
         <span class="post-time datetime"><?= $post->time ?></span>
         <?php if (!isset($tooltip)) : ?>
-        <a href="/<?= $thread->boardUrl ?>/<?= $thread->id ?>#post-<?= $post->id ?>" class="post-id e-post-reply"><?= _('No.') ?> <?= $post->id ?></a>
+        <a href="/post-<?= $post->id ?>" class="post-id e-post-reply"><?= _('No.') ?> <?= $post->id ?></a>
         <?php else : ?>
-        <a href="/api/post/<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
+        <a href="/post-<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
         <?php endif ?>
     </div>
 </div>
@@ -39,7 +39,7 @@
                     <?php endif ?>
                 <?php endif ?>
             </a>
-            <button class="button primary stop-media"><?= _('Hide media') ?></button>
+            <button class="button primary e-stop-media"><?= _('Hide media') ?></button>
         <?php else : ?>
             <a href="<?= $fileUrl ?>" class="image" target="_blank">
                 <img src="<?= $config['file']['url'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
@@ -67,7 +67,7 @@
 <div class="post-replies">
     <span><?= _('Replies') ?>:</span>
     <?php foreach ($post->postReplies as $postReply) : ?>
-        <a href="/api/post/<?= $postReply ?>" data-id="<?= $postReply ?>" class="ref">&gt;&gt;<?= $postReply ?></a>
+        <a href="/post-<?= $postReply ?>" data-id="<?= $postReply ?>" class="ref">&gt;&gt;<?= $postReply ?></a>
     <?php endforeach ?>
 </div>
 <?php endif ?>

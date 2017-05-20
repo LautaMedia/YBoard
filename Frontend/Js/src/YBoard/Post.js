@@ -6,7 +6,7 @@ class Post
 {
     constructor()
     {
-        this.file = new PostFile();
+        this.File = new PostFile();
 
         // Remove highlighted posts when the location hash is changed
         document.addEventListener('hashchange', function() {

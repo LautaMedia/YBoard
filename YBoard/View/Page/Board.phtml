@@ -37,9 +37,9 @@
             <?php endif ?>
             </div>
             <div class="thread-buttons">
-                <!--<a href="/<?= $board->url ?>/<?= $thread->id ?>"><?= _('Open thread') ?></a>-->
+                <a class="link" href="/<?= $board->url ?>/<?= $thread->id ?>"><?= _('open') ?></a>
                 <?php if (!$thread->locked || $user->isMod) : ?>
-                <button class="link add-reply" data-thread="<?= $thread->id ?>"><?= _('reply') ?></button>
+                <button class="link e-add-reply" data-thread="<?= $thread->id ?>"><?= _('reply') ?></button>
                 <button class="link get-replies"><?= _('update') ?></button>
                 <?php endif ?>
             </div>

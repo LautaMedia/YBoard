@@ -54,7 +54,7 @@ class PostForm
         });
 
         // Reply to a thread
-        document.querySelectorAll('.add-reply').forEach(function(elm)
+        document.querySelectorAll('.e-add-reply').forEach(function(elm)
         {
             elm.addEventListener('click', function(e)
             {
@@ -264,7 +264,7 @@ class PostForm
 
         let fd = new FormData();
         Array.from(fileList).forEach(file => {
-            fd.append('file', file);
+            fd.append('files[]', file);
         });
 
         this.fileUploadInProgress = true;
@@ -442,7 +442,6 @@ class PostForm
             }
 
             if (thread !== null) {
-                //YBoard.Toast.success(messages.postSent);
                 YBoard.Thread.AutoUpdate.runOnce(thread);
             } else {
                 if (xhr.responseText.length === 0) {

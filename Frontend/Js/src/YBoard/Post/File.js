@@ -5,9 +5,34 @@ class File
 {
     constructor()
     {
+        let that = this;
+
         // Video volume change
-        document.addEventListener('volumechange', function() {
-            localStorage.setItem('videoVolume', this.volume);
+        document.addEventListener('volumechange', function()
+        {
+            localStorage.setItem('videoVolume', that.volume);
+        });
+    }
+
+    bindEvents(parent)
+    {
+        let that = this;
+
+        parent.querySelectorAll('.thumbnail .image').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.expand);
+        });
+
+        parent.querySelectorAll('.thumbnail .media').forEach(function(elm)
+        {
+            elm.addEventListener('click', function(e) {
+                that.playMedia(e, that.stopAllMedia);
+            });
+        });
+
+        parent.querySelectorAll('.e-stop-media').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.stopAllMedia);
         });
     }
 
@@ -27,94 +52,118 @@ class File
         });
     }
 
-    expand(elm)
+    expand(e)
     {
-        var img = $(elm).find('img');
-        elm.parent('.message').addClass('full');
+        function changeSrc(img, src)
+        {
+            let eolFn = expandOnLoad;
+            function expandOnLoad(e)
+            {
+                e.target.removeEventListener('load', eolFn);
+                delete e.target.dataset.expanding;
+                clearTimeout(e.target.loading);
+                let overlay = e.target.parentNode.querySelector('div.overlay');
+                if (overlay !== null) {
+                    overlay.remove();
+                }
+            }
 
-        img.data('orig-src', img.attr('src'));
-        this.changeSrc(img, elm.find('figcaption a').attr('href'));
-        elm.removeClass('thumbnail');
-    }
+            img.dataset.expanding = true;
+            img.loading = setTimeout(function()
+            {
+                let overlay = document.createElement('div');
+                overlay.classList.add('overlay', 'center');
+                overlay.innerHTML = YBoard.spinnerHtml();
 
-    restoreThumbnail(elm)
-    {
-        var img = $(elm).find('img');
+                img.parentNode.appendChild(overlay);
+            }, 200);
 
-        this.changeSrc(img, img.data('orig-src'));
-        elm.addClass('thumbnail');
+            img.addEventListener('load', eolFn);
+            img.setAttribute('src', src);
+        }
 
-        // Scroll to top of image
-        var elmTop = elm.offset().top;
-        if ($(document).scrollTop() > elmTop) {
-            $(document).scrollTop(elmTop);
+        e.preventDefault();
+        if (typeof e.target.dataset.expanded === 'undefined') {
+            // Expand
+            e.target.dataset.expanded = e.target.getAttribute('src');
+            changeSrc(e.target, e.target.parentNode.getAttribute('href'));
+            e.target.closest('.post-file').classList.remove('thumbnail');
+            e.target.closest('.message').classList.add('full');
+        } else {
+            // Restore thumbnail
+            changeSrc(e.target, e.target.dataset.expanded);
+            delete e.target.dataset.expanded;
+            e.target.closest('.post-file').classList.add('thumbnail');
+            e.target.closest('.message').classList.remove('full');
+
+            // Scroll to top of image
+            let elmTop = e.target.getBoundingClientRect().top + window.scrollY;
+            if (elmTop < window.scrollY) {
+                window.scrollTo(0, elmTop);
+            }
         }
     }
 
-    changeSrc(img, src)
+    playMedia(e, stopAllMedia)
     {
-        img.data('expanding', 'true');
-        var loading = setTimeout(function()
-        {
-            img.after('<div class="overlay center">' + YB.spinnerHtml() + '</div>');
-        }, 200);
-        img.attr('src', src).on('load', function()
-        {
-            img.removeData('expanding');
-            clearTimeout(loading);
-            img.next('div.overlay').remove();
-        });
-    }
+        e.preventDefault();
 
-    playMedia(elm)
-    {
-        this.stopAllMedia();
+        stopAllMedia();
 
-        var post = elm.parent('.message');
-        var img = elm.find('img');
+        let fileId = e.target.closest('figure').dataset.id;
 
-        var fileId = elm.data('id');
-
-        if (typeof elm.data('loading') != 'undefined') {
+        if (typeof e.target.dataset.loading !== 'undefined') {
             return false;
         }
 
-        elm.data('loading', 'true');
+        e.target.dataset.loading = true;
 
-        var loading = setTimeout(function()
+        let loading = setTimeout(function()
         {
-            img.after('<div class="overlay bottom left">' + YB.spinnerHtml() + '</div>');
+            let overlay = document.createElement('div');
+            overlay.classList.add('overlay', 'bottom', 'left');
+            overlay.innerHTML = YBoard.spinnerHtml();
+            e.target.appendChild(overlay);
         }, 200);
 
-        $.post('/api/file/getmediaplayer', {'fileId': fileId}).done(function(data)
+        YQuery.post('/api/file/getmediaplayer', {'fileId': fileId}).onLoad(function(xhr)
         {
-            elm.removeClass('thumbnail').addClass('media-player-container');
-            post.addClass('full');
-            elm.prepend(data);
+            let figure = e.target.closest('.post-file');
+            figure.classList.remove('thumbnail');
+            figure.classList.add('media-player-container');
+            e.target.closest('.message').classList.add('full');
 
-            var volume = localStorage.getItem('videoVolume');
+            let data = document.createElement('template');
+            data.innerHTML = xhr.responseText;
+
+            // Bind events etc.
+            YBoard.initElement(data.content);
+
+            figure.insertBefore(data.content, figure.firstElementChild);
+
+            let volume = localStorage.getItem('videoVolume');
             if (volume !== null) {
-                elm.find('video').prop('volume', volume);
+                e.target.parentNode.querySelector('video').volume = volume;
             }
-        }).always(function()
+        }).onEnd(function()
         {
             clearTimeout(loading);
-            elm.find('div.overlay').remove();
-            elm.removeData('loading');
+            e.target.querySelectorAll('div.overlay').forEach(function(elm) {
+                elm.remove();
+            });
+            delete e.target.dataset.loading;
         });
     }
 
     stopAllMedia()
     {
-        $('.media-player-container').each(function()
-        {
-            var self = $(this);
-            var mediaPlayer = self.find('.media-player');
+        document.querySelectorAll('.media-player-container').forEach(function(elm) {
+            let video = elm.querySelector('video');
+            video.pause();
+            video.remove();
 
-            mediaPlayer.find('video').trigger('pause');
-            mediaPlayer.remove();
-
-            self.removeClass('media-player-container').addClass('thumbnail');
+            elm.classList.remove('media-player-container');
+            elm.classList.add('thumbnail');
         });
     }
 }

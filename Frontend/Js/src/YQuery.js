@@ -159,7 +159,7 @@ class YQuery
             xhr = options.xhr(xhr);
         }
 
-        if (typeof options.data.entries !== 'function') {
+        if (typeof options.data.append !== 'function') {
             // Not FormData... Maybe a regular object? Convert to FormData.
             let data = new FormData();
             Object.keys(options.data).forEach(key => data.append(key, options.data[key]));

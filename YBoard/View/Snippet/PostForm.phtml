@@ -32,7 +32,7 @@
     <div class="input-row">
         <label id="label-file">
             <span class="label"><?= _('File') ?> <span>&lt;<?= \YFW\Library\Text::formatBytes($config['file']['maxSize']) ?></span></span>
-            <input type="file" name="files" id="post-files" accept="<?= $config['file']['acceptedTypes'] ?>" data-maxsize="<?= $config['file']['maxSize'] ?>">
+            <input multiple type="file" name="files" id="post-files" accept="<?= $config['file']['acceptedTypes'] ?>" data-maxsize="<?= $config['file']['maxSize'] ?>">
             <span class="button gray"><?= _('Choose file') ?></span>
         </label>
         <input type="text" id="file-name" name="file_name" placeholder="<?= _('No file selected') ?>">

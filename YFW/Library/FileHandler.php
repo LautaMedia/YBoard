@@ -73,7 +73,7 @@ class FileHandler
             . '-level:v 4.1 -filter_complex scale="trunc(in_w/2)*2:trunc(in_h/2)*2" -movflags faststart -c:a aac '
             . '-ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile));
 
-        if (!is_file($tmpFile)) {
+        if (!static::verifyFile($tmpFile)) {
             return false;
         }
 
@@ -97,7 +97,7 @@ class FileHandler
         system('nice --adjustment=19 ffmpeg -i ' . escapeshellarg($file) . ' -threads 0 -strict -2 -c:a aac '
             . '-ac 2 -ar 44100 -b:a 128k ' . escapeshellarg($tmpFile));
 
-        if (!is_file($tmpFile)) {
+        if (!static::verifyFile($tmpFile)) {
             return false;
         }
 
@@ -190,14 +190,9 @@ class FileHandler
         $cmd = 'nice --adjustment=' . (int)static::NICE_VALUE . ' pngcrush ';
         $cmd .= static::PNGCRUSH_OPTIONS . ' ' . escapeshellarg($file) . ' ' . escapeshellarg($tmpFile);
 
-        echo $cmd;
         shell_exec($cmd);
 
-        if (filesize($tmpFile) == 0) {
-            unlink($tmpFile);
-        }
-
-        if (!is_file($tmpFile)) {
+        if (!static::verifyFile($tmpFile)) {
             return false;
         }
 
@@ -216,8 +211,8 @@ class FileHandler
 
     public static function getGifFrameCount(string $file): int
     {
-        $cmd = 'nice --adjustment=' . (int)static::NICE_VALUE . ' identify ';
-        $cmd .= escapeshellarg($file) . ' | wc -l';
+        $cmd = 'echo -n `nice --adjustment=' . (int)static::NICE_VALUE . ' identify ';
+        $cmd .= escapeshellarg($file) . ' | wc -l`';
         $frames = shell_exec($cmd);
 
         return (int)$frames;
@@ -225,7 +220,13 @@ class FileHandler
 
     public static function verifyFile(string $file): bool
     {
-        if (!is_file($file) || filesize($file) == 0) {
+        if (!is_file($file)) {
+            return false;
+        }
+
+        if (filesize($file) === 0) {
+            unlink($file);
+
             return false;
         }
 

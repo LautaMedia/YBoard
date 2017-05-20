@@ -1,10 +1,10 @@
 .catalog {
     display: flex;
     flex-wrap: wrap;
-    padding: 0 5px;
+    margin: 0 -5px -5px 0;
 
     .thread-box {
-        margin: 5px;
+        margin: 0 5px 5px 0;
         background-color: $contentBgColor;
         width: 200px;
         height: 300px;

@@ -108,6 +108,8 @@ class YBoard
             tooltips = elm.querySelectorAll('.tip, .ref');
         }
 
+        this.Post.File.bindEvents(elm);
+
         tooltips.forEach(function(elm)
         {
             elm.addEventListener('mouseover', function(e)
@@ -242,7 +244,7 @@ class YBoard
         let overlay = document.createElement('div');
         overlay.classList.add('form-overlay');
         overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
-        form.append(overlay);
+        form.appendChild(overlay);
 
         YQuery.post(form.getAttribute('action'), fd).onLoad(function(xhr)
         {
