@@ -110,13 +110,15 @@ h4 {
 #content {
     margin-left: 220px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .error-image {
         margin-top: 60px;
         max-width: 100%;
     }
 
-    > .content-box {
+    .content-box {
         background-color: $contentBgColor;
         $shadowColor: darken($bgColor, 5%);
         @if (lightness($bgColor) < 10) {
@@ -126,9 +128,13 @@ h4 {
     }
 }
 
+#inner {
+    padding: 0 20px;
+}
+
 .content-box {
     padding: 40px 60px;
-    margin: 20px 10px;
+    margin: 20px 0;
 
     p {
         line-height: 1.25em;
@@ -163,16 +169,14 @@ h4 {
 }
 
 .board-additional-functions {
-    margin: 0 10px;
+    margin: 5px 0;
 
     input {
         color: $textColor;
-        width: 300px;
-        max-width: 90%;
+        width: 100%;
         padding: 5px;
         box-sizing: border-box;
         background-color: $contentBgColor;
-        height: 100%;
 
         $shadowColor: #ccc;
         @if (lightness($contentBgColor) < 50) {

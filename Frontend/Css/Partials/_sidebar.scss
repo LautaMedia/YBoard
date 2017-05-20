@@ -40,9 +40,7 @@
         height: $height;
         line-height: $height;
         display: block;
-        margin-bottom: 0.5em;
         text-overflow: ellipsis;
-        overflow: hidden;
         white-space: nowrap;
 
         img {
@@ -120,8 +118,6 @@
     }
     .buttons {
         overflow: hidden;
-        display: flex;
-        flex-wrap: wrap;
         margin: 2.5px -2.5px;
 
         button, a {
@@ -132,6 +128,8 @@
             }
         }
         > * {
+            float: left;
+            display: inline-block;
             margin: 2.5px;
             position: relative;
             flex: 1 1 0%;

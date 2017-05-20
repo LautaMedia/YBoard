@@ -4,6 +4,10 @@
         margin-top: $topMenuHeight;
     }
 
+    #inner {
+        padding: 0;
+    }
+
     .content-box {
         padding: 20px;
     }
@@ -26,6 +30,12 @@
 
         &.visible {
             display: block;
+        }
+        #main {
+            display: flex;
+            .columns {
+                flex-grow: 1;
+            }
         }
         #logo {
             float: left;

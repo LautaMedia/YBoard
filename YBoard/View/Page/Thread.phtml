@@ -1,4 +1,6 @@
 <?php include($viewFilesPath . '/Snippet/BoardHeader.phtml') ?>
+
+<div id="inner">
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 
 <div class="content-box thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
@@ -26,5 +28,5 @@
     </div>
 </div>
 
-
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
+</div>

@@ -1,6 +1,7 @@
 <?php include($viewFilesPath . '/Snippet/BoardHeader.phtml') ?>
-<?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 
+<div id="inner">
+<?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
 
 <?php if ($board->url == 'followedthreads') : ?>
@@ -21,12 +22,12 @@
             <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
             <div class="replies">
             <?php if (!empty($thread->replies)) : ?>
+                <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
                 <div class="replies-buttons">
-                    <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
-                        <button class="link more-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show more replies') ?></button>
-                        <button class="link less-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show less replies') ?></button>
-                    <?php endif ?>
+                    <button class="link more-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show more replies') ?></button>
+                    <button class="link less-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show less replies') ?></button>
                 </div>
+                <?php endif ?>
                 <div class="more-replies-container"></div>
                 <?php foreach($thread->replies as $reply) : ?>
                     <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
@@ -52,3 +53,4 @@
 <?php endif ?>
 
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
+</div>

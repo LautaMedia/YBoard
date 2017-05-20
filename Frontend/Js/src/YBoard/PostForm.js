@@ -65,7 +65,7 @@ class PostForm
         });
 
         // Reply to a post
-        document.querySelectorAll('.add-post-reply').forEach(function(elm)
+        document.querySelectorAll('.e-post-reply').forEach(function(elm)
         {
             elm.addEventListener('click', function(e)
             {

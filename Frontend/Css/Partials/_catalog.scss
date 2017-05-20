@@ -68,34 +68,9 @@
         }
 
         .post-buttons {
-            text-align: right;
-            $height: 25px;
-            height: $height;
+            justify-content: end;
             padding: 3px;
-
-            button {
-                height: $height;
-                width: $height;
-                line-height: $height;
-                cursor: pointer;
-                font-size: 20px;
-                vertical-align: middle;
-
-                $bg: darken($contentBgColor, 5%);
-                $hoverBg: darken($contentBgColor, 10%);
-                $color: #111;
-                @if (lightness($contentBgColor) < 50) {
-                    $bg: lighten($contentBgColor, 5%);
-                    $hoverBg: lighten($contentBgColor, 10%);
-                    $color: #eee;
-                }
-
-                background-color: $bg;
-                color: $color;
-                &:hover {
-                    background-color: $hoverBg;
-                }
-            }
+            float: none;
         }
 
         .post {

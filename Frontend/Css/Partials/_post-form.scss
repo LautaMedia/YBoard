@@ -1,9 +1,12 @@
-#content > #post-form:not(.visible) {
+#post-form:not(.visible) {
     display: none;
 }
 
+.replies #post-form {
+    padding: 20px;
+}
+
 #post-form {
-    margin: 10px;
     padding: 20px;
     box-sizing: border-box;
     overflow: hidden;

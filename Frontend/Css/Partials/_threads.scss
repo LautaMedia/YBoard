@@ -1,15 +1,13 @@
+$postMetaHeight: 24px;
 .thread {
     padding: 0;
     overflow: hidden;
     color: $textColor;
+    margin: 20px 0;
 
     $borderColor: darken($contentBgColor, 10%);
     @if (lightness($contentBgColor) < 50) {
         $borderColor: lighten($contentBgColor, 10%);
-    }
-
-    &:not(.tooltipster-base) {
-        margin: 20px 10px 20px 10px;
     }
 
     &:not(.expanded) {
@@ -23,21 +21,9 @@
         }
     }
 
-    .tooltipster-box {
-        padding: 0;
-        @if (lightness($contentBgColor) > 50) {
-            background-color: darken($contentBgColor, 5%);
-        } @else {
-            background-color: lighten($contentBgColor, 5%);
-        }
-        .post-buttons {
-            display: none;
-        }
-    }
-
     #post-form {
         margin: 10px 0 0 0;
-        padding: 0;
+        padding: 20px;
     }
 
     > h3 {
@@ -93,7 +79,7 @@
     }
 
     .thread-content {
-        padding: 5px 10px 10px 10px;
+        padding: 10px;
         #post-form {
             #label-subject, h3 {
                 display: none
@@ -112,7 +98,6 @@
     }
 
     .replies {
-        padding: 0 10px;
         //border-left: 2px solid $borderColor;
 
         $bg: darken($contentBgColor, 2%);
@@ -120,6 +105,8 @@
             $bg: lighten($contentBgColor, 2%);
         }
         background-color: $bg;
+        margin-left: -10px;
+        margin-right: -10px;
 
         hr {
             border: 0;
@@ -133,28 +120,24 @@
     }
 
     .replies-buttons {
-        line-height: 3em;
+        padding: 5px 10px;
     }
 
-    &:not(.tooltipster-base) .reply {
-        padding: 5px 0;
+    .reply {
+        padding: 5px 10px;
+        overflow: hidden;
+        border-top: 5px solid #fff;
         $borderColor: darken($contentBgColor, 10%);
         @if (lightness($contentBgColor) < 50) {
             $borderColor: lighten($contentBgColor, 10%);
         }
-        border-top: 2px solid $borderColor;
-    }
-    .reply {
-        overflow: hidden;
     }
 
-    &:not(.tooltipster-base) .post {
+    .post {
         &:not(.op-post) {
             &.highlighted,
             &.own-post {
-                margin-left: -5px;
-                margin-right: -5px;
-                padding: 5px;
+                padding: 10px;
             }
         }
         &.own-post:not(.op-post):not(.highlighted) {
@@ -189,7 +172,6 @@
         }
     }
 
-    $postMetaHeight: 24px;
     .post-meta {
         min-height: $postMetaHeight;
         @if (lightness($textColor) > 50) {
@@ -223,35 +205,6 @@
             &:hover {
                 color: $linkHoverColor
             }
-        }
-    }
-
-    .post-buttons {
-        float: right;
-        text-align: right;
-        button {
-            height: $postMetaHeight;
-            width: $postMetaHeight;
-            line-height: $postMetaHeight;
-            cursor: pointer;
-            font-size: 16px;
-            vertical-align: middle;
-
-            $hoverBg: darken($contentBgColor, 10%);
-            $color: #111111;
-            @if (lightness($contentBgColor) < 50) {
-                $hoverBg: lighten($contentBgColor, 10%);
-                $color: #eeeeee;
-            }
-
-            background-color: transparent;
-            color: $color;
-            &:hover {
-                background-color: $hoverBg;
-            }
-        }
-        .icon-bookmark-remove {
-            color: $highlightColor;
         }
     }
 
@@ -354,7 +307,7 @@
     }
 
     .thread-buttons {
-        margin: 10px 0 0 0;
+        margin: 5px 0 0 0;
         button {
             &:not(:first-of-type) {
                 margin-left: 10px
@@ -375,5 +328,39 @@
 
     p {
         margin: 0 0 5px 0;
+    }
+}
+
+.post-buttons {
+    float: right;
+    display: flex;
+    button {
+        border: 0;
+        padding: 0;
+        margin-left: 5px;
+        height: $postMetaHeight;
+        width: $postMetaHeight;
+        line-height: $postMetaHeight;
+        cursor: pointer;
+        font-size: 16px;
+        vertical-align: middle;
+
+        $hoverBg: darken($contentBgColor, 10%);
+        $bg: darken($contentBgColor, 5%);
+        $color: #111111;
+        @if (lightness($contentBgColor) < 50) {
+            $hoverBg: lighten($contentBgColor, 10%);
+            $bg: lighten($contentBgColor, 5%);
+            $color: #eeeeee;
+        }
+
+        background-color: $bg;
+        color: $color;
+        &:hover {
+            background-color: $hoverBg;
+        }
+    }
+    .icon-bookmark-remove {
+        color: $highlightColor;
     }
 }

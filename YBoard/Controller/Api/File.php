@@ -52,7 +52,7 @@ class File Extends ApiController
 
         // Process file
         $uploadedFile = new Model\UploadedFile($this->db);
-        $uploadedFile->setConfig($this->config['files']);
+        $uploadedFile->setConfig($this->config['file']);
 
         // Calculate file sizes
         $uploadSize = 0;
