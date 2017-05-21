@@ -25,7 +25,7 @@ class Hide
 
         toggleButton(button);
 
-        YQuery.post(create ? '/api/thread/hide/create' : '/api/thread/hide/delete',
+        YQuery.post(create ? '/api/user/thread/hide/create' : '/api/user/thread/hide/delete',
             {'threadId': thread.dataset.id}).onError(function(xhr)
         {
             thread.classList.toggle('hidden');

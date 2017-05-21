@@ -35,6 +35,10 @@
             width: 100%;
             height: $height;
             margin-bottom: 5px;
+            transition:
+                    border-color $transition,
+                    box-shadow $transition,
+                    background-color $transition;
 
             label {
                 &:not(#label-file) {
@@ -53,6 +57,7 @@
                 padding: 4px 10px;
                 box-sizing: border-box;
                 height: 100%;
+                transition: background-color $transition;
 
                 span {
                     font-size: 0.65em;
@@ -86,6 +91,9 @@
             $shadowColor: #555;
         }
         background-color: $bg;
+        transition:
+                box-shadow $transition,
+                background-color $transition;
         @include input-shadow($shadowColor);
         margin-bottom: 5px;
     }
@@ -101,6 +109,9 @@
         background-color: $bg;
         @include input-shadow($border);
         a:hover { background-color: $hover }
+        transition:
+                box-shadow $transition,
+                background-color $transition;
 
         a {
             $size: 32px;

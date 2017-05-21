@@ -4,6 +4,9 @@ body {
     color: $textColor;
     word-wrap: break-word;
     margin: auto;
+    transition:
+            background-color $transition,
+            color $transition;
 }
 
 img { max-width: 100% }
@@ -11,6 +14,7 @@ img { max-width: 100% }
 a {
     text-decoration: none;
     color: $linkColor;
+    transition: color $transition;
 }
 a:hover { color: $linkHoverColor }
 img { vertical-align: top }
@@ -18,6 +22,10 @@ img { vertical-align: top }
 button, a, input, textarea, select {
     outline: none !important;
     font-family: $fontFamily;
+    transition:
+            border-color $transition,
+            box-shadow $transition,
+            background-color $transition;
 }
 button {
     font-size: $fontSize;
@@ -29,6 +37,7 @@ button.link {
     border: 0;
     background-color: transparent;
     cursor: pointer;
+    transition: color $transition;
 
     &:hover {
         color: $linkHoverColor;
@@ -51,6 +60,9 @@ button.link {
 
     color: $color;
     background-color: $bg;
+    transition:
+            background-color $transition,
+            color $transition;
     &:hover {
         background-color: darken($bg, 10%);
     }
@@ -129,6 +141,9 @@ h4 {
             $shadowColor: lighten($bgColor, 5%);
         }
         box-shadow: 0 0 10px 0 $shadowColor;
+        transition:
+                box-shadow $transition,
+                background-color $transition;
     }
 }
 

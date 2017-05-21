@@ -60,6 +60,7 @@ body:not(.thread-page) .thread.hidden {
             $subjectBgColor: lighten($contentBgColor, 5%);
         }
         background-color: $subjectBgColor;
+        transition: background-color $transition;
 
         .icon {
             display: inline-block;
@@ -124,6 +125,7 @@ body:not(.thread-page) .thread.hidden {
         background-color: $bg;
         margin-left: -10px;
         margin-right: -10px;
+        transition: background-color $transition;
 
         hr {
             border: 0;
@@ -155,6 +157,10 @@ body:not(.thread-page) .thread.hidden {
     }
 
     .post {
+        transition:
+                color $transition,
+                border-color $transition,
+                background-color $transition;
         &:not(.op-post) {
             &.highlighted,
             &.own-post {
@@ -239,6 +245,11 @@ body:not(.thread-page) .thread.hidden {
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
+        transition:
+                max-width $transition,
+                max-height $transition,
+                width $transition,
+                height $transition;
         @if (lightness($contentBgColor) > 50) {
             background-color: rgba(0, 0, 0, 0.04);
         } @else {
@@ -325,6 +336,9 @@ body:not(.thread-page) .thread.hidden {
             $color: #999999;
         }
         color: $color;
+        transition:
+            color $transition,
+            border-color $transition,
     }
 
     .thread-buttons {
@@ -364,6 +378,9 @@ body:not(.thread-page) .thread.hidden {
         cursor: pointer;
         font-size: 16px;
         vertical-align: middle;
+        transition:
+                color $transition,
+                background-color $transition;
 
         $hoverBg: darken($contentBgColor, 10%);
         $bg: darken($contentBgColor, 5%);

@@ -4,7 +4,7 @@ namespace YBoard\Controller\Api;
 use YBoard\ApiController;
 Use YBoard\Model;
 
-class ThreadHide extends ApiController
+class UserThreadHide extends ApiController
 {
     public function create(): void
     {

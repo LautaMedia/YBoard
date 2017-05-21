@@ -13,6 +13,7 @@
         position: relative;
         flex-grow: 1;
         vertical-align: top;
+        transition: background-color $transition;
 
         h3 {
             $height: 30px;
@@ -30,6 +31,7 @@
                 $subjectBgColor: lighten($contentBgColor, 5%);
             }
             background-color: $subjectBgColor;
+            transition: background-color $transition;
 
             .icon {
                 display: inline-block;
@@ -68,7 +70,7 @@
         }
 
         .post-buttons {
-            justify-content: end;
+            justify-content: flex-end;
             padding: 3px;
             float: none;
         }
@@ -85,6 +87,7 @@
                     $bg: lighten($contentBgColor, 5%);
                 }
                 background-color: $bg;
+                transition: background-color $transition;
 
                 img {
                     max-height: 100px;
@@ -103,6 +106,9 @@
             $color: #777;
             color: $color;
             box-shadow: 0 0 10px 10px $contentBgColor;
+            transition:
+                    box-shadow $transition,
+                    background-color $transition;
         }
     }
 }

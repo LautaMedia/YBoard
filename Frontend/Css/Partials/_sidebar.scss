@@ -10,6 +10,7 @@
     font-size: 0.9em;
     background-color: $bgcolor;
     overflow-y: scroll;
+    transition: background-color $transition;
 
     button.link, input.link {
         border: 0;

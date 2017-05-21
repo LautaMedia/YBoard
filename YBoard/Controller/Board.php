@@ -68,7 +68,7 @@ class Board extends Controller
         $view = $this->loadTemplateEngine();
 
         $view->setVar('pageTitle', $board->name);
-        $view->setVar('bodyClass', 'board-page');
+        $view->setVar('bodyClass', !$catalog ? 'board-page' : 'board-catalog-page');
         $view->setVar('threads', $threads);
         $view->setVar('board', $board);
 

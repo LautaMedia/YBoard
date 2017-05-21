@@ -1,5 +1,5 @@
 <div class="post-buttons" data-id="<?= $post->id ?>">
-    <?php if (!$thread->locked || $user->isMod) : ?>
+    <?php if ($bodyClass !== 'board-catalog-page' && (!$thread->locked || $user->isMod)) : ?>
         <button class="icon-bubbles e-post-reply" title="<?= _('Reply') ?>"></button>
     <?php endif ?>
     <!--

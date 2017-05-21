@@ -47,6 +47,13 @@ return [
     '#^/api/user/session/create$#' => ['Api\UserSession', 'create'],
     '#^/api/user/session/delete$#' => ['Api\UserSession', 'delete'],
 
+    // User specific thread functions
+    '#^/api/user/thread/follow/create$#' => ['Api\UserThreadFollow', 'create'],
+    '#^/api/user/thread/follow/delete$#' => ['Api\UserThreadFollow', 'delete'],
+    '#^/api/user/thread/follow/markallread$#' => ['Api\UserThreadFollow', 'markAllRead'],
+    '#^/api/user/thread/hide/create$#' => ['Api\UserThreadHide', 'create'],
+    '#^/api/user/thread/hide/delete$#' => ['Api\UserThreadHide', 'delete'],
+
     // File scripts
     '#^/api/file/create#' => ['Api\File', 'create'],
     '#^/api/file/delete$#' => ['Api\File', 'delete'],
@@ -62,11 +69,6 @@ return [
     // Threads
     '#^/api/thread/getreplies$#' => ['Api\Thread', 'getReplies'],
     '#^/api/thread/update$#' => ['Api\Thread', 'update'],
-    '#^/api/thread/follow/create$#' => ['Api\ThreadFollow', 'create'],
-    '#^/api/thread/follow/delete$#' => ['Api\ThreadFollow', 'delete'],
-    '#^/api/thread/follow/markallread$#' => ['Api\ThreadFollow', 'markAllRead'],
-    '#^/api/thread/hide/create$#' => ['Api\ThreadHide', 'create'],
-    '#^/api/thread/hide/delete$#' => ['Api\ThreadHide', 'delete'],
 
     // Notifications
     '#^/api/notification/getall$#' => ['Notification', 'getAll'],

@@ -1,10 +1,10 @@
 <?php
 namespace YBoard\Controller;
 
-use YBoard\Controller;
+use YBoard\ApiController;
 use YBoard\Model\Post;
 
-class ThreadFollow extends Controller
+class UserThreadFollow extends ApiController
 {
     public function add(): void
     {
