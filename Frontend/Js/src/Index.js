@@ -51,6 +51,3 @@ window.YBoard = YBoard;
 window.YQuery = YQuery;
 window.Toast = Toast;
 window.Modal = Modal;
-
-Modal.open({'title': 'Modaal', 'content': YBoard.spinnerHtml()});
-Modal.open({'title': '1234', 'content': 'loading'});

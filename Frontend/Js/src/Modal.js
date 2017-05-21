@@ -75,7 +75,7 @@ class Modal
 
         // Create close button
         modal.closeButton = document.createElement('button');
-        modal.closeButton.classList.add('close');
+        modal.closeButton.classList.add('close', 'icon-cross');
         modal.closeButton.addEventListener('click', modal.close);
 
         // Create title element, if needed
