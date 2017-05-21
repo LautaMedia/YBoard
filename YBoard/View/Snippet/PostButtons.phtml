@@ -1,17 +1,17 @@
 <div class="post-buttons" data-id="<?= $post->id ?>">
-    <?php if ($bodyClass !== 'board-catalog-page' && (!$thread->locked || $user->isMod)) : ?>
+    <?php if (empty($bodyClass) || $bodyClass !== 'board-catalog-page' && (!$thread->locked || $user->isMod)) : ?>
         <button class="icon-bubbles e-post-reply" title="<?= _('Reply') ?>"></button>
     <?php endif ?>
     <!--
     <a href="#"><?= _('Donate gold') ?></a>
     -->
     <?php if (!$post->threadId) : ?>
-        <?php if (!$user->threadHide->exists($post->id)) : ?>
+        <?php if (!$user->threadIsHidden($post->id)) : ?>
             <button class="icon-eye-crossed e-thread-hide" title="<?= _('Hide') ?>"></button>
         <?php else : ?>
             <button class="icon-eye act e-thread-hide" title="<?= _('Restore') ?>"></button>
         <?php endif ?>
-        <?php if (!$user->threadFollow->exists($post->id)) : ?>
+        <?php if (!$user->threadIsFollowed($post->id)) : ?>
             <button class="icon-bookmark-add e-thread-follow" title="<?= _('Follow') ?>"></button>
         <?php else : ?>
             <button class="icon-bookmark-remove act e-thread-follow" title="<?= _('Unfollow') ?>"></button>

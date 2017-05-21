@@ -5,7 +5,12 @@ use YBoard\Model\Ban;
 use YBoard\Model\Board;
 use YBoard\Model\PostReport;
 use YBoard\Model\User;
+use YBoard\Model\UserNotification;
+use YBoard\Model\UserPreferences;
 use YBoard\Model\UserSession;
+use YBoard\Model\UserStatistics;
+use YBoard\Model\UserThreadFollow;
+use YBoard\Model\UserThreadHide;
 use YFW\Library\BotDetection;
 use YFW\Library\Database;
 use YFW\Library\HttpResponse;
@@ -21,6 +26,7 @@ abstract class Controller extends \YFW\Controller
     protected $user;
     protected $locale;
     protected $localeDomain;
+    protected $requireCaptcha = false;
 
     public function __construct()
     {
@@ -84,6 +90,7 @@ abstract class Controller extends \YFW\Controller
 
             $this->user->session = $session;
 
+
             // Update last active timestamps
             $this->user->updateLastActive();
             $this->user->session->updateLastActive();
@@ -92,6 +99,11 @@ abstract class Controller extends \YFW\Controller
             if (BotDetection::isBot('user')) {
                 $this->user = User::createTemporary($this->db);
                 $this->user->session = new UserSession($this->db);
+                $this->user->preferences = new UserPreferences($this->db);
+                $this->user->statistics = new UserStatistics($this->db);
+                $this->user->threadHide = UserThreadHide::getEmpty();
+                $this->user->threadFollow = UserThreadFollow::getEmpty();
+                $this->user->notifications = new UserNotification($this->db);
 
                 return false;
             }
@@ -100,6 +112,19 @@ abstract class Controller extends \YFW\Controller
             $this->user->session = UserSession::create($this->db, $this->user->id);
 
             $this->setLoginCookie($this->user->id, $this->user->session->id, $this->user->session->verifyKey);
+        }
+
+        $this->user->preferences = UserPreferences::getByUser($this->db, $this->user->id);
+        $this->user->statistics = UserStatistics::getByUser($this->db, $this->user->id);
+        $this->user->threadHide = UserThreadHide::getByUser($this->db, $this->user->id);
+        $this->user->threadFollow = UserThreadFollow::getByUser($this->db, $this->user->id);
+        $this->user->notifications = UserNotification::getByUser($this->db, $this->user->id,
+            $this->user->preferences->hiddenNotificationTypes);
+
+        // Require captcha if enabled and requiredPosts === true|int
+        if ($this->config['captcha']['enabled'] && ($this->config['captcha']['requiredPosts'] === true
+                || $this->user->statistics->totalPosts < $this->config['captcha']['requiredPosts'])) {
+            $this->requireCaptcha = true;
         }
 
         return true;

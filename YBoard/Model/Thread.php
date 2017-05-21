@@ -189,9 +189,10 @@ class Thread extends Post
         $q = $this->db->prepare("INSERT INTO post_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
             ON DUPLICATE KEY UPDATE " . $column . " =  " . $column . "+:val_2");
 
+
         $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue(':val', $val < 0 ? 0 : $val, Database::PARAM_INT);
-        $q->bindValue(':val_2', $val, Database::PARAM_INT);
+        $q->bindValue(':val', max(0, $val), Database::PARAM_INT);
+        $q->bindValue(':val_2', max(0, $val), Database::PARAM_INT);
         $q->execute();
 
         return true;

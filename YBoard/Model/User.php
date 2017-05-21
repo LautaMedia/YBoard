@@ -10,7 +10,6 @@ class User extends Model
     const PASSWORD_HASH_TYPE = PASSWORD_BCRYPT;
 
     public $id = null;
-    public $session;
     public $accountCreated;
     public $username;
     public $class = 0;
@@ -24,6 +23,7 @@ class User extends Model
     public $isAdmin = false;
     public $requireCaptcha = true;
 
+    public $session;
     public $preferences;
     public $statistics;
     public $threadHide;
@@ -32,7 +32,7 @@ class User extends Model
 
     protected $password;
 
-    public function __construct(Database $db, \stdClass $data = null, $skipDbLoad = false)
+    public function __construct(Database $db, ?\stdClass $data = null)
     {
         parent::__construct($db);
 
@@ -67,10 +67,7 @@ class User extends Model
             }
         }
 
-        $this->loadSubclasses($skipDbLoad);
-
         $this->isRegistered = $this->loggedIn = !empty($data->username); // Doubled just for clarity
-        $this->requireCaptcha = $this->statistics->totalPosts < 1;
         $this->ban = $this->getBan();
 
         if ($this->class == 1) {
@@ -80,27 +77,11 @@ class User extends Model
             $this->isMod = true;
         }
 
-        // No functions for nongolds
-        if ($this->goldLevel == 0) {
-            $this->resetGoldSettings();
-        } else {
+        if ($this->goldLevel >= 1) {
             // Override settings for golds
             // TODO: add file maxsize
         }
     }
-
-    protected function resetGoldSettings(): void
-    {
-        if ($this->goldLevel >= 1) {
-            return;
-        }
-
-        // TODO: Add rest of them
-        $this->preferences->useName = false;
-        $this->preferences->hideAds = false;
-        $this->preferences->tinfoilMode = false;
-    }
-
     public function delete(): bool
     {
         // Relations will handle the deletion of rest of the data, so we don't have to care.
@@ -163,16 +144,82 @@ class User extends Model
         return Ban::get($this->db, $_SERVER['REMOTE_ADDR'], $this->id);
     }
 
-    protected function loadSubclasses(bool $skipDbLoad = false): bool
+    public function getHiddenThreads(bool $idsOnly = true): array
     {
-        $this->preferences = new UserPreferences($this->db, $this->id, $skipDbLoad);
-        $this->statistics = new UserStatistics($this->db, $this->id, $skipDbLoad);
-        $this->threadHide = new UserThreadHide($this->db, $this->id, $skipDbLoad);
-        $this->threadFollow = new UserThreadFollow($this->db, $this->id, $skipDbLoad);
-        $this->notifications = new UserNotification($this->db, $this->id, $this->preferences->hiddenNotificationTypes,
-            $skipDbLoad);
+        if (!$idsOnly) {
+            return $this->threadHide['list'];
+        }
+
+        return array_keys($this->threadHide['list']);
+    }
+
+    public function getHiddenThread(int $threadId): ?UserThreadHide
+    {
+        if (!$this->threadIsHidden($threadId)) {
+            return null;
+        }
+
+        return $this->threadHide['list'][$threadId];
+    }
+
+    public function threadIsHidden(int $threadId): bool
+    {
+        return array_key_exists($threadId, $this->threadHide['list']);
+    }
+
+    public function getFollowedThread(int $threadId): ?UserThreadFollow
+    {
+        if (!$this->threadIsFollowed($threadId)) {
+            return null;
+        }
+
+        return $this->threadFollow['list'][$threadId];
+    }
+
+    public function getFollowedThreads(bool $idsOnly = true): array
+    {
+        if (!$idsOnly) {
+            return $this->threadFollow['list'];
+        }
+
+        return array_keys($this->threadFollow['list']);
+    }
+
+    public function threadIsFollowed(int $threadId): bool
+    {
+        return array_key_exists($threadId, $this->threadFollow['list']);
+    }
+
+    public function markFollowedRead(int $threadId): bool
+    {
+        $followed = $this->getFollowedThread($threadId);
+        if ($followed === null) {
+            return false;
+        }
+
+        $this->threadFollow['unreadThreads'] -= 1;
+        $this->threadFollow['unreadPosts'] -= $followed->unreadCount;
+        $followed->markRead();
 
         return true;
+    }
+
+    public function getThreadLastSeenReply(int $threadId): ?int
+    {
+        if (!$this->threadIsFollowed($threadId)) {
+            return null;
+        }
+
+        return $this->threadFollow['list'][$threadId]->lastSeenReply;
+    }
+
+    public function getThreadUnreadCount(int $threadId): ?int
+    {
+        if (!$this->threadIsFollowed($threadId)) {
+            return null;
+        }
+
+        return $this->threadFollow['list'][$threadId]->unreadCount;
     }
 
     public static function getById(Database $db, int $userId): ?self

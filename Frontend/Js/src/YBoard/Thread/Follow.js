@@ -1,47 +1,72 @@
 import YQuery from '../../YQuery';
-import YBoard from '../../YBoard';
 
 class Follow
 {
-    add(id)
+    constructor()
     {
-        this.doAjax(id, '/api/thread/follow/add');
-    }
+        let that = this;
 
-    remove(id)
-    {
-        this.doAjax(id, '/api/thread/follow/remove');
+        document.querySelectorAll('.e-thread-follow').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.toggle);
+        });
+
+        document.querySelectorAll('.e-follow-mark-read').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.markAllRead);
+        });
     }
 
     markAllRead()
     {
-        $('.icon-bookmark .unread-count').hide();
-        $('h3 .notification-count').hide();
-        $.post('/api/thread/follow/markallread').fail(function()
+        document.querySelectorAll('.icon-bookmark .unread-count').forEach(function(elm) {
+            elm.hide();
+        });
+        document.querySelectorAll('h3 .notification-count').forEach(function(elm) {
+            elm.hide();
+        });
+
+        YQuery.post('/api/user/thread/follow/markallread').onError(function()
         {
-            $('.icon-bookmark .unread-count').show();
-            $('h3 .notification-count').show();
+            document.querySelectorAll('.icon-bookmark .unread-count').forEach(function(elm) {
+                elm.show();
+            });
+            document.querySelectorAll('h3 .notification-count').forEach(function(elm) {
+                elm.show();
+            });
         });
     }
 
-    toggleButton(id)
+    toggle(e)
     {
-        let button = YBoard.thread.getElm(id).find('.followbutton');
+        let thread = e.target.closest('.thread');
+        let button = e.currentTarget;
 
-        if (button.hasClass('add')) {
-            button.removeClass('icon-bookmark-add add').addClass('icon-bookmark-remove remove');
-        } else {
-            button.removeClass('icon-bookmark-remove remove').addClass('icon-bookmark-add add');
+        let create = true;
+        if (e.currentTarget.classList.contains('act')) {
+            create = false;
         }
-    }
+        thread.classList.toggle('followed');
 
-    doAjax(id, url)
-    {
-        this.toggleButton(id);
-        YQuery.post(url, {'threadId': id}).fail(function()
+        toggleButton(button);
+
+        YQuery.post(create ? '/api/user/thread/follow/create' : '/api/user/thread/follow/delete',
+            {'threadId': thread.dataset.id}).onError(function(xhr)
         {
-            YBoard.Thread.Follow.toggleButton(id);
+            thread.classList.toggle('followed');
+            toggleButton(button);
         });
+
+        function toggleButton(elm)
+        {
+            if (!elm.classList.contains('act')) {
+                elm.classList.add('icon-bookmark-remove', 'act');
+                elm.classList.remove('icon-bookmark-add');
+            } else {
+                elm.classList.add('icon-bookmark-add');
+                elm.classList.remove('icon-bookmark-remove', 'act');
+            }
+        }
     }
 }
 

@@ -4,9 +4,9 @@
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
 
-<?php if ($board->url == 'followedthreads') : ?>
+<?php if ($board->url === 'followedthreads') : ?>
 <div class="board-additional-functions">
-    <button class="button primary" onclick="markAllFollowedRead()"><?= _('Mark all as read') ?></button>
+    <button class="button primary e-follow-mark-read"><?= _('Mark all as read') ?></button>
 </div>
 <?php endif ?>
 

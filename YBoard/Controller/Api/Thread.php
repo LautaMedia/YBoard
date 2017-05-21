@@ -29,7 +29,7 @@ class Thread extends ApiController
         $view->display('Ajax/ThreadExpand');
 
         // Clear unread count and update last seen reply
-        $followedThread = $this->user->threadFollow->get($_POST['threadId']);
+        $followedThread = $this->user->getFollowedThread($_POST['threadId']);
         if ($followedThread !== null) {
             $followedThread->resetUnreadCount();
             $followedThread->setLastSeenReply($_POST['fromId']);

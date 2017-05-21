@@ -34,11 +34,11 @@
     <button class="sidebar-toggle"><span class="icon-menu"></span><?= _('Menu') ?></button>
     <div class="buttons"
         ><button id="notifications-button" class="icon-alarm" title="<?= _('Notifications') ?>"
-            ><span class="unread-notifications unread-count red<?= ($user->notifications->unreadCount==0?' none':'') ?>"
-            ><?= $user->notifications->unreadCount ?></span></button
+            ><span class="unread-notifications unread-count red<?= ($user->notifications['unread'] === 0 ? ' none' : '') ?>"
+            ><?= $user->notifications['unread'] ?></span></button
         ><a href="/followedthreads/" class="icon-bookmark" title="<?= _('Followed threads') ?>"><?php
-            if($user->threadFollow->unreadCount != 0) :
-                ?><span class="unread-count green"><?= $user->threadFollow->unreadCount ?></span><?php
+            if($user->threadFollow['unreadThreads'] != 0) :
+                ?><span class="unread-count green"><?= $user->threadFollow['unreadThreads'] ?></span><?php
             endif ?></a
         ><button id="scroll-to-bottom" class="icon-enter-down" title="<?= _('Go to bottom') ?>"></button
         ><button id="scroll-to-top" class="icon-enter-up" title="<?= _('Back to top') ?>"></button

@@ -18,7 +18,7 @@ class Thread extends Controller
             if (!$deleted) {
                 $this->notFound(null, _('The thread you are looking for does not exist.'));
             } else {
-                $this->gone();
+                $this->gone(null, _('The thread you are looking for has been deleted.'));
             }
         }
 
@@ -30,14 +30,14 @@ class Thread extends Controller
         }
 
         // Clear unread count and update last seen reply
-        $followedThread = $this->user->threadFollow->get($thread->id);
-        if ($followedThread !== null) {
+        if ($this->user->threadIsFollowed($thread->id)) {
+            $followedThread = $this->user->getFollowedThread($thread->id);
             if (!empty($thread->threadReplies)) {
                 $tmp = array_slice($thread->threadReplies, -1);
                 $lastReply = array_pop($tmp);
                 $followedThread->setLastSeenReply($lastReply->id);
             }
-            $followedThread->resetUnreadCount();
+            $this->user->markFollowedRead($thread->id);
         }
 
         // Increment thread views

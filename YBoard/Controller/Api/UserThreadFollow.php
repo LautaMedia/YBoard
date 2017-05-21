@@ -1,51 +1,48 @@
 <?php
-namespace YBoard\Controller;
+namespace YBoard\Controller\Api;
 
 use YBoard\ApiController;
-use YBoard\Model\Post;
+use YBoard\Model;
 
 class UserThreadFollow extends ApiController
 {
-    public function add(): void
+    public function create(): void
     {
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['thread_id'])) {
+        if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->updateStats('followCount');
+        $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
+        if ($thread === null) {
+            $this->throwJsonError(400, _('Thread does not exist'));
+        }
 
-        $followedThread = $this->user->threadFollow->get($_POST['thread_id']);
-        if ($followedThread === null) {
-            $this->user->threadFollow->add($_POST['thread_id']);
+        if (!$this->user->threadIsFollowed($_POST['threadId'])) {
+            Model\UserThreadFollow::create($this->db, $this->user->id, $_POST['threadId']);
+            $thread->updateStats('followCount');
         }
     }
 
-    public function remove(): void
+    public function delete(): void
     {
-        $this->validateAjaxCsrfToken();
-
-        if (empty($_POST['thread_id'])) {
+        if (empty($_POST['threadId'])) {
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $thread = $posts->getThread($_POST['thread_id'], false);
-        $thread->updateStats('followCount', -1);
+        $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
+        if ($thread === null) {
+            $this->throwJsonError(400, _('Thread does not exist'));
+        }
 
-        $followedThread = $this->user->threadFollow->get($_POST['thread_id']);
-        if ($followedThread !== false) {
-            $followedThread->remove();
+        $followedThread = $this->user->getFollowedThread($_POST['threadId']);
+        if ($followedThread !== null) {
+            $followedThread->delete();
+            $thread->updateStats('followCount', -1);
         }
     }
 
     public function markAllRead(): void
     {
-        $this->validateAjaxCsrfToken();
-
-        $this->user->threadFollow->markAllRead();
+        Model\UserThreadFollow::markAllReadByUser($this->db, $this->user->id);
     }
 }

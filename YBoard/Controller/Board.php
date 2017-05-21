@@ -52,7 +52,7 @@ class Board extends Controller
         $this->limitPages($pageNum,
             $catalog ? $this->config['view']['maxCatalogPages'] : $this->config['view']['maxPages']);
 
-        Model\Thread::setHidden($this->user->threadHide->getAll());
+        Model\Thread::setHidden($this->user->getHiddenThreads());
 
         $board = Model\Board::getByUrl($this->db, $boardUrl);
         $threads = Model\Thread::getByBoard($this->db, $board->id, $pageNum,

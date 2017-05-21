@@ -1,9 +1,10 @@
 <?php
 namespace YBoard\Model;
 
+use YBoard\Model;
 use YFW\Library\Database;
 
-class UserStatistics extends AbstractUserModel
+class UserStatistics extends Model
 {
     public $pageLoads = 0;
     public $sentReplies = 0;
@@ -12,19 +13,20 @@ class UserStatistics extends AbstractUserModel
     public $uploadedFiles = 0;
     public $uploadedFilesTotalSize = 0;
     public $messageTotalCharacters = 0;
-    public $messageAverageLength = 0;
+    public $messageAverageLength = 0.0;
     public $epicThreads = 0;
-    public $purchasesTotalPrice = 0;
+    public $purchasesTotalPrice = 0.0;
     public $goldAccountsDonated = 0;
     public $goldAccountsReceived = 0;
     public $adventWindows = 0;
+    public $markoboyDonations = 0.0;
+    public $niilo22Donations = 0.0;
 
-    public $markoboyDonations = 0;
-    public $niilo22Donations = 0;
-
+    protected $userId = null;
     protected $statistics;
     protected $toUpdate = [];
-    protected $keyNames = [
+
+    protected $keyToName = [
         1 => 'pageLoads',
         2 => 'sentReplies',
         3 => 'createdThreads',
@@ -35,11 +37,46 @@ class UserStatistics extends AbstractUserModel
         8 => 'purchasesTotalPrice',
         9 => 'goldAccountsDonated',
         10 => 'goldAccountsReceived',
-        11 => 'adventWindows',
 
         1000 => 'markoboyDonations',
         1001 => 'niilo22Donations',
     ];
+
+    public function __construct(Database $db, ?int $userId = null, ?array $data = null)
+    {
+        parent::__construct($db);
+        $this->userId = $userId;
+
+        if ($data === null) {
+            return;
+        }
+
+        foreach ($data as $pref) {
+            if (!array_key_exists($pref->statistics_key, $this->keyToName)) {
+                $this->reset($pref->statistics_key);
+            }
+
+            $keyName = $this->keyToName[$pref->statistics_key];
+            switch ($keyName) {
+                case 'pageLoads':
+                case 'sentReplies':
+                case 'createdThreads':
+                case 'uploadedFiles':
+                case 'uploadedFilesTotalSize':
+                case 'messageTotalCharacters':
+                case 'epicThreads':
+                case 'goldAccountsDonated':
+                case 'goldAccountsReceived':
+                    $this->$keyName = (int)$pref->statistics_value;
+                    break;
+                case 'purchasesTotalPrice':
+                case 'markoboyDonations':
+                case 'niilo22Donations':
+                    $this->$keyName = (float)$pref->statistics_value;
+                    break;
+            }
+        }
+    }
 
     public function __destruct()
     {
@@ -65,7 +102,7 @@ class UserStatistics extends AbstractUserModel
 
     public function increment(string $keyName, int $incrementBy = 1): bool
     {
-        $key = array_search($keyName, $this->keyNames);
+        $key = array_search($keyName, $this->keyToName);
 
         $this->{$keyName} += $incrementBy;
         $this->toUpdate[$key] = $this->{$keyName};
@@ -73,25 +110,34 @@ class UserStatistics extends AbstractUserModel
         return true;
     }
 
-    protected function load(): void
+    public function reset($keyName): bool
     {
-        $q = $this->db->prepare("SELECT statistics_key, statistics_value FROM user_statistics WHERE user_id = :user_id");
+        $key = array_search($keyName, $this->keyToName);
+        if ($key) {
+            $defaults = new self($this->db);
+            $this->$keyName = $defaults->$keyName;
+        } else {
+            $key = (int)$keyName;
+        }
+
+        $q = $this->db->prepare("DELETE FROM user_preferences WHERE preferences_key = :preferences_key AND user_id = :user_id");
+        $q->bindValue(':preferences_key', $key, Database::PARAM_INT);
         $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
         $q->execute();
 
-        while ($row = $q->fetch()) {
-            if (!array_key_exists($row->statistics_key, $this->keyNames)) {
-                continue;
-            }
+        return true;
+    }
 
-            $this->{$this->keyNames[$row->statistics_key]} = $row->statistics_value;
+    public static function getByUser(Database $db, int $userId): ?self
+    {
+        $q = $db->prepare("SELECT statistics_key, statistics_value FROM user_statistics WHERE user_id = :user_id");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->execute();
+
+        if ($q->rowCount() === 0) {
+            return null;
         }
 
-        $this->totalPosts = $this->createdThreads + $this->sentReplies;
-        $this->purchasesTotalPrice = str_replace(',', '.', $this->purchasesTotalPrice / 100);
-
-        if ($this->totalPosts != 0) {
-            $this->messageAverageLength = round($this->messageTotalCharacters / $this->totalPosts);
-        }
+        return new self($db, $userId, $q->fetchAll());
     }
 }

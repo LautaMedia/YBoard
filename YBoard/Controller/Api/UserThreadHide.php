@@ -16,9 +16,11 @@ class UserThreadHide extends ApiController
         if ($thread === null) {
             $this->throwJsonError(400, _('Thread does not exist'));
         }
-        $thread->updateStats('hideCount');
 
-        $this->user->threadHide->add($_POST['threadId']);
+        if (!$this->user->threadIsHidden($_POST['threadId'])) {
+            Model\UserThreadHide::create($this->db, $this->user->id, $_POST['threadId']);
+            $thread->updateStats('hideCount');
+        }
     }
 
     public function delete(): void
@@ -31,8 +33,11 @@ class UserThreadHide extends ApiController
         if ($thread === null) {
             $this->throwJsonError(400, _('Thread does not exist'));
         }
-        $thread->updateStats('hideCount', -1);
 
-        $this->user->threadHide->remove($_POST['threadId']);
+        $hiddenThread = $this->user->getHiddenThread($_POST['threadId']);
+        if ($hiddenThread !== null) {
+            $hiddenThread->delete();
+            $thread->updateStats('hideCount', -1);
+        }
     }
 }

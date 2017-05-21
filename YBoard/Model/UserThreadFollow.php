@@ -1,107 +1,39 @@
 <?php
 namespace YBoard\Model;
 
+use YBoard\Model;
 use YFW\Library\Database;
 
-class UserThreadFollow extends AbstractUserModel
+class UserThreadFollow extends Model
 {
     public $unreadCount = 0;
     public $threadId;
-    public $lastSeenReply;
+    public $lastSeenReply = null;
 
-    protected $threads = [];
     protected $userId;
 
-    public static function add(Database $db, int $userId, int $threadId): bool
+    public function __construct(Database $db, int $userId, ?\stdClass $data = null)
     {
-        $q = $db->prepare("INSERT IGNORE INTO user_thread_follow (user_id, thread_id) VALUES (:user_id, :thread_id)");
-        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
-        $q->bindValue(':thread_id', $threadId, Database::PARAM_INT);
-        $q->execute();
+        parent::__construct($db);
+        $this->userId = $userId;
 
-        return true;
-    }
-
-    public function exists(int $threadId): bool
-    {
-        return array_key_exists($threadId, $this->threads);
-    }
-
-    public function getAll(): array
-    {
-        return $this->threads;
-    }
-
-    public function get(int $threadId): ?Thread
-    {
-        if (empty($this->threads[$threadId])) {
-            return null;
+        if ($data === null) {
+            return;
         }
 
-        return $this->threads[$threadId];
-    }
-
-    public function getThreadUnreadCount(int $threadId): ?int
-    {
-        if (empty($this->threads[$threadId])) {
-            return null;
+        foreach ($data as $key => $val) {
+            switch ($key) {
+                case 'unread_count':
+                    $this->unreadCount = (int)$val;
+                    break;
+                case 'thread_id':
+                    $this->threadId = (int)$val;
+                    break;
+                case 'last_seen_reply':
+                    $this->lastSeenReply = (int)$val;
+                    break;
+            }
         }
-
-        return $this->threads[$threadId]->unreadCount;
-    }
-
-    public function getThreadLastSeenReply(int $threadId): ?int
-    {
-        if (empty($this->threads[$threadId]) || empty($this->threads[$threadId]->lastSeenReply)) {
-            return null;
-        }
-
-        return $this->threads[$threadId]->lastSeenReply;
-    }
-
-    public function markAllRead(): bool
-    {
-        $q = $this->db->prepare("UPDATE user_thread_follow SET unread_count = 0
-            WHERE user_id = :user_id AND thread_id = :thread_id");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
-        $q->bindValue(':thread_id', $this->threadId, Database::PARAM_INT);
-        $q->execute();
-
-        return true;
-    }
-
-    protected function load(): void
-    {
-        $q = $this->db->prepare("SELECT thread_id, last_seen_reply, unread_count
-            FROM user_thread_follow WHERE user_id = :user_id ORDER BY unread_count DESC");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
-        $q->execute();
-
-        $this->threads = [];
-        while ($data = $q->fetch()) {
-            $thread = new self($this->db);
-            $this->threads[$data->thread_id] = $thread;
-        }
-
-        if (!empty($this->threads)) {
-            $q = $this->db->prepare("SELECT SUM(unread_count) AS unread_count FROM user_thread_follow
-            WHERE user_id = :user_id LIMIT 1");
-            $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
-            $q->execute();
-
-            $this->unreadCount = $q->fetch(Database::FETCH_COLUMN);
-        }
-    }
-
-    public function remove(): bool
-    {
-        $q = $this->db->prepare("DELETE FROM user_thread_follow
-            WHERE user_id = :user_id AND thread_id = :thread_id");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
-        $q->bindValue(':thread_id', $this->threadId, Database::PARAM_INT);
-        $q->execute();
-
-        return true;
     }
 
     public function setLastSeenReply(int $lastSeenId): bool
@@ -116,12 +48,57 @@ class UserThreadFollow extends AbstractUserModel
         return true;
     }
 
-    public function resetUnreadCount(): bool
+    public function markRead(): bool
     {
         $q = $this->db->prepare("UPDATE user_thread_follow SET unread_count = 0
-            WHERE user_id = :user_id AND thread_id = :thread_id");
+            WHERE user_id = :user_id AND thread_id = :thread_id LIMIT 1");
         $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
         $q->bindValue(':thread_id', $this->threadId, Database::PARAM_INT);
+        $q->execute();
+
+        $this->unreadCount = 0;
+
+        return true;
+    }
+
+    public function delete(): bool
+    {
+        $q = $this->db->prepare("DELETE FROM user_thread_follow
+            WHERE user_id = :user_id AND thread_id = :thread_id LIMIT 1");
+        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->threadId, Database::PARAM_INT);
+        $q->execute();
+
+        return true;
+    }
+
+    public static function create(Database $db, int $userId, int $threadId): self
+    {
+        $q = $db->prepare("INSERT IGNORE INTO user_thread_follow (user_id, thread_id) VALUES (:user_id, :thread_id)");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $threadId, Database::PARAM_INT);
+        $q->execute();
+
+        $followed = new self($db, $userId);
+        $followed->threadId = $threadId;
+
+        return $followed;
+    }
+
+    public static function getEmpty(): array
+    {
+        return [
+            'unreadThreads' => 0,
+            'unreadPosts' => 0,
+            'list' => [],
+        ];
+    }
+
+    public static function markAllReadByUser(Database $db, int $userId): bool
+    {
+        $q = $db->prepare("UPDATE user_thread_follow SET unread_count = 0
+            WHERE user_id = :user_id");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -145,5 +122,31 @@ class UserThreadFollow extends AbstractUserModel
         $q->execute();
 
         return true;
+    }
+
+    public static function getByUser(Database $db, int $userId): array
+    {
+        $q = $db->prepare("SELECT thread_id, last_seen_reply, unread_count
+            FROM user_thread_follow WHERE user_id = :user_id ORDER BY unread_count DESC");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
+        $q->execute();
+
+        $unreadThreadCount = 0;
+        $unreadPostCount = 0;
+        $threads = [];
+
+        while ($data = $q->fetch()) {
+            $threads[$data->thread_id] = new self($db, $userId, $data);
+            if ($data->unread_count !== 0) {
+                ++$unreadThreadCount;
+                $unreadPostCount += $data->unread_count;
+            }
+        }
+
+        return [
+            'unreadThreads' => $unreadThreadCount,
+            'unreadPosts' => $unreadPostCount,
+            'list' => $threads,
+        ];
     }
 }

@@ -51,6 +51,7 @@ return [
     ],
     'captcha' => [
         'enabled' => false,
+        'requiredPosts' => 1, // Required posts to disable captcha, int or true
         'publicKey' => 'xxx',
         'privateKey' => 'xxx',
     ],

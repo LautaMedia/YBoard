@@ -1,48 +1,76 @@
 <?php
 namespace YBoard\Model;
 
+use YBoard\Model;
 use YFW\Library\Database;
 
-class UserThreadHide extends AbstractUserModel
+class UserThreadHide extends Model
 {
-    protected $threads = [];
+    public $threadId;
+    protected $userId;
 
-    public function add(int $threadId): bool
+    public function __construct(Database $db, int $userId, ?\stdClass $data = null)
     {
-        $q = $this->db->prepare("INSERT IGNORE INTO user_thread_hide (user_id, thread_id) VALUES (:user_id, :thread_id)");
+        parent::__construct($db);
+        $this->userId = $userId;
+
+        if ($data === null) {
+            return;
+        }
+
+        foreach ($data as $key => $val) {
+            switch ($key) {
+                case 'thread_id':
+                    $this->threadId = (int)$val;
+                    break;
+            }
+        }
+    }
+
+    public function delete(): bool
+    {
+        $q = $this->db->prepare("DELETE FROM user_thread_hide
+            WHERE user_id = :user_id AND thread_id = :thread_id LIMIT 1");
         $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
-        $q->bindValue(':thread_id', $threadId, Database::PARAM_INT);
+        $q->bindValue(':thread_id', $this->threadId, Database::PARAM_INT);
         $q->execute();
 
         return true;
     }
 
-    public function remove(int $threadId): bool
+    public static function create(Database $db, int $userId, int $threadId): self
     {
-        $q = $this->db->prepare("DELETE FROM user_thread_hide WHERE user_id = :user_id AND thread_id = :thread_id");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
+        $q = $db->prepare("INSERT IGNORE INTO user_thread_hide (user_id, thread_id) VALUES (:user_id, :thread_id)");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->bindValue(':thread_id', $threadId, Database::PARAM_INT);
         $q->execute();
 
-        return true;
+        $hidden = new self($db, $userId);
+        $hidden->threadId = $threadId;
+
+        return $hidden;
     }
 
-    public function exists(int $threadId): bool
+    public static function getEmpty(): array
     {
-        return in_array($threadId, $this->threads);
+        return [
+            'list' => [],
+        ];
     }
 
-    public function getAll(): array
+    public static function getByUser(Database $db, int $userId): array
     {
-        return $this->threads;
-    }
-
-    protected function load(): void
-    {
-        $q = $this->db->prepare("SELECT thread_id FROM user_thread_hide WHERE user_id = :user_id");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
+        $q = $db->prepare("SELECT thread_id FROM user_thread_hide WHERE user_id = :user_id");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
-        $this->threads = $q->fetchAll(Database::FETCH_COLUMN);
+        $threads = [];
+        while ($data = $q->fetch()) {
+            $threads[$data->thread_id] = new self($db, $userId, $data);
+        }
+
+        return [
+            'list' => $threads,
+        ];
     }
 }

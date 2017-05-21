@@ -51,7 +51,7 @@ class YQuery
         return this.ajax(options, headers);
     }
 
-    post(url, data, options = {}, headers = {})
+    post(url, data = {}, options = {}, headers = {})
     {
         options = Object.assign({
             'method': 'POST',

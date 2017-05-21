@@ -1,9 +1,10 @@
 <?php
 namespace YBoard\Model;
 
+use YBoard\Model;
 use YFW\Library\Database;
 
-class UserPreferences extends AbstractUserModel
+class UserPreferences extends Model
 {
     public $theme = null;
     public $darkTheme = false;
@@ -19,6 +20,7 @@ class UserPreferences extends AbstractUserModel
     public $tinfoilMode = false;
     public $useName = false;
 
+    protected $userId = null;
     protected $preferences;
     protected $toUpdate = [];
 
@@ -35,6 +37,45 @@ class UserPreferences extends AbstractUserModel
         10 => 'tinfoilMode',
         11 => 'useName',
     ];
+
+    public function __construct(Database $db, ?int $userId = null, ?array $data = null)
+    {
+        parent::__construct($db);
+        $this->userId = $userId;
+
+        if ($data === null) {
+            return;
+        }
+
+        foreach ($data as $pref) {
+            if (!array_key_exists($pref->preferences_key, $this->keyToName)) {
+                $this->reset($pref->preferences_key);
+            }
+
+            $keyName = $this->keyToName[$pref->preferences_key];
+            switch ($keyName) {
+                case 'theme':
+                case 'locale':
+                    $this->$keyName = $pref->preferences_value;
+                    break;
+                case 'darkTheme':
+                case 'hideSidebar':
+                case 'hideAds':
+                case 'tinfoilMode':
+                case 'useName':
+                    $this->$keyName = (bool)$pref->preferences_value;
+                    break;
+                case 'threadsPerPage':
+                case 'repliesPerThread':
+                case 'threadsPerCatalogPage':
+                    $this->$keyName = (int)$pref->preferences_value;
+                    break;
+                case 'hiddenNotificationTypes':
+                    $this->$keyName = explode(',', $pref->preferences_value);
+                    break;
+            }
+        }
+    }
 
     public function __destruct()
     {
@@ -67,29 +108,29 @@ class UserPreferences extends AbstractUserModel
 
         // Verify and filter values if needed
         switch ($key) {
-            case 2:
-            case 4:
+            case 2: // Dark theme
+            case 4: // Hide sidebar
                 $value = $value === 'true' ? 1 : 0;
                 break;
-            case 5:
+            case 5: // Threads per page
                 if ($value > 50) {
                     $value = 50;
                 }
                 $value = (int)$value;
                 break;
-            case 6:
+            case 6: // Replies per thread
                 $value = (int)$value;
                 if ($value > 10) {
                     $value = 10;
                 }
                 break;
-            case 7:
+            case 7: // Threads per catalog page
                 $value = (int)$value;
                 if ($value > 250) {
                     $value = 250;
                 }
                 break;
-            case 8:
+            case 8: // Hidden notification types
                 foreach ($value as &$v) {
                     $v = (int)$v;
                 }
@@ -108,7 +149,7 @@ class UserPreferences extends AbstractUserModel
         $key = array_search($keyName, $this->keyToName);
         if ($key) {
             $defaults = new self($this->db);
-            $this->{$keyName} = $defaults->{$keyName};
+            $this->$keyName = $defaults->$keyName;
         } else {
             $key = (int)$keyName;
         }
@@ -121,35 +162,16 @@ class UserPreferences extends AbstractUserModel
         return true;
     }
 
-    protected function load(): void
+    public static function getByUser(Database $db, int $userId): ?self
     {
-        $q = $this->db->prepare("SELECT preferences_key, preferences_value FROM user_preferences WHERE user_id = :user_id");
-        $q->bindValue(':user_id', $this->userId, Database::PARAM_INT);
+        $q = $db->prepare("SELECT preferences_key, preferences_value FROM user_preferences WHERE user_id = :user_id");
+        $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
-        while ($row = $q->fetch()) {
-            if (!array_key_exists($row->preferences_key, $this->keyToName)) {
-                $this->reset($row->preferences_key);
-                continue;
-            }
-            $keyName = $this->keyToName[$row->preferences_key];
-            $value = $row->preferences_value;
-
-            switch ($row->preferences_key) {
-                case 5:
-                case 6:
-                case 7:
-                    $value = (int)$value;
-                    break;
-                case 2:
-                case 4:
-                    $value = (bool)$value;
-                    break;
-                case 8:
-                    $value = explode(',', $value);
-                    break;
-            }
-            $this->{$keyName} = $value;
+        if ($q->rowCount() === 0) {
+            return null;
         }
+
+        return new self($db, $userId, $q->fetchAll());
     }
 }

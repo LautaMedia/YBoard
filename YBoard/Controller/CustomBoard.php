@@ -30,7 +30,7 @@ class CustomBoard extends Controller
 
     protected function load(string $fullName, string $shortName): void
     {
-        Model\Thread::setHidden($this->user->threadHide->getAll());
+        Model\Thread::setHidden($this->user->getHiddenThreads());
 
         $this->board = new Model\Board($this->db);
         $this->board->url = $fullName;
@@ -50,12 +50,12 @@ class CustomBoard extends Controller
             case 'followed':
                 $this->board->name = _('Followed threads');
                 $this->board->description = _('Threads you have marked as interesting');
-                $this->threadIds = array_keys($this->user->threadFollow->getAll());
+                $this->threadIds = $this->user->getFollowedThreads();
                 break;
             case 'hidden':
                 $this->board->name = _('Hidden threads');
                 $this->board->description = _('Why are you even reading these?');
-                $this->threadIds = $this->user->threadHide->getAll();
+                $this->threadIds = $this->user->getHiddenThreads();
                 break;
             default:
                 $this->notFound();

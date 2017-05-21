@@ -48,6 +48,10 @@ class User extends ApiController
 
     public function changeName(): void
     {
+        if (!$this->user->loggedIn) {
+            $this->throwJsonError(400, _('You should log in first'));
+        }
+
         if (empty($_POST['newName']) || empty($_POST['password'])) {
             $this->throwJsonError(400, _('Please fill all of the required fields'));
         }
@@ -75,6 +79,10 @@ class User extends ApiController
 
     public function changePassword(): void
     {
+        if (!$this->user->loggedIn) {
+            $this->throwJsonError(400, _('You should log in first'));
+        }
+
         if (empty($_POST['newPassword']) || empty($_POST['newPasswordAgain']) || empty($_POST['password'])) {
             $this->throwJsonError(400, _('Please fill all of the required fields'));
         }
@@ -94,6 +102,10 @@ class User extends ApiController
 
     public function delete(): void
     {
+        if (!$this->user->loggedIn) {
+            $this->throwJsonError(400, _('You should log in first'));
+        }
+
         if (empty($_POST['password'])) {
             $this->throwJsonError(401, _('Please type your current password'));
         }

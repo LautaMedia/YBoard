@@ -244,10 +244,10 @@ class Post extends ApiController
                 $notificationsSkipUsers[] = $thread->userId;
 
                 // Mark thread notifications as read
-                $this->user->notifications->markReadByThread($thread->id);
+                Model\UserNotification::markReadByThread($this->db, $this->user->id, $thread->id);
             } else {
                 // Mark thread notifications as read for OP
-                $this->user->notifications->markReadByPost($thread->id);
+                Model\UserNotification::markReadByPost($this->db, $this->user->id, $thread->id);
             }
         }
 
