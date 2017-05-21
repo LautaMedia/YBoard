@@ -1,4 +1,17 @@
 $postMetaHeight: 24px;
+
+body:not(.thread-page) .thread.hidden {
+    transition: opacity 0.5s;
+    opacity: 0.1;
+    &:hover {
+        opacity: 0.5;
+    }
+    .replies, .message, .thread-buttons, .thread-meta,
+    .post-replies {
+        display: none;
+    }
+}
+
 .thread {
     padding: 0;
     overflow: hidden;

@@ -57,7 +57,7 @@ class UserSession extends ApiController
         }
 
         if ($session === null) {
-            $this->throwJsonError(404, _('Session does not exist'));
+            $this->throwJsonError(400, _('Session does not exist'));
         }
 
         $session->destroy();

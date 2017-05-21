@@ -20,7 +20,7 @@ class Post extends ApiController
 
         $post = Model\Post::get($this->db, $_POST['postId']);
         if ($post === null) {
-            $this->throwJsonError(404, _('Post does not exist'));
+            $this->throwJsonError(400, _('Post does not exist'));
         }
 
         // Thread meta required for OP tag
@@ -82,7 +82,7 @@ class Post extends ApiController
         if (!$hasFile && !empty($fileName)) {
             $file = Model\File::getByOrigName($this->db, $fileName);
             if (!$file) {
-                $this->throwJsonError(404,
+                $this->throwJsonError(400,
                     sprintf(_('File "%s" was not found, please type a different name or choose a file to upload'),
                         htmlspecialchars($fileName)));
             }
@@ -289,7 +289,7 @@ class Post extends ApiController
 
         $post = Model\Post::get($this->db, $_POST['postId'], false);
         if ($post === null) {
-            $this->throwJsonError(404, _('Post does not exist'));
+            $this->throwJsonError(400, _('Post does not exist'));
         }
 
         if ($post->userId != $this->user->id && !$this->user->isMod) {
@@ -329,7 +329,7 @@ class Post extends ApiController
 
         $post = Model\Post::get($this->db, $_POST['post_id'], false);
         if ($post === null) {
-            $this->throwJsonError(404, _('Post does not exist'));
+            $this->throwJsonError(400, _('Post does not exist'));
         }
 
         if ($post->userId != $this->user->id && !$this->user->isMod) {
@@ -357,7 +357,7 @@ class Post extends ApiController
 
         $posts = new Post($this->db);
         if ($posts->get($_POST['post_id'], false) === null) {
-            $this->throwJsonError(404, _('Post does not exist'));
+            $this->throwJsonError(400, _('Post does not exist'));
         }
 
         $postReports = new PostReport($this->db);

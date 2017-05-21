@@ -16,7 +16,7 @@ class File Extends ApiController
 
         $file = Model\File::get($this->db, $_POST['fileId']);
         if ($file === null) {
-            $this->throwJsonError(404, _('File does not exist'));
+            $this->throwJsonError(400, _('File does not exist'));
         }
 
         if ($file->userId != $this->user->id && !$this->user->isMod) {
@@ -101,7 +101,7 @@ class File Extends ApiController
         $file = Model\File::get($this->db, $_POST['fileId']);
 
         if ($file === null) {
-            $this->throwJsonError(404);
+            $this->throwJsonError(400, _('File does not exist'));
         }
         if ($file->inProgress) {
             $this->throwJsonError(418, _('This file is being processed...'));

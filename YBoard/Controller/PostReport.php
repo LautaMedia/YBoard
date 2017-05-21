@@ -30,7 +30,7 @@ class PostReport extends Controller
         $reports = new PostReport($this->db);
         $report = $reports->get($_POST['post_id']);
         if ($report === null) {
-            $this->throwJsonError(404, _('Report does not exist'));
+            $this->throwJsonError(400, _('Report does not exist'));
         }
 
         Model\Log::write($this->db, Model\Log::ACTION_MOD_REPORT_CHECKED, $this->user->id, $report->id);

@@ -17,7 +17,7 @@ class Thread extends ApiController
 
         $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
         if ($thread === null) {
-            $this->throwJsonError(404, _('Thread does not exist'));
+            $this->throwJsonError(400, _('Thread does not exist'));
         }
 
         $view = $this->loadTemplateEngine('Blank');
@@ -35,51 +35,6 @@ class Thread extends ApiController
             $followedThread->setLastSeenReply($_POST['fromId']);
         }
     }
-
-    public function hide(): void
-    {
-        if (empty($_POST['threadId'])) {
-            $this->throwJsonError(400);
-        }
-
-        $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
-        $thread->updateStats('hideCount');
-
-        $this->user->threadHide->add($_POST['threadId']);
-    }
-
-    public function restore(): void
-    {
-        if (empty($_POST['threadId'])) {
-            $this->throwJsonError(400);
-        }
-
-        $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
-        $thread->updateStats('hideCount', -1);
-
-        $this->user->threadHide->remove($_POST['threadId']);
-    }
-
-    public function lock(): void
-    {
-        $this->update('lock', true);
-    }
-
-    public function unlock(): void
-    {
-        $this->update('lock', false);
-    }
-
-    public function stick(): void
-    {
-        $this->update('stick', true);
-    }
-
-    public function unstick(): void
-    {
-        $this->update('stick', false);
-    }
-
     protected function update(string $do, bool $bool): bool
     {
         $this->modOnly();
@@ -90,7 +45,7 @@ class Thread extends ApiController
 
         $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
         if (!$thread) {
-            $this->throwJsonError(404, _('Thread not found'));
+            $this->throwJsonError(400, _('Thread does not exist'));
         }
 
         if ($do == 'stick') {

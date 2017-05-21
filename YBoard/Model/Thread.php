@@ -190,7 +190,7 @@ class Thread extends Post
             ON DUPLICATE KEY UPDATE " . $column . " =  " . $column . "+:val_2");
 
         $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue(':val', $val, Database::PARAM_INT);
+        $q->bindValue(':val', $val < 0 ? 0 : $val, Database::PARAM_INT);
         $q->bindValue(':val_2', $val, Database::PARAM_INT);
         $q->execute();
 

@@ -1,22 +1,47 @@
-import YBoard from '../../YBoard';
+import YQuery from '../../YQuery';
 
-class Hide {
-    add(id)
+class Hide
+{
+    constructor()
     {
-        YBoard.Thread.getElm(id).hide();
-        $.post('/scripts/threads/hide', {'threadId': id}).onError(function()
+        let that = this;
+
+        document.querySelectorAll('.e-thread-hide').forEach(function(elm)
         {
-            YBoard.Thread.getElm(id).show();
+            elm.addEventListener('click', that.toggle);
         });
     }
 
-    remove(id)
+    toggle(e)
     {
-        YBoard.Thread.getElm(id).show();
-        YQuery.post('/scripts/threads/restore', {'threadId': id}).onError(function()
+        let thread = e.target.closest('.thread');
+        let button = e.currentTarget;
+
+        let create = true;
+        if (e.currentTarget.classList.contains('act')) {
+            create = false;
+        }
+        thread.classList.toggle('hidden');
+
+        toggleButton(button);
+
+        YQuery.post(create ? '/api/thread/hide/create' : '/api/thread/hide/delete',
+            {'threadId': thread.dataset.id}).onError(function(xhr)
         {
-            YBoard.Thread.getElm(id).hide();
+            thread.classList.toggle('hidden');
+            toggleButton(button);
         });
+
+        function toggleButton(elm)
+        {
+            if (!elm.classList.contains('act')) {
+                elm.classList.add('icon-eye', 'act');
+                elm.classList.remove('icon-eye-crossed');
+            } else {
+                elm.classList.add('icon-eye-crossed');
+                elm.classList.remove('icon-eye', 'act');
+            }
+        }
     }
 }
 

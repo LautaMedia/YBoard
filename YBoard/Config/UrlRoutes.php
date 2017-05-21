@@ -59,14 +59,14 @@ return [
     '#^/api/post/deletefile$#' => ['Api\Post', 'deleteFile'],
     '#^/api/post/report$#' => ['Api\Post', 'report'],
 
-    // Thread scripts
+    // Threads
     '#^/api/thread/getreplies$#' => ['Api\Thread', 'getReplies'],
     '#^/api/thread/update$#' => ['Api\Thread', 'update'],
-
-    // Follow threads
     '#^/api/thread/follow/create$#' => ['Api\ThreadFollow', 'create'],
     '#^/api/thread/follow/delete$#' => ['Api\ThreadFollow', 'delete'],
-    '#^/api/thread/follow/markallread$#' => ['Api}ThreadFollow', 'markAllRead'],
+    '#^/api/thread/follow/markallread$#' => ['Api\ThreadFollow', 'markAllRead'],
+    '#^/api/thread/hide/create$#' => ['Api\ThreadHide', 'create'],
+    '#^/api/thread/hide/delete$#' => ['Api\ThreadHide', 'delete'],
 
     // Notifications
     '#^/api/notification/getall$#' => ['Notification', 'getAll'],
