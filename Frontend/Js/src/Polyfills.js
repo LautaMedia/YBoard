@@ -1,4 +1,4 @@
-if (typeof NodeList.prototype.remove !== 'function') {
+if (typeof Element.prototype.remove !== 'function') {
     Element.prototype.remove = function () {
         this.parentElement.removeChild(this);
     };

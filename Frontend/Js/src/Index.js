@@ -6,6 +6,8 @@ import './Events';
 
 import YQuery from './YQuery';
 import YBoard from './YBoard';
+import Toast from './Toast';
+import Modal from './Modal';
 
 YQuery.ajaxSetup({
     // AJAX options
@@ -32,13 +34,13 @@ YQuery.ajaxSetup({
         }
 
         if (xhr.status === 418) {
-            YBoard.Toast.error(errorMessage);
+            Toast.error(errorMessage);
         } else {
-            YBoard.Toast.error(errorMessage, errorTitle);
+            Toast.error(errorMessage, errorTitle);
         }
     },
     'timeoutFunction': function(xhr) {
-        YBoard.Toast.error(messages.timeoutWarning);
+        Toast.error(messages.timeoutWarning);
     },
 }, {
     // Headers
@@ -47,3 +49,8 @@ YQuery.ajaxSetup({
 
 window.YBoard = YBoard;
 window.YQuery = YQuery;
+window.Toast = Toast;
+window.Modal = Modal;
+
+Modal.open({'title': 'Modaal', 'content': YBoard.spinnerHtml()});
+Modal.open({'title': '1234', 'content': 'loading'});

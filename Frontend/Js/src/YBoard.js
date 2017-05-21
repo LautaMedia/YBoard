@@ -1,13 +1,13 @@
 import YQuery from './YQuery';
 import Captcha from './YBoard/Captcha';
 import Theme from './YBoard/Theme';
-import Toast from './YBoard/Toast';
 import Catalog from './YBoard/Catalog';
 import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
 import Modal from './YBoard/Modal';
 import Tooltip from './Tooltip';
+import Toast from './Toast';
 
 class YBoard
 {
@@ -17,11 +17,9 @@ class YBoard
         this.Catalog = new Catalog();
         this.Captcha = new Captcha();
         this.Theme = new Theme();
-        this.Toast = new Toast();
         this.Thread = new Thread();
         this.Post = new Post();
         this.PostForm = new PostForm();
-        this.Modal = new Modal();
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -257,7 +255,7 @@ class YBoard
                 }
             } else {
                 overlay.remove();
-                that.Toast.success(data.message);
+                Toast.success(data.message);
                 form.reset();
             }
         }).onError(function(xhr)

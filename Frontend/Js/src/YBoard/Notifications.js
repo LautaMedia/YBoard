@@ -1,3 +1,5 @@
+import Modal from '../Modal';
+
 class Notifications
 {
     constructor()
@@ -15,7 +17,7 @@ class Notifications
     open()
     {
         let that = this;
-        YBoard.Modal.open('/scripts/notifications/get', {
+        Modal.open('/scripts/notifications/get', {
             'onAjaxComplete': function()
             {
                 that.updateUnreadCount($('.notifications-list .not-read').length);

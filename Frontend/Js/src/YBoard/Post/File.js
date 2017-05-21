@@ -1,5 +1,6 @@
 import YQuery from '../../YQuery';
 import YBoard from '../../YBoard';
+import Toast from '../../Toast';
 
 class File
 {
@@ -47,7 +48,7 @@ class File
             'loadFunction': function()
             {
                 this.getElm(id).find('figure').remove();
-                YBoard.Toast.success(messages.fileDeleted);
+                Toast.success(messages.fileDeleted);
             },
         });
     }

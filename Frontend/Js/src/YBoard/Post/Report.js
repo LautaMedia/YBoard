@@ -1,11 +1,13 @@
 import YQuery from '../../YQuery';
 import YBoard from '../../YBoard';
+import Toast from '../../Toast';
+import Modal from '../../Modal';
 
 class Report
 {
     openForm()
     {
-        YBoard.Modal.open('/scripts/report/getform', {
+        Modal.open('/scripts/report/getform', {
             'onAjaxComplete': function()
             {
                 YB.Captcha.render('report-captcha');
@@ -26,8 +28,8 @@ class Report
 
         YQuery.post(form.getAttribute('action'), fd).onLoad(function()
         {
-            YBoard.Toast.success(messages.postReported);
-            YBoard.Modal.closeAll();
+            Toast.success(messages.postReported);
+            Modal.closeAll();
         }).onError(function(xhr)
         {
             if (xhr.status === 418) {
@@ -42,7 +44,7 @@ class Report
     {
         YQuery.post('/scripts/mod/reports/setchecked', {'postId': postId}).done(function()
         {
-            YBoard.Toast.success(messages.reportCleared);
+            Toast.success(messages.reportCleared);
             YBoard.post.getElm(postId).remove();
         });
     }

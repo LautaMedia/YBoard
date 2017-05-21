@@ -1,5 +1,6 @@
 import YBoard from '../../YBoard';
 import YQuery from '../../YQuery';
+import Toast from '../../Toast';
 
 class AutoUpdate
 {
@@ -70,7 +71,7 @@ class AutoUpdate
         }).onLoad(function(xhr)
         {
             if (manual && xhr.responseText.length === 0) {
-                YBoard.Toast.info(messages.noNewReplies);
+                Toast.info(messages.noNewReplies);
                 return;
             }
 

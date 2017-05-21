@@ -8,29 +8,31 @@ class Toast
         }, options);
     }
 
-    success(message, title = false)
+    success(message, title = false, options = {})
     {
-        this._show('success', message, title);
+        this._show('success', message, title, options);
     }
 
-    info(message, title = false)
+    info(message, title = false, options = {})
     {
-        this._show('info', message, title);
+        this._show('info', message, title, options);
     }
 
-    warning(message, title = false)
+    warning(message, title = false, options = {})
     {
-        this._show('warning', message, title);
+        this._show('warning', message, title, options);
     }
 
-    error(message, title = false)
+    error(message, title = false, options = {})
     {
-        this._show('error', message, title);
+        this._show('error', message, title, options);
     }
 
-    _show(type, message, title)
+    _show(type, message, title, options)
     {
         let that = this;
+
+        options = Object.assign({}, this.options, options);
 
         let toastRoot = document.getElementById('toast-root');
         if (toastRoot === null) {
@@ -44,7 +46,7 @@ class Toast
 
         let toastContent = document.createElement('div');
         toastContent.classList.add('toast-content');
-        toast.appendChild(toastContent)
+        toast.appendChild(toastContent);
 
         if (title !== false) {
             let toastTitle = document.createElement('h3');
@@ -76,8 +78,8 @@ class Toast
         };
 
         let fading, removing;
-        fading = setTimeout(toast.startFade, this.options.displayTime);
-        removing = setTimeout(toast.removeToast, this.options.displayTime + this.options.fadeTime);
+        fading = setTimeout(toast.startFade, options.displayTime);
+        removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
 
         toast.addEventListener('mouseover', function(e) {
             clearTimeout(fading);
@@ -87,10 +89,10 @@ class Toast
         });
 
         toast.addEventListener('mouseout', function(e) {
-            fading = setTimeout(toast.startFade, that.options.displayTime);
-            removing = setTimeout(toast.removeToast, that.options.displayTime + that.options.fadeTime);
+            fading = setTimeout(toast.startFade, options.displayTime);
+            removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
         });
     }
 }
 
-export default Toast;
+export default new Toast();

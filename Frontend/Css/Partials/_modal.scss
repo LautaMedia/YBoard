@@ -1,0 +1,61 @@
+#modal-root {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    overflow: auto;
+
+    .modal {
+        margin: auto;
+        z-index: 2;
+        box-sizing: border-box;
+        min-height: 200px;
+        min-width: 200px;
+        background: #ffffff;
+        box-shadow: 0 0 20px -5px black;
+        border: 1px solid $red;
+        position: relative;
+        &:not(:last-of-type) {
+            display: none;
+        }
+
+        .title {
+            font-size: 1.25em;
+            background-color: #1cc26d;
+            padding: 5px 10px;
+        }
+        .content {
+            padding: 10px;
+        }
+
+        .close {
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: block;
+            width: 40px;
+            height: 26px;
+            border: 0;
+            background: none;
+            &:focus {
+                outline: 0;
+            }
+            &:hover {
+                color: #fff;
+                background-color: $red;
+            }
+            &:active {
+                color: #fff;
+                background-color: lighten($red, 10%);
+            }
+        }
+    }
+
+}

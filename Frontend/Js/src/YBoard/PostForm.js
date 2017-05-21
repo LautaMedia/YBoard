@@ -1,5 +1,6 @@
 import YQuery from '../YQuery';
 import YBoard from '../YBoard';
+import Toast from '../Toast';
 
 class PostForm
 {
@@ -263,7 +264,7 @@ class PostForm
         }
 
         if (fileSizeSum > maxSize) {
-            YBoard.Toast.warning(messages.maxSizeExceeded);
+            Toast.warning(messages.maxSizeExceeded);
             this.updateFileProgressBar(0);
             return false;
         }
@@ -315,7 +316,7 @@ class PostForm
                     that.submit();
                 }
             } else {
-                YBoard.Toast.error(messages.errorOccurred);
+                Toast.error(messages.errorOccurred);
                 that.removeFile();
                 that.updateFileProgressBar(0);
             }
@@ -462,7 +463,7 @@ class PostForm
                 } else {
                     let data = JSON.parse(xhr.responseText);
                     if (typeof data.message === 'undefined') {
-                        YBoard.Toast.error(messages.errorOccurred);
+                        Toast.error(messages.errorOccurred);
                     } else {
                         window.location = '/' + fd.get('board') + '/' + data.message;
                     }

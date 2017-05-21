@@ -1,5 +1,6 @@
 import YQuery from '../YQuery';
 import YBoard from '../YBoard';
+import Toast from '../Toast';
 import PostFile from './Post/File';
 
 class Post
@@ -52,7 +53,7 @@ class Post
             } else {
                 // The deleted post is not the current thread
                 YBoard.Thread.getElm(id).remove();
-                YBoard.Toast.success(messages.postDeleted);
+                Toast.success(messages.postDeleted);
             }
         });
     }

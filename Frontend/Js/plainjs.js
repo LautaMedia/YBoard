@@ -1,8 +1,6 @@
-/*
-// -------------------------------------------
+
 // Post moderation
-// -------------------------------------------
-/*
+
 $('.mod-menu').tooltipster({
     content: YB.spinnerHtml(),
     side: 'bottom',
@@ -19,7 +17,6 @@ $('.mod-menu').tooltipster({
         instance.content(content);
     }
 });
-*/
 
 function addBan(e) {
     e.preventDefault();
@@ -48,8 +45,10 @@ function addBan(e) {
     });
 }
 
-/*
-if ($('body').hasClass('thread-page')) {
+
+// Start/stop autoupdate
+
+if($('body').hasClass('thread-page')) {
     $(window)
         .on('scroll', function () {
             var windowBottom = $(window).height() + $(window).scrollTop();
@@ -74,88 +73,75 @@ if ($('body').hasClass('thread-page')) {
             YB.thread.ajaxUpdate.start();
         });
 }
-*/
+
 
 // -------------------------------------------
 // Spoilers & reflinks
 // -------------------------------------------
-var reflinkCreateTimeout;
-yQuery
-    .on('touchstart', '.spoiler:not(.spoiled)', function (e) {
-        e.preventDefault();
-        e.target.addClass('spoiled');
-    })
-    .on('click', false, function (e) {
-        document.querySelectorAll('.spoiler.spoiled').forEach(function(elm) {
-            elm.removeClass('spoiled');
-        });
-    })
-    .on('contextmenu', '.reflink', function (e) {
-        e.preventDefault();
-    })
-    /*
-    .on('touchstart mouseenter', '.reflink:not(.tooltipstered)', function (e) {
-        var elm = $(this);
-        reflinkCreateTimeout = setTimeout(function () {
-            e.preventDefault();
-            var id = elm.data('id');
-            var content = YB.spinnerHtml();
-            if (YB.post.getElm(id) != null) {
-                content = YB.post.getElm(id).innerHTML;
-            }
+.on('touchstart', '.spoiler:not(.spoiled)', function (e) {
+    e.preventDefault();
+    e.target.addClass('spoiled');
+})
+.on('click', false, function (e) {
+    document.querySelectorAll('.spoiler.spoiled').forEach(function(elm) {
+        elm.removeClass('spoiled');
+    });
+})
+.on('contextmenu', '.reflink', function (e) {
+    e.preventDefault();
+})
 
-            elm.tooltipster({
-                content: content,
-                side: 'bottom',
-                animationDuration: 0,
-                updateAnimation: null,
-                delay: 0,
-                arrow: false,
-                contentAsHTML: true,
-                theme: 'thread',
-                trigger: 'custom',
-                triggerOpen: {
-                    mouseenter: true,
-                    touchstart: true
-                },
-                triggerClose: {
-                    mouseleave: true,
-                    click: true
-                },
-                functionInit: function (instance, helper) {
-                    var id = $(helper.origin).data('id');
-                    $.post('/scripts/posts/get', {'postId': id}).done(function (data) {
-                        // Update timestamps
-                        data = $(data);
-                        data.find('.datetime').localizeTimestamp(this);
-
-                        instance.content(data);
-                    }).fail(function () {
-                        instance.close();
-                    });
-                }
-            }).tooltipster('open');
-        }, 100);
-    })
-    .on('touchend mouseleave', '.reflink:not(.tooltipstered)', function (e) {
-        clearTimeout(reflinkCreateTimeout);
-    })
-    .on('click', ':not(.tooltipster-base) .reflink', function (e) {
-        var id = $(this).data('id');
+.on('touchstart mouseenter', '.reflink:not(.tooltipstered)', function (e) {
+    var elm = $(this);
+    reflinkCreateTimeout = setTimeout(function () {
+        e.preventDefault();
+        var id = elm.data('id');
+        var content = YB.spinnerHtml();
         if (YB.post.getElm(id) != null) {
-            e.preventDefault();
-            window.location = window.location.href.split('#')[0] + '#post-' + id;
+            content = YB.post.getElm(id).innerHTML;
         }
 
-    });
-    */
+        elm.tooltipster({
+            content: content,
+            side: 'bottom',
+            animationDuration: 0,
+            updateAnimation: null,
+            delay: 0,
+            arrow: false,
+            contentAsHTML: true,
+            theme: 'thread',
+            trigger: 'custom',
+            triggerOpen: {
+                mouseenter: true,
+                touchstart: true
+            },
+            triggerClose: {
+                mouseleave: true,
+                click: true
+            },
+            functionInit: function (instance, helper) {
+                var id = $(helper.origin).data('id');
+                $.post('/scripts/posts/get', {'postId': id}).done(function (data) {
+                    // Update timestamps
+                    data = $(data);
+                    data.find('.datetime').localizeTimestamp(this);
 
-// -------------------------------------------
-// Basic tooltips
-// -------------------------------------------
-/*$('.tooltip').tooltipster({
-    side: 'bottom',
-    animationDuration: 0,
-    delay: 0,
-    trigger: 'click'
-});*/
+                    instance.content(data);
+                }).fail(function () {
+                    instance.close();
+                });
+            }
+        }).tooltipster('open');
+    }, 100);
+})
+.on('touchend mouseleave', '.reflink:not(.tooltipstered)', function (e) {
+    clearTimeout(reflinkCreateTimeout);
+})
+.on('click', ':not(.tooltipster-base) .reflink', function (e) {
+    var id = $(this).data('id');
+    if (YB.post.getElm(id) != null) {
+        e.preventDefault();
+        window.location = window.location.href.split('#')[0] + '#post-' + id;
+    }
+
+});
