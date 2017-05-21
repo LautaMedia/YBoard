@@ -15,11 +15,6 @@ $postMetaHeight: 24px;
             display: none;
         }
     }
-    &.expanded {
-        .e-more-replies {
-            display: none
-        }
-    }
 
     #post-form {
         display: block;
@@ -130,6 +125,10 @@ $postMetaHeight: 24px;
 
     .replies-buttons {
         padding: 5px 10px;
+        display: flex;
+        * {
+            margin-right: 10px
+        }
     }
 
     .reply {

@@ -133,12 +133,10 @@ class Thread extends Post
     {
         $from = '';
         if ($newest) {
-            $order = 'DESC';
             if ($fromId) {
                 $from = ' AND a.id > :from';
             }
         } else {
-            $order = 'ASC';
             if ($fromId) {
                 $from = ' AND a.id < :from';
             }
@@ -151,7 +149,7 @@ class Thread extends Post
         }
 
         $q = $this->db->prepare(static::POST_QUERY . 'WHERE a.thread_id = :thread_id' . $from . '
-            ORDER BY a.id ' . $order . $limit);
+            ORDER BY a.id DESC' . $limit);
         $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         if ($from) {
             $q->bindValue(':from', $fromId, Database::PARAM_INT);
@@ -164,9 +162,7 @@ class Thread extends Post
             $replies[] = new Reply($this->db, $row);
         }
 
-        if ($newest) {
-            $replies = array_reverse($replies);
-        }
+        $replies = array_reverse($replies);
 
         return $replies;
     }

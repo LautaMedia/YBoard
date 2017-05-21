@@ -15,12 +15,13 @@
         align-items: center;
         border-radius: 5px;
         cursor: pointer;
-        transition: opacity 0.4s;
+        transition: opacity 0.2s;
         color: #000;
         &.fading {
             opacity: 0;
         }
         &:hover {
+            transition-delay: 0.4s;
             opacity: 0.95;
         }
         &::before {

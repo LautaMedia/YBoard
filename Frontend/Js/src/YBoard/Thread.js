@@ -1,12 +1,20 @@
+import YQuery from '../YQuery';
+import YBoard from '../YBoard';
 import AutoUpdate from './Thread/AutoUpdate';
 import Hide from './Thread/Hide';
 import Follow from './Thread/Follow';
 
 class Thread {
     constructor() {
+        let that = this;
         this.AutoUpdate = new AutoUpdate();
         this.Hide = new Hide();
         this.Follow = new Follow();
+
+        document.querySelectorAll('.replies-buttons').forEach(function(elm) {
+            elm.querySelector('.e-more-replies').addEventListener('click', that.expand);
+            elm.querySelector('.e-less-replies').addEventListener('click', that.shrink);
+        });
     }
 
     getElm(id)
@@ -48,31 +56,46 @@ class Thread {
         }
     }
 
-    expand(threadId)
+    shrink(e)
+    {
+        let thread = e.target.closest('.thread');
+        thread.querySelector('.more-replies-container').innerHTML = '';
+        thread.querySelector('.e-more-replies').show();
+        thread.classList.remove('expanded');
+    }
+
+    expand(e)
     {
         // Thread inline expansion
-        var thread = this.getElm(threadId);
-        if (!thread.hasClass('expanded')) {
-            // Expand
-            thread.addClass('expanded', true);
+        let thread = e.target.closest('.thread');
+        let threadId = thread.dataset.id;
+        let fromId = thread.querySelector('.reply').dataset.id;
+        let loadCount = 100;
 
-            var fromId = thread.find('.reply:first').attr('id').replace('post-', '');
+        YQuery.post('/api/thread/getreplies', {
+            'threadId': threadId,
+            'fromId': fromId,
+            'count': loadCount,
+        }).onLoad(function(xhr)
+        {
+            let data = document.createElement('template');
+            data.innerHTML = xhr.responseText;
+            YBoard.initElement(data.content);
 
-            $.post('/scripts/threads/getreplies', {
-                'threadId': threadId,
-                'fromId': fromId,
-            }).done(function(data)
-            {
-                // Update timestamps
-                data = $(data);
-                data.find('.datetime').localizeTimestamp(this);
+            let loadedCount = data.content.querySelectorAll('.reply').length;
+            if (loadedCount < loadCount) {
+                thread.querySelector('.e-more-replies').hide();
+            }
 
-                thread.find('.more-replies-container').html(data);
-            });
-        } else {
-            // Contract
-            thread.removeClass('expanded').find('.more-replies-container').html('');
-        }
+            let expandContainer = thread.querySelector('.more-replies-container');
+            let firstVisibleReply = expandContainer.querySelector('.reply');
+            if (firstVisibleReply === null) {
+                expandContainer.appendChild(data.content);
+            } else {
+                thread.querySelector('.more-replies-container').insertBefore(data.content, firstVisibleReply);
+            }
+            thread.classList.add('expanded');
+        });
     }
 }
 

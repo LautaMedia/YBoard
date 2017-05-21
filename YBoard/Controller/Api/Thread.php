@@ -13,6 +13,7 @@ class Thread extends ApiController
         }
 
         $newest = empty($_POST['newest']) ? false : true;
+        $count = empty($_POST['count']) ? 100 : (int)$_POST['count'];
 
         $thread = Model\Thread::get($this->db, $_POST['threadId'], false);
         if ($thread === null) {
@@ -23,7 +24,7 @@ class Thread extends ApiController
 
         $view->setVar('thread', $thread);
         $view->setVar('board', Model\Board::getById($this->db, $thread->boardId));
-        $view->setVar('replies', $thread->getReplies(null, $newest, $_POST['fromId']));
+        $view->setVar('replies', $thread->getReplies($count, $newest, $_POST['fromId']));
 
         $view->display('Ajax/ThreadExpand');
 
