@@ -287,8 +287,7 @@ class Post extends ApiController
             $this->throwJsonError(400);
         }
 
-        $posts = new Post($this->db);
-        $post = $posts->get($_POST['postId'], false);
+        $post = Model\Post::get($this->db, $_POST['postId'], false);
         if ($post === null) {
             $this->throwJsonError(404, _('Post does not exist'));
         }
@@ -303,7 +302,7 @@ class Post extends ApiController
         }
 
         if (!empty($post->threadId)) {
-            $thread = $posts->getThread($post->threadId, false);
+            $thread = Model\Thread::get($this->db, $post->threadId, false);
             $thread->undoLastBump();
         }
 
@@ -313,7 +312,7 @@ class Post extends ApiController
         $replied = $post->getRepliedPosts();
         if (!empty($replied)) {
             $messageQueue->send([
-                'types' => UserNotification::NOTIFICATION_TYPE_POST_REPLY,
+                'types' => Model\UserNotification::NOTIFICATION_TYPE_POST_REPLY,
                 'posts' => $replied,
             ], MessageQueue::MSG_TYPE_REMOVE_POST_NOTIFICATION);
         }

@@ -6,17 +6,24 @@ class Post
 {
     constructor()
     {
+        let that = this;
         this.File = new PostFile();
 
         // Remove highlighted posts when the location hash is changed
-        document.addEventListener('hashchange', function() {
-            this.removeHighlights();
+        document.addEventListener('hashchange', function()
+        {
+            that.removeHighlights();
         });
+    }
 
-        [].forEach.call(document.getElementsByClassName('e-post-delete'), function(elm) {
-            elm.addEventListener('click', function(e) {
-                console.log(e.target);
-            });
+    bindEvents(elm)
+    {
+        let that = this;
+        this.File.bindEvents(elm);
+
+        elm.querySelectorAll('.e-post-delete').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.delete);
         });
     }
 
@@ -25,27 +32,27 @@ class Post
         return document.getElementById('post-' + id);
     }
 
-    delete(id)
+    delete(e)
     {
+        let that = this;
         if (!confirm(messages.confirmDeletePost)) {
             return false;
         }
 
-        let that = this;
-        YQuery.post('/api/post/delete', {'postId': id}, {
-            'loadFunction': function()
-            {
-                that.getElm(id).remove();
-                if ($('body').hasClass('thread-page')) {
-                    if (YB.thread.getElm(id).is('*')) {
-                        // We're in the thread we just deleted
-                        YB.returnToBoard();
-                    }
-                } else {
-                    // The deleted post is not the current thread
-                    YBoard.thread.getElm(id).remove();
-                    YBoard.Toast.success(messages.postDeleted);
+        let post = e.target.closest('.post');
+        let id = post.dataset.id;
+        YQuery.post('/api/post/delete', {'postId': id}).onLoad(function()
+        {
+            post.remove();
+            if (document.body.classList.contains('thread-page')) {
+                if (YBoard.Thread.getElm(id) !== null) {
+                    // We're in the thread we just deleted
+                    YBoard.returnToBoard();
                 }
+            } else {
+                // The deleted post is not the current thread
+                YBoard.Thread.getElm(id).remove();
+                YBoard.Toast.success(messages.postDeleted);
             }
         });
     }

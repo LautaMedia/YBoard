@@ -1,6 +1,7 @@
 <?php
 namespace YBoard\Controller\Cli;
 
+use YBoard\CliController;
 use YBoard\Model\Board;
 use YBoard\Model\File;
 use YBoard\Model\Post;
@@ -8,13 +9,13 @@ use YBoard\Model\Thread;
 use YBoard\Model\User;
 use YBoard\Model\UserSession;
 
-class Cleanup extends AbstractCliDatabase
+class Cleanup extends CliController
 {
     public function deleteOldFiles(): void
     {
         File::deleteOrphans($this->db);
 
-        $glob = glob($this->config['file']['savePath'] . '/*/*/*.*');
+        $glob = glob($this->config['file']['savePath'] . '/[0-9a-z][0-9a-z]/{o,t}/*.*', GLOB_BRACE);
         $i = 1;
         $count = 0;
         foreach ($glob AS $file) {
@@ -30,26 +31,25 @@ class Cleanup extends AbstractCliDatabase
 
             unlink($file);
             if (!QUIET) {
-                echo "\n" . $file . " deleted";
+                echo $file . " deleted\n";
             }
             ++$count;
         }
 
         if (!QUIET) {
-            echo "\n\n" . $count . " files deleted\n";
+            echo "\n" . $count . " files deleted\n";
         }
     }
 
     public function deleteOldPosts(): void
     {
-
         $threads = [];
         foreach (Board::getAll($this->db) as $board) {
             if (!$board->inactiveHoursDelete) {
                 continue;
             }
 
-            $threads = array_merge($threads, Thread::getOld($this->db, $board->id, $board->inactiveHoursDelete));
+            $threads = array_merge($threads, Thread::getOldIds($this->db, $board->id, $board->inactiveHoursDelete));
         }
 
         if (!empty($threads)) {

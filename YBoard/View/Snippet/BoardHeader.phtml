@@ -7,7 +7,7 @@
         <?php if (empty($thread)) : ?>
         <button class="button primary create-thread"><?= _('Create a thread') ?></button>
         <?php elseif (!$thread->locked) : ?>
-        <button class="button primary e-add-reply"><?= _('Reply to thread') ?></button>
+        <button class="button primary e-thread-reply"><?= _('Reply to thread') ?></button>
         <?php endif ?>
     </div>
 </header>

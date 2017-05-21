@@ -1,7 +1,9 @@
 <?php
 namespace YBoard\Controller\Cli;
 
-class Cron extends AbstractCliDatabase
+use YBoard\CliController;
+
+class Cron extends CliController
 {
     public function daily(): void
     {

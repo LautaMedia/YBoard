@@ -108,7 +108,7 @@ class YBoard
             tooltips = elm.querySelectorAll('.tip, .ref');
         }
 
-        this.Post.File.bindEvents(elm);
+        this.Post.bindEvents(elm);
 
         tooltips.forEach(function(elm)
         {

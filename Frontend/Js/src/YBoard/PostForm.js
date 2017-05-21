@@ -54,13 +54,19 @@ class PostForm
         });
 
         // Reply to a thread
-        document.querySelectorAll('.e-add-reply').forEach(function(elm)
+        document.querySelectorAll('.e-thread-reply').forEach(function(elm)
         {
             elm.addEventListener('click', function(e)
             {
                 e.preventDefault();
-                that.threadReply(e.target.closest('.thread').dataset.id);
-                that.msgElm.focus();
+
+                let threadId = null;
+                let thread = e.target.closest('.thread');
+                if (thread !== null) {
+                    threadId = thread.dataset.id;
+                }
+
+                that.threadReply(threadId);
             });
         });
 
@@ -306,7 +312,7 @@ class PostForm
                 that.elm.querySelector('#file-id').value = data.message[0];
 
                 if (that.submitAfterFileUpload) {
-                    this.submit();
+                    that.submit();
                 }
             } else {
                 YBoard.Toast.error(messages.errorOccurred);
@@ -369,9 +375,12 @@ class PostForm
 
     threadReply(threadId)
     {
-        YBoard.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
-        this.show(true);
-        this.setDestination(true, threadId);
+        if (threadId !== null) {
+            YBoard.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
+            this.show(true);
+            this.setDestination(true, threadId);
+        }
+
         this.msgElm.focus();
     }
 
@@ -443,6 +452,8 @@ class PostForm
 
             if (thread !== null) {
                 YBoard.Thread.AutoUpdate.runOnce(thread);
+                // Reset post form
+                that.reset();
             } else {
                 if (xhr.responseText.length === 0) {
                     YBoard.pageReload();
@@ -455,9 +466,6 @@ class PostForm
                     }
                 }
             }
-
-            // Reset post form
-            that.reset();
         }).onEnd(function()
         {
             submitButton.disabled = false;

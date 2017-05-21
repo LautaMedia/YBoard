@@ -118,7 +118,7 @@ They use native gettext for maximum performance.
 2. Run `locale-gen`
 3. Restart PHP `service php7.1-fpm restart`
 
-If you edit the config or locales, please regenerate the javascripts with `php RunCommand.php GenerateFiles allJs`.
+If you edit the config or locales, please regenerate the javascripts with `php RunCommand.php GenerateFiles`.
 
 
 ## Discussion

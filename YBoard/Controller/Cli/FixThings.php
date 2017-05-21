@@ -1,26 +1,25 @@
 <?php
 namespace YBoard\Controller\Cli;
 
+use YBoard\CliController;
 use YBoard\Model\File;
 
-class FixThings extends AbstractCliDatabase
+class FixThings extends CliController
 {
     public function filesizes(): void
     {
-        $files = new File($this->db);
-
-        $glob = glob(ROOT_PATH . '/public/static/files/*/t/*.*');
+        $glob = glob($this->config['file']['savePath'] . '/[a-z0-9][a-z0-9]/{0,t}/*.*', GLOB_BRACE);
         foreach ($glob AS $filePath) {
             $fileName = pathinfo($filePath, PATHINFO_FILENAME);
 
-            $file = $files->getByName($fileName);
+            $file = File::getByName($this->db, $fileName);
             if (!$file) {
                 continue;
             }
 
-            $file->updateSize(filesize($filePath));
+            $file->setSize(filesize($filePath));
 
-            echo "\n" . $filePath . " updated";
+            echo $filePath . " updated\n";
         }
     }
 }

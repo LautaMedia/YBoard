@@ -1,12 +1,12 @@
 <?php
 namespace YBoard;
 
-class ApiController extends Controller
+abstract class ApiController extends Controller
 {
     public function __construct()
     {
         parent::__construct();
 
-        //$this->validateAjaxCsrfToken();
+        $this->validateAjaxCsrfToken();
     }
 }

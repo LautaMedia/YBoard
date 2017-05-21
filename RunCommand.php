@@ -44,6 +44,3 @@ date_default_timezone_set('UTC');
 $className = '\YBoard\Controller\Cli\\' . $controller;
 $cron = new $className();
 $cron->$command();
-
-// Why not?
-echo "\n";

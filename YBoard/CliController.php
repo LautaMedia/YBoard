@@ -1,9 +1,9 @@
 <?php
-namespace YBoard\Controller\Cli;
+namespace YBoard;
 
 use YFW\Library\Database;
 
-abstract class AbstractCliDatabase
+abstract class CliController
 {
     protected $config;
     protected $db;
@@ -13,6 +13,8 @@ abstract class AbstractCliDatabase
         // Load config
         if ($config === null) {
             $this->config = require(ROOT_PATH . '/YBoard/Config/App.php');
+        } else {
+            $this->config = $config;
         }
 
         // Get a database connection

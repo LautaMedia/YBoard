@@ -1,14 +1,13 @@
 <?php
 namespace YBoard\Controller\Cli;
 
-use YFW\Controller;
 use YFW\Library\i18n;
 
-class GenerateFiles extends Controller
+class GenerateFiles
 {
     protected $config;
 
-    public function allJs(): void
+    public function index(): void
     {
         $this->jsLocales();
         $this->jsConfig();

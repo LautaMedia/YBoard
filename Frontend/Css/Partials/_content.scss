@@ -17,6 +17,7 @@ img { vertical-align: top }
 
 button, a, input, textarea, select {
     outline: none !important;
+    font: $fontSize $fontFamily;
 }
 
 button.link {

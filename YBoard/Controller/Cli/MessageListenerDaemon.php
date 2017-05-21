@@ -12,7 +12,7 @@ use YFW\Library\FileHandler;
 class MessageListenerDaemon
 {
     protected $config;
-    protected $db;
+    protected $db = null;
 
     public function __construct()
     {

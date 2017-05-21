@@ -24,8 +24,8 @@
             <?php if (!empty($thread->replies)) : ?>
                 <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
                 <div class="replies-buttons">
-                    <button class="link more-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show more replies') ?></button>
-                    <button class="link less-replies" onclick="getMoreReplies(<?= $thread->id ?>)"><?= _('show less replies') ?></button>
+                    <button class="link e-more-replies"><?= _('show more replies') ?></button>
+                    <button class="link e-less-replies"><?= _('show less replies') ?></button>
                 </div>
                 <?php endif ?>
                 <div class="more-replies-container"></div>
@@ -39,8 +39,8 @@
             <div class="thread-buttons">
                 <a class="link" href="/<?= $board->url ?>/<?= $thread->id ?>"><?= _('open') ?></a>
                 <?php if (!$thread->locked || $user->isMod) : ?>
-                <button class="link e-add-reply" data-thread="<?= $thread->id ?>"><?= _('reply') ?></button>
-                <button class="link get-replies"><?= _('update') ?></button>
+                <button class="link e-thread-reply"><?= _('reply') ?></button>
+                <button class="link e-get-replies"><?= _('update') ?></button>
                 <?php endif ?>
             </div>
         </div>

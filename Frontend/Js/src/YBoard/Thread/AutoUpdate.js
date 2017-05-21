@@ -17,7 +17,7 @@ class AutoUpdate
         this.startDelayTimeout = 0;
         this.originalDocTitle = document.title;
 
-        document.querySelectorAll('.thread .get-replies').forEach(function(elm) {
+        document.querySelectorAll('.thread .e-get-replies').forEach(function(elm) {
             elm.addEventListener('click', function(e) {
                 e.preventDefault();
                 that.runOnce(elm.closest('.thread').dataset.id);

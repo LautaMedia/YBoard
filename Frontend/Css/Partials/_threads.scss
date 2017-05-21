@@ -11,12 +11,12 @@ $postMetaHeight: 24px;
     }
 
     &:not(.expanded) {
-        .less-replies {
+        .e-less-replies {
             display: none;
         }
     }
     &.expanded {
-        .more-replies {
+        .e-more-replies {
             display: none
         }
     }
