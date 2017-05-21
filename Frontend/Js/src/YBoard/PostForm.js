@@ -316,9 +316,11 @@ class PostForm
                 }
             } else {
                 YBoard.Toast.error(messages.errorOccurred);
+                that.removeFile();
                 that.updateFileProgressBar(0);
             }
         }).onError(function() {
+            that.removeFile();
             that.updateFileProgressBar(0);
         });
 
