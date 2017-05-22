@@ -162,14 +162,14 @@ class UserPreferences extends Model
         return true;
     }
 
-    public static function getByUser(Database $db, int $userId): ?self
+    public static function getByUser(Database $db, int $userId): self
     {
         $q = $db->prepare("SELECT preferences_key, preferences_value FROM user_preferences WHERE user_id = :user_id");
         $q->bindValue(':user_id', $userId, Database::PARAM_INT);
         $q->execute();
 
         if ($q->rowCount() === 0) {
-            return null;
+            return new self($db);
         }
 
         return new self($db, $userId, $q->fetchAll());

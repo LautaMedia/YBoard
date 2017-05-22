@@ -267,7 +267,7 @@ abstract class Controller extends \YFW\Controller
         $templateEngine->setVar('requireCaptcha', $this->requireCaptcha);
 
         // Preload hints, TODO: fix locale and theme hints
-        header('Link: <' . $this->config['url']['static'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush',
+        header('Link: <' . $this->config['url']['static'] . $this->config['app']['logo'] . '>; rel=preload; as=image; nopush',
             false);
         header('Link: <' . $this->config['url']['static'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
             false);
