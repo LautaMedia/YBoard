@@ -32,8 +32,8 @@ class Thread extends Controller
         // Clear unread count and update last seen reply
         if ($this->user->threadIsFollowed($thread->id)) {
             $followedThread = $this->user->getFollowedThread($thread->id);
-            if (!empty($thread->threadReplies)) {
-                $tmp = array_slice($thread->threadReplies, -1);
+            if (!empty($thread->replies)) {
+                $tmp = array_slice($thread->replies, -1);
                 $lastReply = array_pop($tmp);
                 $followedThread->setLastSeenReply($lastReply->id);
             }

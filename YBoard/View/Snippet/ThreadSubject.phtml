@@ -1,8 +1,7 @@
 <h3>
-    <a href="/<?= $thread->boardUrl ?>/<?= $thread->id ?><?php
-    if ($user->getThreadLastSeenReply($thread->id) !== null) :
-        ?>#post-<?= $user->getThreadLastSeenReply($thread->id) ?><?php
-    endif ?>"><?php if ($thread->sticky) :
+    <a href="/<?= $thread->boardUrl ?>/<?= $thread->id ?><?=
+    $user->getThreadLastSeenReply($thread->id) !== null ? '#post-' . $user->getThreadLastSeenReply($thread->id):''
+    ?>"><?php if ($thread->sticky) :
         ?><span class="icon-pushpin icon" title="<?= _('Sticky') ?>"></span><?php
     endif;
     if ($thread->locked) :

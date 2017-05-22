@@ -2,6 +2,7 @@
 namespace YBoard\Controller;
 
 use YBoard\Controller;
+use YFW\Library\TemplateEngine;
 
 class InfoPages extends Controller
 {
@@ -9,35 +10,36 @@ class InfoPages extends Controller
     {
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = _('FAQ');
-
-        $view->display('InfoPages/FAQ');
+        $view->setVar('pageTitle', _('FAQ'));
+        $this->display($view, 'FAQ');
     }
 
     public function rules(): void
     {
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = _('Rules');
-
-        $view->display('InfoPages/Rules');
+        $view->setVar('pageTitle', _('Rules'));
+        $this->display($view, 'Rules');
     }
 
     public function about(): void
     {
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = _('About');
-
-        $view->display('InfoPages/About');
+        $view->setVar('pageTitle', _('About'));
+        $this->display($view, 'About');
     }
 
     public function advertising(): void
     {
         $view = $this->loadTemplateEngine();
 
-        $view->pageTitle = _('Advertising');
+        $view->setVar('pageTitle', _('Advertising'));
+        $this->display($view, 'Advertising');
+    }
 
-        $view->display('InfoPages/Advertising');
+    protected function display(TemplateEngine $view, string $pageName)
+    {
+        $view->display('InfoPage/' . $pageName);
     }
 }

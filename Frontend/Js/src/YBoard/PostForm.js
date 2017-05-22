@@ -12,6 +12,7 @@ class PostForm
             return;
         }
 
+        this.captchaRendered = false;
         this.locationParent = this.elm.parentNode;
         this.location = this.elm.nextElementSibling;
         this.msgElm = this.elm.querySelector('#post-message');
@@ -30,7 +31,7 @@ class PostForm
                 that.insertBbCode(e.target.dataset.code);
             });
         });
-        this.elm.querySelector('.bb-color-bar').addEventListener('click', function()
+        this.elm.querySelector('.e-postform-color-bar').addEventListener('click', function()
         {
             that.toggleBbColorBar();
         });
@@ -114,34 +115,52 @@ class PostForm
         {
             that.submit(e);
         });
+
+        this.elm.querySelectorAll('input, select textarea').forEach(function(elm) {
+            elm.addEventListener('focus', function(e)
+            {
+                that.renderCaptcha();
+            });
+        });
     }
 
     show(isReply)
     {
-        let that = this;
         if (!isReply) {
             // Reset if we click the "Create thread" -button
             this.reset();
         }
 
-        if (YBoard.Captcha.isEnabled()) {
-            let button = this.elm.querySelector('.g-recaptcha');
-            if (!!button && !button.dataset.rendered) {
-                // Button exists and captcha not rendered
-                YBoard.Captcha.render(button, {
-                    'size': 'invisible',
-                    'callback': function(response)
-                    {
-                        that.submit(null, response);
-                    },
-                    //'badge': 'inline',
-                });
-            }
-        }
+        this.renderCaptcha();
+
         this.elm.classList.add('visible');
         if (this.msgElm.offsetParent !== null) {
             this.msgElm.focus();
         }
+    }
+
+    renderCaptcha()
+    {
+        let that = this;
+        if (!YBoard.Captcha.isEnabled()) {
+            return;
+        }
+
+        let button = this.elm.querySelector('.g-recaptcha');
+        if (!button || this.captchaRendered) {
+            return;
+        }
+
+        this.captchaRendered = true;
+
+        // Button exists and captcha not rendered
+        YBoard.Captcha.render(button, {
+            'size': 'invisible',
+            'callback': function(response)
+            {
+                that.submit(null, response);
+            },
+        });
     }
 
     hide()
@@ -441,7 +460,7 @@ class PostForm
 
         let fd = new FormData(this.elm);
 
-        YQuery.post(this.elm.getAttribute('action'), fd, {
+        YQuery.post('/api/post/create', fd, {
             'contentType': null
         }).onLoad(function(xhr)
         {

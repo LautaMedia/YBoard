@@ -1,4 +1,4 @@
-<form class="content-box" id="post-form" action="/api/post/create" method="post">
+<form class="content-box" id="post-form" action="post">
     <fieldset>
         <input type="hidden" id="file-id" name="file_id">
 <?php if (!empty($thread->id)) : ?>
@@ -53,7 +53,7 @@
             <a class="icon-code bb-code" title="<?= _('Code') ?>" data-code="code"></a>
             <a class="icon-sup bb-code" title="<?= _('Superscript') ?>" data-code="sup"></a>
             <a class="icon-sub bb-code" title="<?= _('Subscript') ?>" data-code="sub"></a>
-            <a class="icon-palette bb-color-bar" title="<?= _('Colors') ?>"></a>
+            <a class="icon-palette e-postform-color-bar" title="<?= _('Colors') ?>"></a>
             <div id="color-buttons">
                 <a class="icon-palette black bb-code" title="<?= _('Black') ?>" data-code="black"></a>
                 <a class="icon-palette gray bb-code" title="<?= _('Gray') ?>" data-code="gray"></a>
@@ -74,7 +74,7 @@
         <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
         <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
         <input type="submit" class="button primary<?=
-            $config['captcha']['enabled'] ? ' g-recaptcha"' : '"'
+            $requireCaptcha ? ' g-recaptcha"' : '"'
         ?> value="<?= _('Submit') ?>">
     </div>
     <div id="post-options">

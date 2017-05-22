@@ -248,8 +248,9 @@ abstract class Controller extends \YFW\Controller
             $theme = $this->user->preferences->theme;
         }
 
+        $activeStylesheet = !$this->user->preferences->darkTheme ? $this->config['themes'][$theme]['light'] : $this->config['themes'][$theme]['dark'];
         $templateEngine->setVar('stylesheet', [
-            'active' => !$this->user->preferences->darkTheme ? $this->config['themes'][$theme]['light'] : $this->config['themes'][$theme]['dark'],
+            'active' => $activeStylesheet,
             'color' => $this->config['themes'][$theme]['color'],
             'light' => $this->config['themes'][$theme]['light'],
             'dark' => $this->config['themes'][$theme]['dark'],
@@ -263,6 +264,7 @@ abstract class Controller extends \YFW\Controller
 
         $templateEngine->setVar('user', $this->user);
         $templateEngine->setVar('boardList', $this->boards);
+        $templateEngine->setVar('requireCaptcha', $this->requireCaptcha);
 
         // Preload hints, TODO: fix locale and theme hints
         header('Link: <' . $this->config['app']['staticUrl'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush',
@@ -270,10 +272,10 @@ abstract class Controller extends \YFW\Controller
         header('Link: <' . $this->config['app']['staticUrl'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
             false);
         header('Link: <' . $this->config['app']['staticUrl'] . '/js/config.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/fi_FI.UTF-8.default.js>; rel=preload; as=script; nopush',
+        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
             false);
         header('Link: <' . $this->config['app']['staticUrl'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/css/ylilauta.css>; rel=preload; as=style; nopush',
+        header('Link: <' . $this->config['app']['staticUrl'] . $activeStylesheet . '>; rel=preload; as=style; nopush',
             false);
 
         return $templateEngine;

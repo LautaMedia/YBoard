@@ -31,7 +31,7 @@ class Thread extends ApiController
         // Clear unread count and update last seen reply
         $followedThread = $this->user->getFollowedThread($_POST['threadId']);
         if ($followedThread !== null) {
-            $followedThread->resetUnreadCount();
+            $this->user->markFollowedRead($_POST['threadId']);
             $followedThread->setLastSeenReply($_POST['fromId']);
         }
     }

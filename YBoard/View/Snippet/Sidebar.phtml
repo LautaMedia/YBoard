@@ -7,10 +7,10 @@
         </a>
         <div class="columns">
             <a href="/gold"><?= _('Gold account') ?></a>
-            <a href="/faq"><?= _('FAQ') ?></a>
-            <a href="/rules"><?= _('Rules') ?></a>
-            <a href="/about"><?= _('About') ?></a>
-            <a href="/advertising"><?= _('Advertising') ?></a>
+            <a href="/info/faq"><?= _('FAQ') ?></a>
+            <a href="/info/rules"><?= _('Rules') ?></a>
+            <a href="/info/about"><?= _('About') ?></a>
+            <a href="/info/advertising"><?= _('Advertising') ?></a>
         </div>
         <?php if($config['search']['enabled']): ?>
         <form id="search" method="get" action="/search">
@@ -30,7 +30,7 @@
                 <input type="password" name="password" placeholder="<?= _('Password') ?>" required>
                 <div>
                     <button type="submit" class="button primary" name="login"><?= _('Log_in') ?></button>
-                    <button type="button" class="button transparent signup"><?= _('Sign up') ?></button>
+                    <button type="button" class="button transparent e-signup"><?= _('Sign up') ?></button>
                 </div>
             </form>
             <form id="signup" class="ajax" action="/api/user/create" method="post">
@@ -39,7 +39,7 @@
                 <input type="password" name="repassword" placeholder="<?= _('Password again') ?>" required>
                 <div>
                     <button type="submit" class="button primary<?=
-                    $config['captcha']['enabled'] ? ' g-recaptcha"' : '"'
+                    $requireCaptcha ? ' g-recaptcha"' : '"'
                     ?> name="login"><?= _('Sign up') ?></button>
                     <button type="button" class="button transparent cancel"><?= _('Cancel') ?></button>
                 </div>
@@ -68,7 +68,7 @@
             <?php endif ?>
             <a class="button square icon-user" href="/profile/" title="<?= _('Profile') ?>"></a>
             <a class="button square icon-cog" href="/preferences" title="<?= _('Preferences') ?>"></a>
-            <button class="button square icon-lamp switch-theme" title="<?= _('Switch theme colors') ?>"></button>
+            <button class="button square icon-lamp e-switch-theme" title="<?= _('Switch theme colors') ?>"></button>
             <?php if ($user->loggedIn) : ?>
                 <form id="logout" class="ajax" action="/api/user/session/delete" method="post">
                     <button type="submit" class="button square icon-exit" title="<?= _('Log out') ?>"

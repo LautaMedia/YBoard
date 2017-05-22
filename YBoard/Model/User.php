@@ -21,7 +21,6 @@ class User extends Model
     public $ban = false;
     public $isMod = false;
     public $isAdmin = false;
-    public $requireCaptcha = true;
 
     public $session;
     public $preferences;
@@ -192,9 +191,17 @@ class User extends Model
 
     public function markFollowedRead(int $threadId): bool
     {
+        if ($this->threadFollow['unreadThreads'] === 0) {
+            return true;
+        }
+
         $followed = $this->getFollowedThread($threadId);
         if ($followed === null) {
             return false;
+        }
+
+        if ($followed->unreadCount === 0) {
+            return true;
         }
 
         $this->threadFollow['unreadThreads'] -= 1;

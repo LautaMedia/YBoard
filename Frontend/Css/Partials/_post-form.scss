@@ -151,16 +151,6 @@
             margin-right: 0;
             margin-left: auto;
         }
-        > div {
-            // ReCaptcha infobox
-            order: 999;
-            flex-basis: 100%;
-            text-align: right;
-            margin-top: 10px;
-            .grecaptcha-badge {
-                margin-left: auto;
-            }
-        }
     }
 
     #label-file {

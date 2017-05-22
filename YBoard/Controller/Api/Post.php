@@ -127,7 +127,7 @@ class Post extends ApiController
             }
         }
 
-        if ($this->config['captcha']['enabled'] && $this->user->requireCaptcha) {
+        if ($this->requireCaptcha) {
             if (empty($_POST["g-recaptcha-response"])) {
                 $this->throwJsonError(400, _('Empty CAPTCHA response. Please try again.'));
             }

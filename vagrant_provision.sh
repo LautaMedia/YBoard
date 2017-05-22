@@ -16,6 +16,8 @@ apt install -y jpegoptim pngcrush imagemagick nginx mysql-server-5.7 php7.1-fpm 
 sed -i -e 's/^user .*;/user ubuntu;/g' /etc/nginx/nginx.conf
 sed -i -e 's/#\? \?use .*;//g' /etc/nginx/nginx.conf
 sed -i -e 's/#\? \?multi_accept .*;/multi_accept on; use epoll;/g' /etc/nginx/nginx.conf
+# Sendfile messes up with caches
+sed -i -e 's/\t\?sendfile on;/\tsendfile off;/g' /etc/nginx/nginx.conf
 
 # SSL is not enabled, but this is how you should do it.
 # See also the commented-out ssl directives in nginx-config.

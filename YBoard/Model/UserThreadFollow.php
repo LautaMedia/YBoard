@@ -30,7 +30,7 @@ class UserThreadFollow extends Model
                     $this->threadId = (int)$val;
                     break;
                 case 'last_seen_reply':
-                    $this->lastSeenReply = (int)$val;
+                    $this->lastSeenReply = $val === null ? null : (int)$val;
                     break;
             }
         }

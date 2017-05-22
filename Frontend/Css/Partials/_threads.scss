@@ -52,7 +52,6 @@ body:not(.thread-page) .thread.hidden {
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-        position: relative;
 
         $subjectBgColor: darken($contentBgColor, 5%);
         @if (lightness($contentBgColor) < 50) {
@@ -60,6 +59,13 @@ body:not(.thread-page) .thread.hidden {
         }
         background-color: $subjectBgColor;
         transition: background-color $transition;
+
+        a {
+            display: flex;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
 
         .icon {
             display: inline-block;
@@ -76,22 +82,14 @@ body:not(.thread-page) .thread.hidden {
         }
 
         .notification-count {
-            position: absolute;
-            right: 0;
+            margin-left: auto;
             min-width: $height;
             height: $height;
             padding: 0 5px;
             text-align: center;
             box-sizing: border-box;
-            background-color: hsla(hue($highlightColor), saturation($highlightColor), lightness($highlightColor), 0.5);
+            background-color: hsla(hue($highlightColor), saturation($highlightColor), lightness($highlightColor), 0.8);
             color: #fff;
-        }
-
-        a {
-            display: block;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
         }
     }
 

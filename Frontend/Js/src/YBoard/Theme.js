@@ -7,7 +7,7 @@ class Theme
         let that = this;
 
         // Switch theme
-        document.querySelector('.switch-theme').addEventListener('click', function()
+        document.querySelector('.e-switch-theme').addEventListener('click', function()
         {
             that.switchVariation();
         });
@@ -19,7 +19,7 @@ class Theme
             }
         });
 
-        document.querySelector('.sidebar-toggle').addEventListener('click', function () {
+        document.querySelector('.e-sidebar-toggle').addEventListener('click', function () {
             document.getElementById('sidebar').classList.toggle('visible');
         });
 

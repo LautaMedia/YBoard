@@ -46,7 +46,7 @@ class YBoard
         // Sidebar signup & login
         let loginForm = document.getElementById('login');
         if (loginForm !== null) {
-            loginForm.querySelector('.signup').addEventListener('click', function(e)
+            loginForm.querySelector('.e-signup').addEventListener('click', function(e)
             {
                 that.signup(e, true);
             });
@@ -141,12 +141,12 @@ class YBoard
 
     localizeDatetime(elm)
     {
-        elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString('ca');
+        elm.innerHTML =  new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
     }
 
     localizeNumber(elm)
     {
-        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('nu', {
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString(undefined, {
             minimumFractionDigits: 0
         });
     }
@@ -158,7 +158,7 @@ class YBoard
             currency = 'eur';
         }
 
-        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString('nu', {
+        elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString(undefined, {
             'style': 'currency',
             'currency': currency
         });
