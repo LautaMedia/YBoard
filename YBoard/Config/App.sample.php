@@ -4,9 +4,13 @@ return [
     'app' => [
         'name' => 'YBoard',
         'motto' => 'On speed again',
-        'url' => '//localhost:9001', // no trailing slash
-        'staticUrl' => '//localhost:9001/static', // no trailing slash
-        'logoUrl' => '/img/norppa_ylilauta.svg', // relative to staticUrl
+        'logo' => '/img/norppa_ylilauta.svg', // relative to staticUrl
+    ],
+    'url' => [
+        // no trailing slash
+        'public' => '//localhost:9001',
+        'static' => '//localhost:9001/static',
+        'files' => '//localhost:9001/files',
     ],
     'view' => [
         'maxPages' => 100,
@@ -31,8 +35,7 @@ return [
         'threadIntervalLimit' => 30,
     ],
     'file' => [
-        'url' => '//localhost:9001/static/files', // no trailing slash
-        'savePath' => ROOT_PATH . '/public/static/files', // no trailing slash
+        'savePath' => ROOT_PATH . '/files', // no trailing slash
         'diskMinFree' => 1073741824,
         'maxSize' => 10485760,
         'maxPixelCount' => 50000000,

@@ -108,8 +108,8 @@ class File Extends ApiController
         }
 
         $view = new TemplateEngine(ROOT_PATH . '/YBoard/View/', 'Blank');
-        $view->setVar('fileUrl', $this->config['file']['url'] . '/' . $file->folder . '/o/' . $file->name . '/' . '1.' . $file->extension);
-        $view->setVar('poster', $this->config['file']['url'] . '/' . $file->folder . '/t/' . $file->name . '.jpg');
+        $view->setVar('fileUrl', $this->config['url']['files'] . '/' . $file->folder . '/o/' . $file->name . '/' . '1.' . $file->extension);
+        $view->setVar('poster', $this->config['url']['files'] . '/' . $file->folder . '/t/' . $file->name . '.jpg');
         $view->setVar('loop', $file->isGif);
 
         $view->display('Ajax/MediaPlayer');

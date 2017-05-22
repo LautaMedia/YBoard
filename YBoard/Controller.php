@@ -267,15 +267,15 @@ abstract class Controller extends \YFW\Controller
         $templateEngine->setVar('requireCaptcha', $this->requireCaptcha);
 
         // Preload hints, TODO: fix locale and theme hints
-        header('Link: <' . $this->config['app']['staticUrl'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush',
+        header('Link: <' . $this->config['url']['static'] . $this->config['app']['logoUrl'] . '>; rel=preload; as=image; nopush',
             false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
+        header('Link: <' . $this->config['url']['static'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
             false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/js/config.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
+        header('Link: <' . $this->config['url']['static'] . '/js/config.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['url']['static'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
             false);
-        header('Link: <' . $this->config['app']['staticUrl'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
-        header('Link: <' . $this->config['app']['staticUrl'] . $activeStylesheet . '>; rel=preload; as=style; nopush',
+        header('Link: <' . $this->config['url']['static'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['url']['static'] . $activeStylesheet . '>; rel=preload; as=style; nopush',
             false);
 
         return $templateEngine;
@@ -444,7 +444,7 @@ abstract class Controller extends \YFW\Controller
     {
         $images = glob(ROOT_PATH . '/static/img/' . $errorCode . '/*.*');
         if (!empty($images)) {
-            return $this->config['app']['staticUrl'] . str_replace(ROOT_PATH . '/static', '',
+            return $this->config['url']['static'] . str_replace(ROOT_PATH . '/static', '',
                     $images[array_rand($images)]);
         }
 

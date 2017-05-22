@@ -5,7 +5,6 @@ import Catalog from './YBoard/Catalog';
 import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
-import Modal from './YBoard/Modal';
 import Tooltip from './Tooltip';
 import Toast from './Toast';
 

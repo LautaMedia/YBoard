@@ -2,7 +2,6 @@
 
 import './Polyfills';
 import './PrototypeExtensions';
-import './Events';
 
 import YQuery from './YQuery';
 import YBoard from './YBoard';

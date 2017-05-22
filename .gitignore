@@ -4,7 +4,7 @@ node_modules
 Log/*
 static/js/*.js.map
 static/js/config.js
-static/file/*
+files/*
 YBoard/Config/Database.php
 YBoard/Config/App.php
 Profiler/*

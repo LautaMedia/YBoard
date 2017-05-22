@@ -8,20 +8,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="<?= $stylesheet['color'] ?>">
 
-    <base href="<?= $config['app']['url'] ?>">
+    <base href="<?= $config['url']['public'] ?>">
 
-    <link rel="icon" sizes="192x192" href="<?= $config['app']['staticUrl'] ?>/img/norppa_icon.png">
-    <link rel="stylesheet" class="css" href="<?= $config['app']['staticUrl'] . $stylesheet['active'] ?>"
-          data-light="<?= $config['app']['staticUrl'] . $stylesheet['light'] ?>"
-          data-dark="<?= $config['app']['staticUrl'] . $stylesheet['dark'] ?>"
+    <link rel="icon" sizes="192x192" href="<?= $config['url']['static'] ?>/img/norppa_icon.png">
+    <link rel="stylesheet" class="css" href="<?= $config['url']['static'] . $stylesheet['active'] ?>"
+          data-light="<?= $config['url']['static'] . $stylesheet['light'] ?>"
+          data-dark="<?= $config['url']['static'] . $stylesheet['dark'] ?>"
           data-darkTheme="<?= $stylesheet['darkTheme'] ?>">
     <?php if ($user->preferences->hideSidebar): ?>
-    <link rel="stylesheet" id="hide-sidebar" href="<?= $config['app']['staticUrl'] ?>/css/hide_sidebar.css">
+    <link rel="stylesheet" id="hide-sidebar" href="<?= $config['url']['static'] ?>/css/hide_sidebar.css">
     <?php endif ?>
 
-    <script src="<?= $config['app']['staticUrl'] ?>/js/locale/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
-    <script src="<?= $config['app']['staticUrl'] ?>/js/config.js" defer></script>
-    <script src="<?= $config['app']['staticUrl'] ?>/js/yboard.js" defer></script>
+    <script src="<?= $config['url']['static'] ?>/js/locale/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
+    <script src="<?= $config['url']['static'] ?>/js/config.js" defer></script>
+    <script src="<?= $config['url']['static'] ?>/js/yboard.js" defer></script>
     <script>let csrfToken='<?= $user->session->csrfToken ?>';</script>
 
     <?php if ($requireCaptcha): ?>

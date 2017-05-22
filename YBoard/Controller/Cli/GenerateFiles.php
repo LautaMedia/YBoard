@@ -88,7 +88,7 @@ class GenerateFiles
     protected function getJsConfig(): string
     {
         $config = [
-            'staticUrl' => $this->config['app']['staticUrl'],
+            'staticUrl' => $this->config['url']['static'],
         ];
 
         if ($this->config['captcha']['enabled']) {

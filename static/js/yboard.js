@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -295,6 +295,139 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Toast = function () {
+    function Toast() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, Toast);
+
+        this.options = Object.assign({
+            'displayTime': 3000,
+            'fadeTime': 2000
+        }, options);
+    }
+
+    _createClass(Toast, [{
+        key: 'success',
+        value: function success(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('success', message, title, options);
+        }
+    }, {
+        key: 'info',
+        value: function info(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('info', message, title, options);
+        }
+    }, {
+        key: 'warning',
+        value: function warning(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('warning', message, title, options);
+        }
+    }, {
+        key: 'error',
+        value: function error(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('error', message, title, options);
+        }
+    }, {
+        key: '_show',
+        value: function _show(type, message, title, options) {
+            var that = this;
+
+            options = Object.assign({}, this.options, options);
+
+            var toastRoot = document.getElementById('toast-root');
+            if (toastRoot === null) {
+                toastRoot = document.createElement('div');
+                toastRoot.id = 'toast-root';
+                document.body.appendChild(toastRoot);
+            }
+
+            var toast = document.createElement('div');
+            toast.classList.add('toast', type);
+
+            var toastContent = document.createElement('div');
+            toastContent.classList.add('toast-content');
+            toast.appendChild(toastContent);
+
+            if (title !== false) {
+                var toastTitle = document.createElement('h3');
+                toastTitle.innerHTML = title;
+                toastContent.appendChild(toastTitle);
+            }
+
+            var toastMessage = document.createElement('p');
+            toastMessage.innerHTML = message;
+            toastContent.appendChild(toastMessage);
+
+            toastRoot.appendChild(toast);
+
+            toast.addEventListener('click', function (e) {
+                e.currentTarget.removeToast();
+            });
+
+            toast.removeToast = function () {
+                toast.remove();
+
+                if (toastRoot.querySelector('.toast') === null) {
+                    toastRoot.remove();
+                }
+            };
+
+            toast.startFade = function () {
+                toast.classList.add('fading');
+                toast.style.transitionDuration = that.options.fadeTime / 1000 + 's';
+            };
+
+            var fading = void 0,
+                removing = void 0;
+            fading = setTimeout(toast.startFade, options.displayTime);
+            removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
+
+            toast.addEventListener('mouseover', function (e) {
+                clearTimeout(fading);
+                clearTimeout(removing);
+                e.currentTarget.classList.remove('fading');
+                e.currentTarget.style.transitionDuration = '';
+            });
+
+            toast.addEventListener('mouseout', function (e) {
+                fading = setTimeout(toast.startFade, options.displayTime);
+                removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
+            });
+        }
+    }]);
+
+    return Toast;
+}();
+
+exports.default = new Toast();
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -303,39 +436,35 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Captcha = __webpack_require__(9);
+var _Captcha = __webpack_require__(8);
 
 var _Captcha2 = _interopRequireDefault(_Captcha);
 
-var _Theme = __webpack_require__(15);
+var _Theme = __webpack_require__(13);
 
 var _Theme2 = _interopRequireDefault(_Theme);
 
-var _Catalog = __webpack_require__(10);
+var _Catalog = __webpack_require__(9);
 
 var _Catalog2 = _interopRequireDefault(_Catalog);
 
-var _Thread = __webpack_require__(16);
+var _Thread = __webpack_require__(14);
 
 var _Thread2 = _interopRequireDefault(_Thread);
 
-var _Post = __webpack_require__(12);
+var _Post = __webpack_require__(10);
 
 var _Post2 = _interopRequireDefault(_Post);
 
-var _PostForm = __webpack_require__(13);
+var _PostForm = __webpack_require__(11);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
 
-var _Modal = __webpack_require__(11);
-
-var _Modal2 = _interopRequireDefault(_Modal);
-
-var _Tooltip = __webpack_require__(8);
+var _Tooltip = __webpack_require__(7);
 
 var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -624,157 +753,7 @@ var YBoard = function () {
 exports.default = new YBoard();
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Toast = function () {
-    function Toast() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, Toast);
-
-        this.options = Object.assign({
-            'displayTime': 3000,
-            'fadeTime': 2000
-        }, options);
-    }
-
-    _createClass(Toast, [{
-        key: 'success',
-        value: function success(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('success', message, title, options);
-        }
-    }, {
-        key: 'info',
-        value: function info(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('info', message, title, options);
-        }
-    }, {
-        key: 'warning',
-        value: function warning(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('warning', message, title, options);
-        }
-    }, {
-        key: 'error',
-        value: function error(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('error', message, title, options);
-        }
-    }, {
-        key: '_show',
-        value: function _show(type, message, title, options) {
-            var that = this;
-
-            options = Object.assign({}, this.options, options);
-
-            var toastRoot = document.getElementById('toast-root');
-            if (toastRoot === null) {
-                toastRoot = document.createElement('div');
-                toastRoot.id = 'toast-root';
-                document.body.appendChild(toastRoot);
-            }
-
-            var toast = document.createElement('div');
-            toast.classList.add('toast', type);
-
-            var toastContent = document.createElement('div');
-            toastContent.classList.add('toast-content');
-            toast.appendChild(toastContent);
-
-            if (title !== false) {
-                var toastTitle = document.createElement('h3');
-                toastTitle.innerHTML = title;
-                toastContent.appendChild(toastTitle);
-            }
-
-            var toastMessage = document.createElement('p');
-            toastMessage.innerHTML = message;
-            toastContent.appendChild(toastMessage);
-
-            toastRoot.appendChild(toast);
-
-            toast.addEventListener('click', function (e) {
-                e.currentTarget.removeToast();
-            });
-
-            toast.removeToast = function () {
-                toast.remove();
-
-                if (toastRoot.querySelector('.toast') === null) {
-                    toastRoot.remove();
-                }
-            };
-
-            toast.startFade = function () {
-                toast.classList.add('fading');
-                toast.style.transitionDuration = that.options.fadeTime / 1000 + 's';
-            };
-
-            var fading = void 0,
-                removing = void 0;
-            fading = setTimeout(toast.startFade, options.displayTime);
-            removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
-
-            toast.addEventListener('mouseover', function (e) {
-                clearTimeout(fading);
-                clearTimeout(removing);
-                e.currentTarget.classList.remove('fading');
-                e.currentTarget.style.transitionDuration = '';
-            });
-
-            toast.addEventListener('mouseout', function (e) {
-                fading = setTimeout(toast.startFade, options.displayTime);
-                removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
-            });
-        }
-    }]);
-
-    return Toast;
-}();
-
-exports.default = new Toast();
-
-/***/ }),
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _YQuery = __webpack_require__(0);
-
-var _YQuery2 = _interopRequireDefault(_YQuery);
-
-var _YBoard = __webpack_require__(1);
-
-var _YBoard2 = _interopRequireDefault(_YBoard);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -912,7 +891,7 @@ var Modal = function () {
 exports.default = new Modal();
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -959,7 +938,7 @@ if (typeof Element.prototype.closest !== 'function') {
 }
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1056,31 +1035,29 @@ NodeList.prototype.remove = function () {
 };
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+__webpack_require__(4);
+
 __webpack_require__(5);
-
-__webpack_require__(6);
-
-__webpack_require__(3);
 
 var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Modal = __webpack_require__(4);
+var _Modal = __webpack_require__(3);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -1130,7 +1107,7 @@ window.Toast = _Toast2.default;
 window.Modal = _Modal2.default;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1361,7 +1338,7 @@ var Tooltip = function () {
 exports.default = Tooltip;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1422,7 +1399,7 @@ var Captcha = function () {
 exports.default = Captcha;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1477,112 +1454,7 @@ var Catalog = function () {
 exports.default = Catalog;
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Modal = function () {
-    function Modal() {
-        _classCallCheck(this, Modal);
-    }
-
-    _createClass(Modal, [{
-        key: 'open',
-        value: function open(url, options) {
-            var that = this;
-            this.$body = $('body');
-            this.$blocker = null;
-
-            // Default options
-            this.options = $.extend({
-                closeExisting: true,
-                postData: {},
-                onAjaxComplete: function onAjaxComplete() {}
-            }, options);
-
-            // Close any open modals.
-            if (this.options.closeExisting) {
-                $('.modal-container').remove();
-            }
-
-            // Open blocker
-            this.$body.css('overflow', 'hidden');
-            $('.modal-container.current').removeClass('current');
-            this.$blocker = $('<div class="modal-container current"></div>').appendTo(this.$body);
-
-            // Bind close event
-            $(document).off('keydown.modal').on('keydown.modal', function (e) {
-                if (e.which == 27) {
-                    that.close();
-                }
-            });
-            this.$blocker.click(function (e) {
-                if (e.target == this) {
-                    that.close();
-                }
-            });
-
-            this.$container = $('<div class="modal"><button class="modal-close"><span class="icon-cross"></span></button></div>');
-            this.$blocker.append(this.$container);
-            this.$elm = $('<div class="modal-content"></div>');
-            this.$container.append(this.$elm);
-            this.$elm.html('<div class="modal-loading">' + YB.spinnerHtml() + '</div>');
-
-            var current = this.$elm;
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: options.postData
-            }).done(function (html) {
-                current.html(html);
-            }).fail(function () {
-                YB.modal.close();
-            });
-        }
-    }, {
-        key: 'close',
-        value: function close() {
-            $('.modal-container:last').remove();
-            $('.modal-container:last').addClass('current');
-
-            if ($('.modal-container').length == 0) {
-                $('body').css('overflow', '');
-            }
-        }
-    }, {
-        key: 'closeAll',
-        value: function closeAll() {
-            $('.modal-container').remove();
-            $('body').css('overflow', '');
-        }
-    }, {
-        key: 'bindClose',
-        value: function bindClose() {
-            var that = this;
-            document.querySelectorAll('.modal-close').forEach(function (elm) {
-                elm.removeEventListener('click', that.close);
-                elm.addEventListener('click', that.close);
-            });
-        }
-    }]);
-
-    return Modal;
-}();
-
-exports.default = Modal;
-
-/***/ }),
-/* 12 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1598,15 +1470,15 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _File = __webpack_require__(14);
+var _File = __webpack_require__(12);
 
 var _File2 = _interopRequireDefault(_File);
 
@@ -1696,7 +1568,7 @@ var Post = function () {
 exports.default = Post;
 
 /***/ }),
-/* 13 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1714,11 +1586,11 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -2212,7 +2084,7 @@ var PostForm = function () {
 exports.default = PostForm;
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2228,11 +2100,11 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -2403,7 +2275,7 @@ var File = function () {
 exports.default = File;
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2521,7 +2393,7 @@ var Theme = function () {
 exports.default = Theme;
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2537,19 +2409,19 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _AutoUpdate = __webpack_require__(17);
+var _AutoUpdate = __webpack_require__(15);
 
 var _AutoUpdate2 = _interopRequireDefault(_AutoUpdate);
 
-var _Hide = __webpack_require__(19);
+var _Hide = __webpack_require__(17);
 
 var _Hide2 = _interopRequireDefault(_Hide);
 
-var _Follow = __webpack_require__(18);
+var _Follow = __webpack_require__(16);
 
 var _Follow2 = _interopRequireDefault(_Follow);
 
@@ -2656,7 +2528,7 @@ var Thread = function () {
 exports.default = Thread;
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2668,7 +2540,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YBoard = __webpack_require__(1);
+var _YBoard = __webpack_require__(2);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -2676,7 +2548,7 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Toast = __webpack_require__(2);
+var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -2864,7 +2736,7 @@ var AutoUpdate = function () {
 exports.default = AutoUpdate;
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2955,7 +2827,7 @@ var Follow = function () {
 exports.default = Follow;
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
