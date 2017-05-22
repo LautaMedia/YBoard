@@ -135,7 +135,7 @@ class UserStatistics extends Model
         $q->execute();
 
         if ($q->rowCount() === 0) {
-            return new self($db);
+            return new self($db, $userId);
         }
 
         return new self($db, $userId, $q->fetchAll());
