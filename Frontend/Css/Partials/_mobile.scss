@@ -135,11 +135,9 @@
             &.thumbnail {
                 @media (max-width:339px) {
                     max-width: 80px;
-                    figcaption { font-size: 0.8em }
                 }
                 @media (min-width:340px) and (max-width:499px) {
                     max-width: 120px;
-                    figcaption { font-size: 0.85em }
                 }
                 @media (min-width:500px) and (max-width:599px) {
                     max-width: 160px;

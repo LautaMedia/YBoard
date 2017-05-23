@@ -62,6 +62,9 @@
                 span {
                     font-size: 0.65em;
                 }
+                @media (max-width: 499px) {
+                    display: none;
+                }
             }
             input, select {
                 flex-grow: 1;
