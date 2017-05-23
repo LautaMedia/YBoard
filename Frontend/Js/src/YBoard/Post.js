@@ -34,7 +34,6 @@ class Post
     refClick(e)
     {
         let referred = e.currentTarget.dataset.id;
-        console.log(referred);
         if (typeof referred === 'undefined') {
             return true;
         }

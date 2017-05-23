@@ -563,6 +563,7 @@ var YBoard = function () {
                 tooltips = elm.querySelectorAll('.tip, .ref');
             }
 
+            this.PostForm.bindPostEvents(elm);
             this.Post.bindEvents(elm);
 
             tooltips.forEach(function (elm) {
@@ -1523,7 +1524,6 @@ var Post = function () {
         key: 'refClick',
         value: function refClick(e) {
             var referred = e.currentTarget.dataset.id;
-            console.log(referred);
             if (typeof referred === 'undefined') {
                 return true;
             }
@@ -1667,15 +1667,6 @@ var PostForm = function () {
             });
         });
 
-        // Reply to a post
-        document.querySelectorAll('.e-post-reply').forEach(function (elm) {
-            elm.addEventListener('click', function (e) {
-                e.preventDefault();
-                that.postReply(e.target.closest('.post').dataset.id);
-                that.msgElm.focus();
-            });
-        });
-
         // Cancel post
         this.elm.querySelector('#reset-button').addEventListener('click', function (e) {
             e.preventDefault();
@@ -1712,6 +1703,20 @@ var PostForm = function () {
     }
 
     _createClass(PostForm, [{
+        key: 'bindPostEvents',
+        value: function bindPostEvents(elm) {
+            var that = this;
+
+            // Reply to a post
+            elm.querySelectorAll('.e-post-reply').forEach(function (elm) {
+                elm.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    that.postReply(e.target.closest('.post').dataset.id);
+                    that.msgElm.focus();
+                });
+            });
+        }
+    }, {
         key: 'show',
         value: function show(isReply) {
             if (!isReply) {
@@ -2027,7 +2032,6 @@ var PostForm = function () {
         key: 'submit',
         value: function submit(e) {
             var that = this;
-            console.log('submitFn');
             if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object' && e !== null) {
                 e.preventDefault();
             }

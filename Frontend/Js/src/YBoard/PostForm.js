@@ -72,17 +72,6 @@ class PostForm
             });
         });
 
-        // Reply to a post
-        document.querySelectorAll('.e-post-reply').forEach(function(elm)
-        {
-            elm.addEventListener('click', function(e)
-            {
-                e.preventDefault();
-                that.postReply(e.target.closest('.post').dataset.id);
-                that.msgElm.focus();
-            });
-        });
-
         // Cancel post
         this.elm.querySelector('#reset-button').addEventListener('click', function(e)
         {
@@ -120,6 +109,22 @@ class PostForm
             elm.addEventListener('focus', function(e)
             {
                 that.renderCaptcha();
+            });
+        });
+    }
+
+    bindPostEvents(elm)
+    {
+        let that = this;
+
+        // Reply to a post
+        elm.querySelectorAll('.e-post-reply').forEach(function(elm)
+        {
+            elm.addEventListener('click', function(e)
+            {
+                e.preventDefault();
+                that.postReply(e.target.closest('.post').dataset.id);
+                that.msgElm.focus();
             });
         });
     }
@@ -438,7 +443,6 @@ class PostForm
     submit(e)
     {
         let that = this;
-        console.log('submitFn');
         if (typeof e === 'object' && e !== null) {
             e.preventDefault();
         }

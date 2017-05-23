@@ -105,6 +105,7 @@ class YBoard
             tooltips = elm.querySelectorAll('.tip, .ref');
         }
 
+        this.PostForm.bindPostEvents(elm);
         this.Post.bindEvents(elm);
 
         tooltips.forEach(function(elm)
