@@ -1,16 +1,23 @@
+body.no-sidebar {
+    #sidebar {
+        z-index: 999;
+        display: none;
+        &.visible {
+            display: block
+        }
+    }
+}
+
 #sidebar {
     $bgcolor: $sidebarColor;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 190px;
-    padding: 10px 15px;
+    width: $sidebarWidth;
+    padding: 10px;
+    box-sizing: border-box;
     overflow: auto;
     font-size: 0.9em;
     background-color: $bgcolor;
-    overflow-y: scroll;
     transition: background-color $transition;
+    flex-shrink: 0;
 
     button.link, input.link {
         border: 0;

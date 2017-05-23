@@ -1,19 +1,18 @@
 .catalog {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -5px -5px 0;
+    justify-content: space-between;
+    margin: -5px;
 
     .thread-box {
-        margin: 0 5px 5px 0;
+        flex: 1 1 200px;
+        margin: 5px;
         background-color: $contentBgColor;
-        width: 200px;
-        height: 300px;
+        max-height: 300px;
+        box-sizing: border-box;
         overflow: hidden;
-        display: inline-block;
-        position: relative;
-        flex-grow: 1;
-        vertical-align: top;
         transition: background-color $transition;
+        position: relative;
 
         h3 {
             $height: 30px;

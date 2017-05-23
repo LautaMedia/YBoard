@@ -1,9 +1,14 @@
+body, html {
+    height: 100vh;
+}
 body {
     background: $bgColor;
     font: $fontSize $fontFamily;
     color: $textColor;
     word-wrap: break-word;
     margin: auto;
+    display: flex;
+    overflow: hidden;
     transition:
             background-color $transition,
             color $transition;
@@ -123,11 +128,16 @@ h4 {
     margin-bottom: 10px;
 }
 
-#content {
-    margin-left: 220px;
-    overflow: hidden;
+#wrapper {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+}
+
+#content {
+    overflow: auto;
+    max-height: 100%;
+    flex-grow: 1;
 
     .error-image {
         margin-top: 60px;

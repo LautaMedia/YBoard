@@ -1,7 +1,6 @@
 @media (max-width: 800px) {
     body {
         font-size: 13px;
-        margin-top: $topMenuHeight;
     }
 
     #inner {
@@ -10,10 +9,6 @@
 
     .content-box {
         padding: 20px;
-    }
-
-    #topbar {
-        display: flex;
     }
 
     #sidebar {
@@ -157,10 +152,10 @@
     }
 
     .catalog {
-        padding: 0;
+        margin: 0;
         .thread-box {
-            margin: 3px;
-            width: 150px;
+            margin: 2px;
+            flex: 1 1 150px;
         }
     }
 }

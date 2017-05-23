@@ -11,7 +11,8 @@ class Post
         this.File = new PostFile();
 
         if (window.location.hash.substr(0, 6) === '#post-') {
-            document.getElementById('post-' + window.location.hash.substr(6)).classList.add('highlighted');
+            let post = document.getElementById('post-' + window.location.hash.substr(6));
+            post.classList.add('highlighted');
         }
     }
 

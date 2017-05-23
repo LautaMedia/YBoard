@@ -1502,7 +1502,8 @@ var Post = function () {
         this.File = new _File2.default();
 
         if (window.location.hash.substr(0, 6) === '#post-') {
-            document.getElementById('post-' + window.location.hash.substr(6)).classList.add('highlighted');
+            var post = document.getElementById('post-' + window.location.hash.substr(6));
+            post.classList.add('highlighted');
         }
     }
 

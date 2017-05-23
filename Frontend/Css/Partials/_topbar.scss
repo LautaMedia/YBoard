@@ -1,9 +1,7 @@
 #topbar {
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
+    flex: 0 0 $topMenuHeight;
+    display: flex;
+    width: 100%;
     height: $topMenuHeight;
     line-height: $topMenuHeight;
     overflow: hidden;
