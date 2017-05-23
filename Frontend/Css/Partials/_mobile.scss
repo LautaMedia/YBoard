@@ -1,6 +1,13 @@
-@media (max-width: 800px) {
+@media (max-width: 799px) {
     body {
         font-size: 13px;
+    }
+
+    #e-sidebar-hide {
+        display: none;
+    }
+    #e-sidebar-toggle {
+        display: inline;
     }
 
     #inner {
@@ -12,20 +19,20 @@
     }
 
     #sidebar {
-        #sidebar-hide-button {
-            display: none;
-        }
-
-        top: $topMenuHeight;
         padding: 10px;
         display: none;
         z-index: 999;
-        width: 80%;
-        border-right: 250px solid darken($sidebarColor, 10%);
-
-        &.visible {
-            display: block;
+        @media (max-width: 599px) {
+            position: fixed;
+            top: $topMenuHeight;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 260px;
+            border-right: 350px solid darken($sidebarColor, 10%);
+            box-sizing: content-box;
         }
+
         #main {
             display: flex;
             .columns {
@@ -51,14 +58,6 @@
         }
         #search {
             clear: both;
-        }
-        .buttons {
-            display: block;
-            overflow: hidden;
-            margin-top: 10px;
-            > * {
-                margin: 0 5px 5px 0;
-            }
         }
     }
 

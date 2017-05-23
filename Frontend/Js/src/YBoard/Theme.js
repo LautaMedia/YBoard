@@ -15,39 +15,21 @@ class Theme
         // Mobile, click on the shadow to hide
         document.getElementById('sidebar').addEventListener('click', function (e) {
             if (e.offsetX > document.getElementById('sidebar').clientWidth) {
-                document.getElementById('sidebar').classList.toggle('visible');
                 document.body.classList.toggle('sidebar-visible');
             }
         });
 
-        document.querySelector('.e-sidebar-toggle').addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('visible');
+        document.querySelector('#e-sidebar-toggle').addEventListener('click', function () {
             document.body.classList.toggle('sidebar-visible');
         });
     }
 
     toggleSidebar()
     {
-        // Toggle the CSS stylesheet for sidebar hiding
-        if (document.getElementById('hide-sidebar') !== null) {
-            document.getElementById('hide-sidebar').remove();
-            document.getElementById('sidebar').classList.remove('visible');
-
-            YQuery.post('/api/user/preferences/set', {
-                'hideSidebar': 'false',
-            });
-        } else {
-            let hideSidebarCss = document.createElement('link');
-            hideSidebarCss.setAttribute('rel', 'stylesheet');
-            hideSidebarCss.setAttribute('id', 'hide-sidebar');
-            hideSidebarCss.setAttribute('href', config.staticUrl + '/css/hide_sidebar.css');
-            document.querySelector('head').appendChild(hideSidebarCss);
-
-            YQuery.post('/api/user/preferences/set', {
-                'hideSidebar': 'true',
-            });
-        }
-
+        document.body.classList.toggle('no-sidebar');
+        YQuery.post('/api/user/preferences/set', {
+            'hideSidebar': document.body.classList.contains('no-sidebar'),
+        });
     }
 
     switchVariation()

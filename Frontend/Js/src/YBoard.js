@@ -56,7 +56,7 @@ class YBoard
         }
 
         // Hide sidebar
-        document.getElementById('sidebar-hide-button').addEventListener('click', function()
+        document.getElementById('e-sidebar-hide').addEventListener('click', function()
         {
             that.Theme.toggleSidebar();
         });

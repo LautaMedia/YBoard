@@ -16,32 +16,19 @@
         border: 0;
         padding: 0;
         background-color: transparent;
-        display: inline-block;
         height: $topMenuHeight;
         line-height: $topMenuHeight;
         position: relative;
+        display: inline-block;
+        &:hover {
+            background-color: lighten($sidebarColor, 10%);
+        }
     }
 
     .unread-count {
         position: absolute;
         top: 2px;
         right: 2px;
-    }
-
-    .e-sidebar-toggle {
-        text-align: center;
-        color: $sidebarLinkColor;
-        padding-right: 10px;
-        span {
-            font-size: 20px;
-            width: $topMenuHeight;
-            line-height: $topMenuHeight;
-            display: inline-block;
-            vertical-align: top;
-        }
-        &:hover {
-            background-color: lighten($sidebarColor, 10%);
-        }
     }
 
     .buttons {
@@ -51,9 +38,65 @@
             border-left: 1px solid lighten($sidebarColor, 10%);
             text-align: center;
             width: $topMenuHeight;
-            &:hover {
-                background-color: lighten($sidebarColor, 10%);
-            }
         }
+    }
+
+    #e-sidebar-toggle {
+        padding-right: 10px;
+    }
+
+    @media (max-width: 799px) {
+        #e-sidebar-toggle {
+            display: inline-block;
+        }
+        #e-sidebar-hide {
+            display: none;
+        }
+    }
+}
+
+@media (min-width: 800px) {
+    body:not(.no-sidebar) #topbar #e-sidebar-toggle {
+        display: none;
+    }
+}
+
+#e-sidebar-hide {
+    font-family: icomoon;
+    cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    color: darken($sidebarLinkColor, 20%);
+    top: 50%;
+    position: absolute;
+    left: 0;
+    display: block;
+    font-size: 10px;
+    width: $topMenuHeight;
+    height: $topMenuHeight;
+    line-height: $topMenuHeight;
+    text-align: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 5px 1px 5px 0;
+    transform: translateY(-50%);
+    &:before {
+        content: "\e93c";
+    }
+    body:not(.no-sidebar) &:before {
+        content: "\e93b";
+    }
+}
+
+#e-sidebar-toggle {
+    text-align: center;
+    color: $sidebarLinkColor;
+    padding-right: 10px;
+    span {
+        font-size: 20px;
+        width: $topMenuHeight;
+        line-height: $topMenuHeight;
+        display: inline-block;
+        vertical-align: top;
     }
 }

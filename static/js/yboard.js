@@ -517,7 +517,7 @@ var YBoard = function () {
         }
 
         // Hide sidebar
-        document.getElementById('sidebar-hide-button').addEventListener('click', function () {
+        document.getElementById('e-sidebar-hide').addEventListener('click', function () {
             that.Theme.toggleSidebar();
         });
 
@@ -2324,13 +2324,11 @@ var Theme = function () {
         // Mobile, click on the shadow to hide
         document.getElementById('sidebar').addEventListener('click', function (e) {
             if (e.offsetX > document.getElementById('sidebar').clientWidth) {
-                document.getElementById('sidebar').classList.toggle('visible');
                 document.body.classList.toggle('sidebar-visible');
             }
         });
 
-        document.querySelector('.e-sidebar-toggle').addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('visible');
+        document.querySelector('#e-sidebar-toggle').addEventListener('click', function () {
             document.body.classList.toggle('sidebar-visible');
         });
     }
@@ -2338,25 +2336,10 @@ var Theme = function () {
     _createClass(Theme, [{
         key: 'toggleSidebar',
         value: function toggleSidebar() {
-            // Toggle the CSS stylesheet for sidebar hiding
-            if (document.getElementById('hide-sidebar') !== null) {
-                document.getElementById('hide-sidebar').remove();
-                document.getElementById('sidebar').classList.remove('visible');
-
-                _YQuery2.default.post('/api/user/preferences/set', {
-                    'hideSidebar': 'false'
-                });
-            } else {
-                var hideSidebarCss = document.createElement('link');
-                hideSidebarCss.setAttribute('rel', 'stylesheet');
-                hideSidebarCss.setAttribute('id', 'hide-sidebar');
-                hideSidebarCss.setAttribute('href', config.staticUrl + '/css/hide_sidebar.css');
-                document.querySelector('head').appendChild(hideSidebarCss);
-
-                _YQuery2.default.post('/api/user/preferences/set', {
-                    'hideSidebar': 'true'
-                });
-            }
+            document.body.classList.toggle('no-sidebar');
+            _YQuery2.default.post('/api/user/preferences/set', {
+                'hideSidebar': document.body.classList.contains('no-sidebar')
+            });
         }
     }, {
         key: 'switchVariation',

@@ -1,11 +1,10 @@
-body.no-sidebar {
-    #sidebar {
-        z-index: 999;
-        display: none;
-        &.visible {
-            display: block
-        }
-    }
+body.no-sidebar #sidebar {
+    z-index: 999;
+    display: none;
+}
+
+body.sidebar-visible #sidebar {
+    display: block;
 }
 
 #sidebar {
@@ -126,7 +125,10 @@ body.no-sidebar {
     }
     .buttons {
         overflow: hidden;
-        margin: 2.5px -2.5px;
+        margin: 10px 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-gap: 10px;
 
         button, a {
             background-color: $buttonBg;
@@ -136,14 +138,8 @@ body.no-sidebar {
             }
         }
         > * {
-            float: left;
-            display: inline-block;
-            margin: 2.5px;
+            width: 100%;
             position: relative;
-            flex: 1 1 0%;
-        }
-        + a {
-            margin-top: 10px;
         }
     }
     #user form {
@@ -192,34 +188,5 @@ body.no-sidebar {
         position: absolute;
         top: 2px;
         right: 2px;
-    }
-
-    #sidebar-hide-button {
-        font-family: icomoon;
-        cursor: pointer;
-        background-color: transparent;
-        border: 0;
-        color: darken($sidebarLinkColor, 20%);
-        top: 50%;
-        position: absolute;
-        left: 0;
-        display: block;
-        font-size: 10px;
-        width: 11px;
-        height: 20px;
-        text-align: center;
-        overflow: hidden;
-        box-sizing: border-box;
-        padding: 5px 1px 5px 0;
-        transform: translateY(-50%);
-        &:hover {
-            background-color: $buttonBg;
-        }
-        &:before {
-            content: "\e93b";
-        }
-    }
-    &.visible #sidebar-hide-button:before {
-        content: "\e93c";
     }
 }

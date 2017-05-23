@@ -15,9 +15,6 @@
           data-light="<?= $config['url']['static'] . $stylesheet['light'] ?>"
           data-dark="<?= $config['url']['static'] . $stylesheet['dark'] ?>"
           data-darkTheme="<?= $stylesheet['darkTheme'] ?>">
-    <?php if ($user->preferences->hideSidebar): ?>
-    <link rel="stylesheet" id="hide-sidebar" href="<?= $config['url']['static'] ?>/css/hide_sidebar.css">
-    <?php endif ?>
 
     <script src="<?= $config['url']['static'] ?>/js/locale/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
     <script src="<?= $config['url']['static'] ?>/js/config.js" defer></script>
@@ -34,7 +31,8 @@
 
 <div id="wrapper">
     <div id="topbar">
-        <button class="e-sidebar-toggle"><span class="icon-menu"></span><?= _('Menu') ?></button>
+        <button id="e-sidebar-hide"></button>
+        <button id="e-sidebar-toggle"><span class="icon-menu"></span><?= _('Menu') ?></button>
         <div class="buttons"
         ><button id="notifications-button" class="icon-alarm" title="<?= _('Notifications') ?>"
             ><span class="unread-notifications unread-count red<?= ($user->notifications['unread'] === 0 ? ' none' : '') ?>"
