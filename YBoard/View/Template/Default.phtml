@@ -28,7 +28,7 @@
     <script src="https://www.google.com/recaptcha/api.js?render=explicit" defer></script>
     <?php endif ?>
 </head>
-<body<?= (!empty($bodyClass)?' class="' . $bodyClass . '"':'') ?>>
+<body class="<?= $bodyClass ?> <?= $user->preferences->hideSidebar ? 'no-sidebar':'' ?>">
 
 <div id="topbar">
     <button class="e-sidebar-toggle"><span class="icon-menu"></span><?= _('Menu') ?></button>

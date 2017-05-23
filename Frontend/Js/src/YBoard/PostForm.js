@@ -301,6 +301,7 @@ class PostForm
 
         let that = this;
         let fileUpload = YQuery.post('/api/file/create', fd, {
+            'timeout': 0,
             'contentType': null,
             'xhr': function(xhr) {
                 if (!xhr.upload) {

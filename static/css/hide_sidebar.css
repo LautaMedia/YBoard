@@ -1,1 +1,1 @@
-body{margin-top:35px}#topbar{display:block}#sidebar{top:35px;z-index:999;display:none}#sidebar.visible{display:block}#content{margin-left:0}
+body{margin-top:35px}#topbar{display:block}#sidebar{top:35px;z-index:999;display:none}#sidebar.visible{display:block}body:not(.sidebar-visible) #content{margin-left:0}

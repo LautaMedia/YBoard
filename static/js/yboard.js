@@ -89,7 +89,7 @@ var YQuery = function () {
             'method': 'GET',
             'url': '',
             'data': null,
-            'timeout': 30000,
+            'timeout': 0,
             'loadFunction': null,
             'timeoutFunction': null,
             'errorFunction': null,
@@ -578,11 +578,18 @@ var YBoard = function () {
                         'onOpen': function onOpen(tip) {
                             _YQuery2.default.post('/api/post/get', {
                                 'postId': postId
+                            }, {
+                                'errorFunction': null
                             }).onLoad(function (xhr) {
                                 tip.setContent(xhr.responseText);
                                 tip.position();
                             }).onError(function (xhr) {
-                                tip.setContent(messages.errorOccurred);
+                                if (xhr.responseText.length !== 0) {
+                                    var json = JSON.parse(xhr.responseText);
+                                    tip.setContent(json.message);
+                                } else {
+                                    tip.setContent(messages.errorOccurred);
+                                }
                                 tip.position();
                             });
                         }
@@ -1881,6 +1888,7 @@ var PostForm = function () {
 
             var that = this;
             var fileUpload = _YQuery2.default.post('/api/file/create', fd, {
+                'timeout': 0,
                 'contentType': null,
                 'xhr': function xhr(_xhr) {
                     if (!_xhr.upload) {
@@ -2306,30 +2314,24 @@ var Theme = function () {
             that.switchVariation();
         });
 
-        // Mobile
+        // Mobile, click on the shadow to hide
         document.getElementById('sidebar').addEventListener('click', function (e) {
             if (e.offsetX > document.getElementById('sidebar').clientWidth) {
                 document.getElementById('sidebar').classList.toggle('visible');
+                document.body.classList.toggle('sidebar-visible');
             }
         });
 
         document.querySelector('.e-sidebar-toggle').addEventListener('click', function () {
             document.getElementById('sidebar').classList.toggle('visible');
-        });
-
-        document.querySelectorAll('body > :not(#topbar):not(#sidebar)').forEach(function (elm) {
-            elm.addEventListener('click', function (e) {
-                var sidebar = document.getElementById('sidebar');
-                if (sidebar.classList.contains('visible')) {
-                    sidebar.classList.remove('visible');
-                }
-            });
+            document.body.classList.toggle('sidebar-visible');
         });
     }
 
     _createClass(Theme, [{
         key: 'toggleSidebar',
         value: function toggleSidebar() {
+            // Toggle the CSS stylesheet for sidebar hiding
             if (document.getElementById('hide-sidebar') !== null) {
                 document.getElementById('hide-sidebar').remove();
                 document.getElementById('sidebar').classList.remove('visible');

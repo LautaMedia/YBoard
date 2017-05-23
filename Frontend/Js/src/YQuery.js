@@ -6,7 +6,7 @@ class YQuery
             'method': 'GET',
             'url': '',
             'data': null,
-            'timeout': 30000,
+            'timeout': 0,
             'loadFunction': null,
             'timeoutFunction': null,
             'errorFunction': null,

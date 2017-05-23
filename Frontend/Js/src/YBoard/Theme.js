@@ -12,30 +12,23 @@ class Theme
             that.switchVariation();
         });
 
-        // Mobile
+        // Mobile, click on the shadow to hide
         document.getElementById('sidebar').addEventListener('click', function (e) {
             if (e.offsetX > document.getElementById('sidebar').clientWidth) {
                 document.getElementById('sidebar').classList.toggle('visible');
+                document.body.classList.toggle('sidebar-visible');
             }
         });
 
         document.querySelector('.e-sidebar-toggle').addEventListener('click', function () {
             document.getElementById('sidebar').classList.toggle('visible');
-        });
-
-        document.querySelectorAll('body > :not(#topbar):not(#sidebar)').forEach(function (elm) {
-            elm.addEventListener('click', function(e)
-            {
-                let sidebar = document.getElementById('sidebar');
-                if (sidebar.classList.contains('visible')) {
-                    sidebar.classList.remove('visible');
-                }
-            });
+            document.body.classList.toggle('sidebar-visible');
         });
     }
 
     toggleSidebar()
     {
+        // Toggle the CSS stylesheet for sidebar hiding
         if (document.getElementById('hide-sidebar') !== null) {
             document.getElementById('hide-sidebar').remove();
             document.getElementById('sidebar').classList.remove('visible');

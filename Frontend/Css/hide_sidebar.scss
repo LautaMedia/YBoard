@@ -17,6 +17,8 @@ body {
     }
 }
 
-#content {
-    margin-left: 0;
+body:not(.sidebar-visible) {
+    #content {
+        margin-left: 0;
+    }
 }

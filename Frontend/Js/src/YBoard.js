@@ -123,13 +123,20 @@ class YBoard
                     {
                         YQuery.post('/api/post/get', {
                             'postId': postId,
+                        }, {
+                            'errorFunction': null,
                         }).onLoad(function(xhr)
                         {
                             tip.setContent(xhr.responseText);
                             tip.position();
                         }).onError(function(xhr)
                         {
-                            tip.setContent(messages.errorOccurred);
+                            if (xhr.responseText.length !== 0) {
+                                let json = JSON.parse(xhr.responseText);
+                                tip.setContent(json.message);
+                            } else {
+                                tip.setContent(messages.errorOccurred)
+                            }
                             tip.position();
                         });
                     },
