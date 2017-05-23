@@ -242,11 +242,7 @@ body:not(.thread-page) .thread.hidden {
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
-        transition:
-                max-width $transition,
-                max-height $transition,
-                width $transition,
-                height $transition;
+
         @if (lightness($contentBgColor) > 50) {
             background-color: rgba(0, 0, 0, 0.04);
         } @else {
