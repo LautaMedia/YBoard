@@ -12,6 +12,7 @@
     box-shadow: 0 0 10px 0 darken($sidebarColor, 10%);
 
     button, a {
+        font-size: 1em;
         cursor: pointer;
         color: $sidebarLinkColor;
         border: 0;
@@ -29,8 +30,7 @@
         right: 2px;
     }
 
-    .sidebar-toggle {
-        float: left;
+    .e-sidebar-toggle {
         text-align: center;
         color: $sidebarLinkColor;
         padding-right: 10px;
@@ -47,7 +47,7 @@
     }
 
     .buttons {
-        float: right;
+        margin-left: auto;
         font-size: 20px;
         > * {
             border-left: 1px solid lighten($sidebarColor, 10%);
