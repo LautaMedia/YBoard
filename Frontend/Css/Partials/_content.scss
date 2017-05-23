@@ -8,7 +8,6 @@ body {
     word-wrap: break-word;
     margin: auto;
     display: flex;
-    overflow: hidden;
     transition:
             background-color $transition,
             color $transition;
@@ -136,8 +135,6 @@ h4 {
 }
 
 #content {
-    overflow: auto;
-    max-height: 100%;
     flex-grow: 1;
 
     .error-image {
