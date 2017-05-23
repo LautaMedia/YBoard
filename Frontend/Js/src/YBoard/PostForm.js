@@ -324,9 +324,8 @@ class PostForm
 
                 return xhr;
             }
-        }).onEnd(function() {
-            that.fileUploadInProgress = false;
         }).onLoad(function(xhr) {
+            that.fileUploadInProgress = false;
             that.updateFileProgressBar(100);
             let data = JSON.parse(xhr.responseText);
             if (data.message.length !== 0) {
@@ -363,6 +362,7 @@ class PostForm
         this.elm.querySelector('#file-id').value = '';
         this.elm.querySelector('#file-name').value = '';
         this.updateFileProgressBar(0);
+        this.fileUploadInProgress = false;
         this.submitAfterFileUpload = false;
     }
 
@@ -438,8 +438,19 @@ class PostForm
     submit(e)
     {
         let that = this;
+        console.log('submitFn');
         if (typeof e === 'object' && e !== null) {
             e.preventDefault();
+        }
+
+        let submitButton = this.elm.querySelector('input[type="submit"].button');
+
+        // File upload in progress -> wait until done
+        if (this.fileUploadInProgress) {
+            Toast.info(messages.waitingForFileUpload);
+            submitButton.disabled = true;
+            this.submitAfterFileUpload = true;
+            return false;
         }
 
         // Prevent duplicate submissions by double clicking etc.
@@ -447,15 +458,6 @@ class PostForm
             return false;
         }
         this.submitInProgress = true;
-
-        let submitButton = this.elm.querySelector('input[type="submit"].button');
-
-        // File upload in progress -> wait until done
-        if (this.fileUploadInProgress) {
-            submitButton.disabled = true;
-            this.submitAfterFileUpload = true;
-            return false;
-        }
 
         this.elm.querySelector('#post-files').value = '';
 

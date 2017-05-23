@@ -86,6 +86,20 @@ class YQuery
             xhr.setRequestHeader(key, headers[key]);
         }
 
+        // Run always
+        this.onEnd = function(fn)
+        {
+            xhr.addEventListener('loadend', function()
+            {
+                fn(xhr);
+            });
+
+            return this;
+        };
+        if (typeof options.loadendFunction === 'function') {
+            this.onEnd(options.loadendFunction);
+        }
+
         // OnLoad
         this.onLoad = function(fn)
         {
@@ -133,20 +147,6 @@ class YQuery
         };
         if (typeof options.errorFunction === 'function') {
             this.onError(options.errorFunction);
-        }
-
-        // Run always
-        this.onEnd = function(fn)
-        {
-            xhr.addEventListener('loadend', function()
-            {
-                fn(xhr);
-            });
-
-            return this;
-        };
-        if (typeof options.loadendFunction === 'function') {
-            this.onEnd(options.loadendFunction);
         }
 
         this.getXhrObject = function()

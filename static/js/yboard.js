@@ -182,6 +182,18 @@ var YQuery = function () {
                 xhr.setRequestHeader(key, headers[key]);
             }
 
+            // Run always
+            this.onEnd = function (fn) {
+                xhr.addEventListener('loadend', function () {
+                    fn(xhr);
+                });
+
+                return this;
+            };
+            if (typeof options.loadendFunction === 'function') {
+                this.onEnd(options.loadendFunction);
+            }
+
             // OnLoad
             this.onLoad = function (fn) {
                 xhr.addEventListener('load', function () {
@@ -223,18 +235,6 @@ var YQuery = function () {
             };
             if (typeof options.errorFunction === 'function') {
                 this.onError(options.errorFunction);
-            }
-
-            // Run always
-            this.onEnd = function (fn) {
-                xhr.addEventListener('loadend', function () {
-                    fn(xhr);
-                });
-
-                return this;
-            };
-            if (typeof options.loadendFunction === 'function') {
-                this.onEnd(options.loadendFunction);
             }
 
             this.getXhrObject = function () {
@@ -1911,9 +1911,8 @@ var PostForm = function () {
 
                     return _xhr;
                 }
-            }).onEnd(function () {
-                that.fileUploadInProgress = false;
             }).onLoad(function (xhr) {
+                that.fileUploadInProgress = false;
                 that.updateFileProgressBar(100);
                 var data = JSON.parse(xhr.responseText);
                 if (data.message.length !== 0) {
@@ -1952,6 +1951,7 @@ var PostForm = function () {
             this.elm.querySelector('#file-id').value = '';
             this.elm.querySelector('#file-name').value = '';
             this.updateFileProgressBar(0);
+            this.fileUploadInProgress = false;
             this.submitAfterFileUpload = false;
         }
     }, {
@@ -2027,8 +2027,19 @@ var PostForm = function () {
         key: 'submit',
         value: function submit(e) {
             var that = this;
+            console.log('submitFn');
             if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object' && e !== null) {
                 e.preventDefault();
+            }
+
+            var submitButton = this.elm.querySelector('input[type="submit"].button');
+
+            // File upload in progress -> wait until done
+            if (this.fileUploadInProgress) {
+                _Toast2.default.info(messages.waitingForFileUpload);
+                submitButton.disabled = true;
+                this.submitAfterFileUpload = true;
+                return false;
             }
 
             // Prevent duplicate submissions by double clicking etc.
@@ -2036,15 +2047,6 @@ var PostForm = function () {
                 return false;
             }
             this.submitInProgress = true;
-
-            var submitButton = this.elm.querySelector('input[type="submit"].button');
-
-            // File upload in progress -> wait until done
-            if (this.fileUploadInProgress) {
-                submitButton.disabled = true;
-                this.submitAfterFileUpload = true;
-                return false;
-            }
 
             this.elm.querySelector('#post-files').value = '';
 

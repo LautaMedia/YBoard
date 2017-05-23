@@ -274,7 +274,7 @@ abstract class Controller extends \YFW\Controller
         header('Link: <' . $this->config['url']['static'] . '/js/config.js>; rel=preload; as=script; nopush', false);
         header('Link: <' . $this->config['url']['static'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
             false);
-        header('Link: <' . $this->config['url']['static'] . '/js/yboard.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['url']['static'] . '/js/yboard.min.js>; rel=preload; as=script; nopush', false);
         header('Link: <' . $this->config['url']['static'] . $activeStylesheet . '>; rel=preload; as=style; nopush',
             false);
 

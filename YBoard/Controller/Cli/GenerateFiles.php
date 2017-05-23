@@ -79,6 +79,7 @@ class GenerateFiles
             'showFullMessage' => _('show full message'),
             'passwordsDoNotMatch' => _('The two passwords do not match'),
             'passwordChanged' => _('Password changed'),
+            'waitingForFileUpload' => _('Your message will be sent after the file upload is completed.'),
             'oldBrowserWarning' => _('You are using an outdated browser which does not support some modern techniques used by this website. Please upgrade your browser.'),
         ];
 
