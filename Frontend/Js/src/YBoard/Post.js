@@ -28,6 +28,7 @@ class Post
 
     truncateLongPosts(elm)
     {
+        return;
         let that = this;
 
         elm.querySelectorAll('.message').forEach(function(elm) {

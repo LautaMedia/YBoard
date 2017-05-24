@@ -1519,6 +1519,7 @@ var Post = function () {
     }, {
         key: 'truncateLongPosts',
         value: function truncateLongPosts(elm) {
+            return;
             var that = this;
 
             elm.querySelectorAll('.message').forEach(function (elm) {
