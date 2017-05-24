@@ -1,13 +1,9 @@
-body, html {
-    height: 100vh;
-}
 body {
     background: $bgColor;
     font: $fontSize $fontFamily;
     color: $textColor;
     word-wrap: break-word;
     margin: auto;
-    display: flex;
     transition:
             background-color $transition,
             color $transition;
@@ -127,8 +123,11 @@ h4 {
     margin-bottom: 10px;
 }
 
+body:not(.no-sidebar) {
+    margin-left: $sidebarWidth;
+}
+
 #wrapper {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: auto;

@@ -1498,13 +1498,7 @@ var Post = function () {
     function Post() {
         _classCallCheck(this, Post);
 
-        var that = this;
         this.File = new _File2.default();
-
-        if (window.location.hash.substr(0, 6) === '#post-') {
-            var post = document.getElementById('post-' + window.location.hash.substr(6));
-            post.classList.add('highlighted');
-        }
     }
 
     _createClass(Post, [{
@@ -1532,12 +1526,6 @@ var Post = function () {
             if (document.getElementById('post-' + referred) !== null) {
                 e.preventDefault();
                 document.location.hash = '#post-' + referred;
-
-                // Highlight post
-                document.querySelectorAll('.highlighted').forEach(function (elm) {
-                    elm.classList.remove('highlighted');
-                });
-                document.getElementById('post-' + referred).classList.add('highlighted');
             }
         }
     }, {

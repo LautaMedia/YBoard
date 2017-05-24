@@ -16,6 +16,12 @@ body:not(.thread-page) .thread.hidden {
     overflow: hidden;
     color: $textColor;
     margin: 20px 0;
+    background-color: $contentBgColor;
+    $shadowColor: darken($bgColor, 5%);
+    @if (lightness($bgColor) < 10) {
+        $shadowColor: lighten($bgColor, 5%);
+    }
+    box-shadow: 0 0 10px 0 $shadowColor;
 
     $borderColor: darken($contentBgColor, 10%);
     @if (lightness($contentBgColor) < 50) {
@@ -34,16 +40,19 @@ body:not(.thread-page) .thread.hidden {
         margin: 10px 0 0 0;
         padding: 20px;
     }
-    .thread-content > #post-form {
+    > #post-form {
         margin: 20px 0;
-        padding: 0;
+        padding: 5px;
     }
     .replies #post-form {
-        padding: 5px;
+        background-color: transparent;
+        padding: 0;
+        #label-subject, h3 {
+            display: none
+        }
     }
 
     > h3 {
-        text-align: left;
         $height: 35px;
         margin-bottom: 0;
         font-weight: 400;
@@ -59,16 +68,18 @@ body:not(.thread-page) .thread.hidden {
         }
         background-color: $subjectBgColor;
         transition: background-color $transition;
+        display: flex;
 
-        a {
-            display: flex;
+        .subject {
+            flex-grow: 1;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
+            padding: 0 10px
         }
 
         .icon {
-            display: inline-block;
+            flex: 0 0 $height;
             width: $height;
             height: $height;
             line-height: $height;
@@ -77,11 +88,8 @@ body:not(.thread-page) .thread.hidden {
             text-align: center;
         }
 
-        .subject {
-            padding: 0 10px
-        }
-
         .notification-count {
+            flex: 0 0 $height;
             margin-left: auto;
             min-width: $height;
             height: $height;
@@ -93,15 +101,6 @@ body:not(.thread-page) .thread.hidden {
         }
     }
 
-    .thread-content {
-        padding: 10px;
-        #post-form {
-            #label-subject, h3 {
-                display: none
-            }
-        }
-    }
-
     .thread-meta {
         font-size: 0.85em;
         @if (lightness($textColor) > 50) {
@@ -109,33 +108,11 @@ body:not(.thread-page) .thread.hidden {
         } @else {
             color: lighten($textColor, 40%);
         }
-        margin: 5px 0;
+        margin: 5px 10px;
     }
 
-    .replies {
-        //border-left: 2px solid $borderColor;
-
-        $bg: darken($contentBgColor, 2%);
-        @if (lightness($contentBgColor) < 50) {
-            $bg: lighten($contentBgColor, 2%);
-        }
-        background-color: $bg;
-        margin-left: -10px;
-        margin-right: -10px;
-        transition: background-color $transition;
-
-        hr {
-            border: 0;
-            $color: #000;
-            @if (lightness($contentBgColor) < 50) {
-                $color: #ffffff;
-            }
-            border-top: 1px solid $color;
-            margin: 10px 0;
-        }
-    }
-
-    .replies-buttons {
+    .replies-buttons,
+    .thread-buttons {
         padding: 5px 10px;
         display: flex;
         * {
@@ -143,35 +120,46 @@ body:not(.thread-page) .thread.hidden {
         }
     }
 
+    hr {
+        border: 0;
+        $color: #000;
+        @if (lightness($contentBgColor) < 50) {
+            $color: #ffffff;
+        }
+        border-top: 1px solid $color;
+        margin: 10px 0;
+    }
+
     .reply {
-        padding: 5px 10px;
+        $bg: darken($contentBgColor, 2%);
+        @if (lightness($contentBgColor) < 50) {
+            $bg: lighten($contentBgColor, 2%);
+        }
+        background-color: $bg;
+        transition: background-color $transition;
+
         overflow: hidden;
-        border-top: 5px solid $contentBgColor;
+        margin-bottom: 5px;
         $borderColor: darken($contentBgColor, 10%);
         @if (lightness($contentBgColor) < 50) {
             $borderColor: lighten($contentBgColor, 10%);
         }
-    }
-
-    .post {
-        transition:
-                color $transition,
-                border-color $transition,
-                background-color $transition;
-        &:not(.op-post) {
-            &.highlighted,
-            &.own-post {
-                padding: 10px;
-            }
-        }
-        &.own-post:not(.op-post):not(.highlighted) {
+        &.own-post:not(:target) {
             $bgColor: darken($contentBgColor, 7%);
             @if (lightness($contentBgColor) < 50) {
                 $bgColor: lighten($contentBgColor, 7%);
             }
             background-color: $bgColor;
         }
-        &.highlighted {
+    }
+
+    .post {
+        padding: 10px;
+        transition:
+                color $transition,
+                background-color $transition;
+
+        &:target {
             $bgColor: $contentBgColor;
             @if (lightness($contentBgColor) > 95) {
                 $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) - 3%);
@@ -183,6 +171,9 @@ body:not(.thread-page) .thread.hidden {
                 $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor));
             }
             background-color: $bgColor;
+            margin-top: -100px;
+            border-top: 100px solid transparent;
+            background-clip: padding-box;
         }
     }
 
@@ -190,10 +181,6 @@ body:not(.thread-page) .thread.hidden {
         margin: 5px 0 10px 0;
         overflow: hidden;
         word-wrap: break-word;
-        &:not(.full) {
-            max-height: 500px;
-            overflow: auto;
-        }
     }
 
     .post-meta {
@@ -202,8 +189,6 @@ body:not(.thread-page) .thread.hidden {
             color: darken($textColor, 40%);
         } @else {
             color: lighten($textColor, 40%);
-        }
-        .user-info {
         }
         .user-info, .post-info {
             display: inline-block;
@@ -232,94 +217,6 @@ body:not(.thread-page) .thread.hidden {
         }
     }
 
-    .post-file {
-        float: left;
-        margin: 0 20px 5px 0;
-        max-width: 100%;
-        min-width: 100px;
-        min-height: 60px;
-        text-align: center;
-        box-sizing: border-box;
-        white-space: nowrap;
-        overflow: hidden;
-
-        @if (lightness($contentBgColor) > 50) {
-            background-color: rgba(0, 0, 0, 0.04);
-        } @else {
-            background-color: rgba(255, 255, 255, 0.04);
-        }
-
-        > a {
-            position: relative;
-            display: block;
-
-            .overlay {
-                position: absolute;
-                max-width: 100%;
-                max-height: 100%;
-                color: #ffffff;
-                background-color: rgba(0, 0, 0, 0.7);
-                display: flex;
-
-                &.center {
-                    left: 50%;
-                    top: 50%;
-                    transform: translateX(-50%) translateY(-50%);
-                    font-size: 32px;
-                    padding: 10px;
-                }
-                &.bottom {
-                    bottom: 0;
-                    font-size: 20px;
-                    padding: 5px;
-                    &.right {
-                        right: 0;
-                    }
-                    &.left {
-                        left: 0;
-                    }
-                }
-            }
-        }
-
-        .no-thumbnail {
-            display: block;
-            font-size: 100px;
-            padding: 20px;
-            background-color: #ddd;
-            color: #444;
-        }
-        &:not(.media-player-container) .e-stop-media {
-            display: none;
-        }
-        &.media-player-container {
-            > a {
-                display: none;
-            }
-            .e-stop-media {
-                display: block;
-            }
-        }
-        video {
-            max-width: 100%;
-            min-width: 240px;
-        }
-        &.thumbnail {
-            max-width: 240px;
-        }
-        figcaption {
-            text-align: left;
-            padding: 3px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.8em;
-            line-height: 1.3em;
-            span {
-                display: block
-            }
-        }
-    }
-
     .post-replies {
         font-size: 0.8em;
         $color: #777777;
@@ -334,20 +231,14 @@ body:not(.thread-page) .thread.hidden {
             border-color $transition,
     }
 
-    .thread-buttons {
-        margin: 5px 0 0 0;
-        display: flex;
-        * {
-            margin-right: 10px
-        }
-    }
-
     .quote {
         color: $quoteColor;
         &.blue {
             color: $blueQuoteColor;
         }
     }
+
+    @import 'Posts/file';
 }
 
 .mod-menu-html {

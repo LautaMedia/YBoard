@@ -16,7 +16,10 @@ body.sidebar-visible #sidebar {
     font-size: 0.9em;
     background-color: $bgcolor;
     transition: background-color $transition;
-    flex-shrink: 0;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    top: 0;
 
     button.link, input.link {
         border: 0;

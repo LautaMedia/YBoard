@@ -12,40 +12,40 @@
 
 <?php if (!empty($threads)) : ?>
     <?php foreach($threads as $thread) : ?>
-    <div class="content-box thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
+    <div class="thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
         <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
-        <div class="thread-content">
-            <div class="post op-post<?= ($thread->userId==$user->id?' own-post':'') ?>" id="post-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
-                <?php $post = $thread; include($viewFilesPath . '/Snippet/Post.phtml') ?>
-            </div>
 
-            <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
-            <div class="replies">
-            <?php if (!empty($thread->replies)) : ?>
-                <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
-                <div class="replies-buttons">
-                    <button class="link e-more-replies"><?= _('show more replies') ?></button>
-                    <button class="link e-less-replies"><?= _('show less replies') ?></button>
-                </div>
-                <?php endif ?>
-                <div class="more-replies-container"></div>
-                <?php foreach($thread->replies as $reply) : ?>
-                    <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
-                        <?php $post = $reply; include($viewFilesPath . '/Snippet/Post.phtml') ?>
-                    </div>
-                <?php endforeach ?>
-            <?php endif ?>
-            </div>
-            <div class="thread-buttons">
-                <a class="link" href="/<?= $board->url ?>/<?= $thread->id ?><?=
-                $user->getThreadLastSeenReply($thread->id) !== null ? '#post-' . $user->getThreadLastSeenReply($thread->id):''
-                ?>"><?= _('open') ?></a>
-                <?php if (!$thread->locked || $user->isMod) : ?>
-                <button class="link e-thread-reply"><?= _('reply') ?></button>
-                <button class="link e-get-replies"><?= _('update') ?></button>
-                <?php endif ?>
-            </div>
+        <div class="post op-post<?= ($thread->userId==$user->id?' own-post':'') ?>" id="post-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
+            <?php $post = $thread; include($viewFilesPath . '/Snippet/Post.phtml') ?>
         </div>
+
+        <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
+        <div class="replies">
+        <?php if (!empty($thread->replies)) : ?>
+            <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
+            <div class="replies-buttons">
+                <button class="link e-more-replies"><?= _('show more replies') ?></button>
+                <button class="link e-less-replies"><?= _('show less replies') ?></button>
+            </div>
+            <?php endif ?>
+            <div class="more-replies-container"></div>
+            <?php foreach($thread->replies as $reply) : ?>
+                <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
+                    <?php $post = $reply; include($viewFilesPath . '/Snippet/Post.phtml') ?>
+                </div>
+            <?php endforeach ?>
+        <?php endif ?>
+        </div>
+        <div class="thread-buttons">
+            <a class="link" href="/<?= $board->url ?>/<?= $thread->id ?><?=
+            $user->getThreadLastSeenReply($thread->id) !== null ? '#post-' . $user->getThreadLastSeenReply($thread->id):''
+            ?>"><?= _('open') ?></a>
+            <?php if (!$thread->locked || $user->isMod) : ?>
+            <button class="link e-thread-reply"><?= _('reply') ?></button>
+            <button class="link e-get-replies"><?= _('update') ?></button>
+            <?php endif ?>
+        </div>
+
     </div>
     <?php endforeach; unset($thread); ?>
 <?php else : ?>

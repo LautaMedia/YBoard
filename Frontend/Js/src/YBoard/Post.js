@@ -7,13 +7,7 @@ class Post
 {
     constructor()
     {
-        let that = this;
         this.File = new PostFile();
-
-        if (window.location.hash.substr(0, 6) === '#post-') {
-            let post = document.getElementById('post-' + window.location.hash.substr(6));
-            post.classList.add('highlighted');
-        }
     }
 
     bindEvents(elm)
@@ -42,12 +36,6 @@ class Post
         if (document.getElementById('post-' + referred) !== null) {
             e.preventDefault();
             document.location.hash = '#post-' + referred;
-
-            // Highlight post
-            document.querySelectorAll('.highlighted').forEach(function(elm) {
-                elm.classList.remove('highlighted');
-            });
-            document.getElementById('post-' + referred).classList.add('highlighted');
         }
     }
 
