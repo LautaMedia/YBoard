@@ -18,7 +18,7 @@
     overflow: hidden;
     z-index: 1000;
     background-color: $sidebarColor;
-    box-shadow: 0 0 10px 0 darken($sidebarColor, 10%);
+    box-shadow: 0 10px 10px -10px darken($sidebarColor, 10%);
     position: fixed;
     top: 0;
     left: 0;

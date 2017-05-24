@@ -287,8 +287,13 @@ body:not(.thread-page) .thread.hidden {
         background-color: $bg;
         color: $color;
         border-radius: 5px;
+        &.act {
+            background-color: hsl(hue($highlightColor), saturation($highlightColor), lightness($highlightColor));
+            color: #fff;
+        }
         &:hover {
             background-color: $hoverBg;
+            color: $color;
         }
     }
     .icon-bookmark-remove {

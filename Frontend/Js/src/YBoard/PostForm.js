@@ -75,7 +75,7 @@ class PostForm
         // Cancel post
         this.elm.querySelector('#reset-button').addEventListener('click', function(e)
         {
-            if (confirm(messages.confirmPostCancel)) {
+            if (that.msgElm.value.length === 0 || confirm(messages.confirmPostCancel)) {
                 e.preventDefault();
                 that.reset(true);
             }

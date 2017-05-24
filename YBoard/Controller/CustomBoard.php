@@ -66,10 +66,6 @@ class CustomBoard extends Controller
 
     protected function show(array $threads, int $pageNum, bool $catalog = false): void
     {
-        if (empty($threads) && $pageNum !== 1) {
-            $this->notFound(null, _('You don\'t have this many threads here!'));
-        }
-
         if (!$catalog) {
             $maxPages = $this->config['view']['maxPages'];
             $bodyClass = 'board-page';

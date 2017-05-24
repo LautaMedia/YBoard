@@ -59,10 +59,6 @@ class Board extends Controller
             $catalog ? $this->user->preferences->threadsPerCatalogPage : $this->user->preferences->threadsPerPage,
             $catalog ? 0 : $this->user->preferences->repliesPerThread);
 
-        if (empty($threads) && $pageNum !== 1) {
-            $this->notFound(null, _('This board does not have this many threads!'));
-        }
-
         $isLastPage = count($threads) < ($catalog ? $this->user->preferences->threadsPerCatalogPage : $this->user->preferences->threadsPerPage);
 
         $view = $this->loadTemplateEngine();
