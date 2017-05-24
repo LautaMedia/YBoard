@@ -7,6 +7,17 @@ body.sidebar-visible #sidebar {
     display: block;
 }
 
+@media (min-width: 800px) {
+    body:not(.no-sidebar) {
+        margin-left: $sidebarWidth;
+    }
+}
+@media (min-width: 600px) {
+    body.sidebar-visible {
+        margin-left: $sidebarWidth;
+    }
+}
+
 #sidebar {
     $bgcolor: $sidebarColor;
     width: $sidebarWidth;
@@ -20,6 +31,7 @@ body.sidebar-visible #sidebar {
     left: 0;
     bottom: 0;
     top: 0;
+    will-change: transform;
 
     button.link, input.link {
         border: 0;

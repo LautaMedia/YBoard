@@ -7,10 +7,14 @@
     z-index: 1000;
     background-color: $sidebarColor;
     box-shadow: 0 0 10px 0 darken($sidebarColor, 10%);
-    position: sticky;
+    position: fixed;
     top: 0;
+    will-change: transform;
+    font-size: 20px;
 
     button, a {
+        text-align: center;
+        width: $topMenuHeight;
         font-size: 1em;
         cursor: pointer;
         color: $sidebarLinkColor;
@@ -26,24 +30,22 @@
         }
     }
 
+    .right {
+        margin-left: auto;
+        display: flex;
+        > * {
+            border-left: 1px solid lighten($sidebarColor, 10%);
+        }
+    }
+
+    > button, > a {
+        border-right: 1px solid lighten($sidebarColor, 10%);
+    }
+
     .unread-count {
         position: absolute;
         top: 2px;
         right: 2px;
-    }
-
-    .buttons {
-        margin-left: auto;
-        font-size: 20px;
-        > * {
-            border-left: 1px solid lighten($sidebarColor, 10%);
-            text-align: center;
-            width: $topMenuHeight;
-        }
-    }
-
-    #e-sidebar-toggle {
-        padding-right: 10px;
     }
 
     @media (max-width: 799px) {

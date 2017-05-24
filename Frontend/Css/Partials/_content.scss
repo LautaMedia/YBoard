@@ -123,10 +123,6 @@ h4 {
     margin-bottom: 10px;
 }
 
-body:not(.no-sidebar) {
-    margin-left: $sidebarWidth;
-}
-
 #wrapper {
     display: flex;
     flex-direction: column;
