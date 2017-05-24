@@ -23,10 +23,10 @@
         <?php $paddingBottom = str_replace(',','.', round($post->file->thumbHeight / $post->file->thumbWidth * 100, 4)) ?>
     <?php endif ?>
     <?php $fileUrl = $config['url']['files'] . '/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
-    <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>">
+    <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>" style="width:<?= $post->file->thumbWidth ?>px">
         <?php if (in_array($post->file->extension, ['m4a', 'mp4'])): ?>
             <a href="<?= $fileUrl ?>" class="media" target="_blank"
-               style="width:<?= $post->file->thumbWidth ?>px;padding-bottom:<?= $paddingBottom ?>%">
+               style="padding-bottom:<?= $paddingBottom ?>%">
                 <?php if ($post->file->hasThumbnail): ?>
                 <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
                 <?php else: ?>
@@ -46,7 +46,7 @@
             <button class="button primary e-stop-media"><?= _('Hide media') ?></button>
         <?php else: ?>
             <a href="<?= $fileUrl ?>" class="image" target="_blank"
-               style="width:<?= $post->file->thumbWidth ?>px;padding-bottom:<?= $paddingBottom ?>%">
+               style="padding-bottom:<?= $paddingBottom ?>%">
                 <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
             </a>
         <?php endif ?>

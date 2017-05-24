@@ -76,9 +76,11 @@
     &.thumbnail a {
         height: 0;
     }
-    &:not(.thumbnail) a {
+    &:not(.thumbnail) {
         width: auto !important;
-        padding-bottom: 0 !important;
+        a {
+            padding-bottom: 0 !important;
+        }
     }
     figcaption {
         text-align: left;

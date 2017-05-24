@@ -235,11 +235,13 @@ class UploadedFile extends File
                 throw new FileUploadException(sprintf(_('Unsupported file type: %s'), $this->extension));
         }
 
+        error_log($this->thumbWidth);
+        error_log($this->thumbHeight);
         // Save file to database
-        $q = $this->db->prepare("INSERT INTO file (user_id, folder, name, extension, size, width, height, duration,
-            has_thumbnail, has_sound, is_gif, in_progress)
-            VALUES (:user_id, :folder, :name, :extension, :size, :width, :height, :duration, :has_thumbnail, :has_sound,
-            :is_gif, :in_progress)");
+        $q = $this->db->prepare("INSERT INTO file (user_id, folder, name, extension, size, width, height,
+            thumb_width, thumb_height, duration, has_thumbnail, has_sound, is_gif, in_progress)
+            VALUES (:user_id, :folder, :name, :extension, :size, :width, :height, :thumb_width, :thumb_height,
+            :duration, :has_thumbnail, :has_sound, :is_gif, :in_progress)");
         $q->bindValue(':user_id', $userId);
         $q->bindValue(':folder', $this->folder);
         $q->bindValue(':name', $this->name);
