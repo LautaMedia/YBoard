@@ -90,6 +90,11 @@
         }
     }
 
+    .referring {
+        border-bottom: 1px dotted green;
+        font-weight: bold;
+    }
+
     @import 'Posts/file';
 }
 

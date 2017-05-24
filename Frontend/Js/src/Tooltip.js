@@ -7,6 +7,7 @@ class Tooltip
             'offset': 10,
             'content': '',
             'onOpen': null,
+            'onClose': null,
             'closeEvent': 'mouseout',
             'position': 'bottom',
         }, options);
@@ -79,6 +80,10 @@ class Tooltip
 
     close(tooltip)
     {
+        if (typeof this.options.onClose === 'function') {
+            this.options.onClose(this);
+        }
+
         tooltip.elm = null;
 
         let tip = document.querySelector('.tooltip[data-id="' + tooltip.id + '"]');

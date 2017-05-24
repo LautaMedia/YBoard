@@ -573,18 +573,28 @@ var YBoard = function () {
                     if (typeof e.target.dataset.id !== 'undefined') {
                         postId = e.target.dataset.id;
                     }
+                    var postXhr = null;
                     new _Tooltip2.default(e, {
                         'openDelay': 100,
                         'position': 'bottom',
                         'content': that.spinnerHtml(),
                         'onOpen': function onOpen(tip) {
-                            _YQuery2.default.post('/api/post/get', {
+                            postXhr = _YQuery2.default.post('/api/post/get', {
                                 'postId': postId
                             }, {
                                 'errorFunction': null
                             }).onLoad(function (xhr) {
+                                if (tip.elm === null) {
+                                    return;
+                                }
                                 tip.setContent(xhr.responseText);
                                 tip.position();
+
+                                var referringId = e.target.closest('.post').dataset.id;
+                                var referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
+                                if (referring !== null) {
+                                    referring.classList.add('referring');
+                                }
                             }).onError(function (xhr) {
                                 if (xhr.responseText.length !== 0) {
                                     var json = JSON.parse(xhr.responseText);
@@ -594,6 +604,12 @@ var YBoard = function () {
                                 }
                                 tip.position();
                             });
+                            postXhr = postXhr.getXhrObject();
+                        },
+                        'onClose': function onClose() {
+                            if (postXhr !== null && postXhr.readyState !== 4) {
+                                postXhr.abort();
+                            }
                         }
                     });
                 });
@@ -1141,6 +1157,7 @@ var Tooltip = function () {
             'offset': 10,
             'content': '',
             'onOpen': null,
+            'onClose': null,
             'closeEvent': 'mouseout',
             'position': 'bottom'
         }, options);
@@ -1213,6 +1230,10 @@ var Tooltip = function () {
     }, {
         key: 'close',
         value: function close(tooltip) {
+            if (typeof this.options.onClose === 'function') {
+                this.options.onClose(this);
+            }
+
             tooltip.elm = null;
 
             var tip = document.querySelector('.tooltip[data-id="' + tooltip.id + '"]');

@@ -117,20 +117,30 @@ class YBoard
                 if (typeof e.target.dataset.id !== 'undefined') {
                     postId = e.target.dataset.id;
                 }
+                let postXhr = null;
                 new Tooltip(e, {
                     'openDelay': 100,
                     'position': 'bottom',
                     'content': that.spinnerHtml(),
                     'onOpen': function(tip)
                     {
-                        YQuery.post('/api/post/get', {
+                        postXhr = YQuery.post('/api/post/get', {
                             'postId': postId,
                         }, {
                             'errorFunction': null,
                         }).onLoad(function(xhr)
                         {
+                            if (tip.elm === null) {
+                                return;
+                            }
                             tip.setContent(xhr.responseText);
                             tip.position();
+
+                            let referringId = e.target.closest('.post').dataset.id;
+                            let referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
+                            if (referring !== null) {
+                                referring.classList.add('referring');
+                            }
                         }).onError(function(xhr)
                         {
                             if (xhr.responseText.length !== 0) {
@@ -141,6 +151,12 @@ class YBoard
                             }
                             tip.position();
                         });
+                        postXhr = postXhr.getXhrObject();
+                    },
+                    'onClose': function() {
+                        if (postXhr !== null && postXhr.readyState !== 4) {
+                            postXhr.abort();
+                        }
                     },
                 });
             });
