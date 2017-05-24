@@ -423,11 +423,11 @@ class PostForm
 
         this.msgElm.focus();
         let append = '';
-        if (this.msgElm.value.substr(-1) === '\n') {
-            append += '\n';
-        } else {
-            if (this.msgElm.value.length !== 0) {
+        if (this.msgElm.value.substr(-1) !== '\n' && this.msgElm.value.length !== 0) {
+            if (this.msgElm.value.substr(-1) !== '\n') {
                 append += '\n\n';
+            } else {
+                append += '\n';
             }
         }
         append += '>>' + postId + '\n';
@@ -437,7 +437,7 @@ class PostForm
             append += '>' + selectedText.replace(/(\r\n|\n|\r)/g, '$1>') + '\n';
         }
 
-        this.msgElm.value = this.msgElm.value.trim() + append;
+        this.msgElm.insertAtCaret(append);
     }
 
     submit(e)
