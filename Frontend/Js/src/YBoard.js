@@ -106,6 +106,7 @@ class YBoard
         }
 
         this.PostForm.bindPostEvents(elm);
+        this.Post.truncateLongPosts(elm);
         this.Post.bindEvents(elm);
 
         tooltips.forEach(function(elm)

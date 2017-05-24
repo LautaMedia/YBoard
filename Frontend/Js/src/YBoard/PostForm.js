@@ -404,7 +404,7 @@ class PostForm
     threadReply(threadId)
     {
         if (threadId !== null) {
-            YBoard.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
+            YBoard.Thread.getElm(threadId).appendChild(this.elm);
             this.show(true);
             this.setDestination(true, threadId);
         }

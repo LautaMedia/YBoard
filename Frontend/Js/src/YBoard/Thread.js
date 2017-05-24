@@ -80,9 +80,8 @@ class Thread {
         {
             let data = document.createElement('template');
             data.innerHTML = xhr.responseText;
-            YBoard.initElement(data.content);
 
-            let loadedCount = data.content.querySelectorAll('.reply').length;
+            let loadedCount = data.content.querySelectorAll('.post').length;
             if (loadedCount < loadCount) {
                 thread.querySelector('.e-more-replies').hide();
             }
@@ -94,6 +93,9 @@ class Thread {
             } else {
                 thread.querySelector('.more-replies-container').insertBefore(data.content, firstVisibleReply);
             }
+
+            YBoard.initElement(data.content);
+
             thread.classList.add('expanded');
         });
     }

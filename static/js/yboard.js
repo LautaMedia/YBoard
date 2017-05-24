@@ -564,6 +564,7 @@ var YBoard = function () {
             }
 
             this.PostForm.bindPostEvents(elm);
+            this.Post.truncateLongPosts(elm);
             this.Post.bindEvents(elm);
 
             tooltips.forEach(function (elm) {
@@ -1514,9 +1515,11 @@ var Post = function () {
             elm.querySelectorAll('.ref').forEach(function (elm) {
                 elm.addEventListener('click', that.refClick);
             });
-
-            // Truncate long posts
-            elm.querySelectorAll('.post').forEach(function (elm) {
+        }
+    }, {
+        key: 'truncateLongPosts',
+        value: function truncateLongPosts(elm) {
+            elm.querySelectorAll('.message').forEach(function (elm) {
                 if (elm.clientHeight > 600) {
                     elm.classList.add('truncated');
                     var button = document.createElement('button');
@@ -1526,7 +1529,7 @@ var Post = function () {
                     });
                     button.classList.add('button');
                     button.innerHTML = 'Show full message';
-                    elm.appendChild(button);
+                    elm.parentNode.insertBefore(button, elm.nextSibling);
                 }
             });
         }
@@ -1997,7 +2000,7 @@ var PostForm = function () {
         key: 'threadReply',
         value: function threadReply(threadId) {
             if (threadId !== null) {
-                _YBoard2.default.Thread.getElm(threadId).querySelector('.thread-content').appendChild(this.elm);
+                _YBoard2.default.Thread.getElm(threadId).appendChild(this.elm);
                 this.show(true);
                 this.setDestination(true, threadId);
             }
@@ -2497,9 +2500,8 @@ var Thread = function () {
             }).onLoad(function (xhr) {
                 var data = document.createElement('template');
                 data.innerHTML = xhr.responseText;
-                _YBoard2.default.initElement(data.content);
 
-                var loadedCount = data.content.querySelectorAll('.reply').length;
+                var loadedCount = data.content.querySelectorAll('.post').length;
                 if (loadedCount < loadCount) {
                     thread.querySelector('.e-more-replies').hide();
                 }
@@ -2511,6 +2513,9 @@ var Thread = function () {
                 } else {
                     thread.querySelector('.more-replies-container').insertBefore(data.content, firstVisibleReply);
                 }
+
+                _YBoard2.default.initElement(data.content);
+
                 thread.classList.add('expanded');
             });
         }
@@ -2626,10 +2631,7 @@ var AutoUpdate = function () {
                 var data = document.createElement('template');
                 data.innerHTML = xhr.responseText;
 
-                // Do all JS magic
-                _YBoard2.default.initElement(data.content);
-
-                that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
+                that.lastUpdateNewReplies = data.content.querySelectorAll('.post').length;
                 that.newReplies += that.lastUpdateNewReplies;
 
                 if (that.lastUpdateNewReplies === 0) {
@@ -2639,6 +2641,7 @@ var AutoUpdate = function () {
                 }
 
                 thread.querySelector('.replies').appendChild(data.content);
+                _YBoard2.default.initElement(data.content);
 
                 // Run again
                 if (!manual) {

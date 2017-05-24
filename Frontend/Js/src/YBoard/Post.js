@@ -24,9 +24,11 @@ class Post
         {
             elm.addEventListener('click', that.refClick);
         });
+    }
 
-        // Truncate long posts
-        elm.querySelectorAll('.post').forEach(function(elm) {
+    truncateLongPosts(elm)
+    {
+        elm.querySelectorAll('.message').forEach(function(elm) {
             if (elm.clientHeight > 600) {
                 elm.classList.add('truncated');
                 let button = document.createElement('button');
@@ -36,7 +38,7 @@ class Post
                 });
                 button.classList.add('button');
                 button.innerHTML = 'Show full message';
-                elm.appendChild(button);
+                elm.parentNode.insertBefore(button, elm.nextSibling);
             }
         });
     }

@@ -77,11 +77,8 @@ class AutoUpdate
 
             let data = document.createElement('template');
             data.innerHTML = xhr.responseText;
-
-            // Do all JS magic
-            YBoard.initElement(data.content);
-
-            that.lastUpdateNewReplies = data.querySelectorAll('.message').length;
+            
+            that.lastUpdateNewReplies = data.content.querySelectorAll('.post').length;
             that.newReplies += that.lastUpdateNewReplies;
 
             if (that.lastUpdateNewReplies === 0) {
@@ -91,6 +88,7 @@ class AutoUpdate
             }
 
             thread.querySelector('.replies').appendChild(data.content);
+            YBoard.initElement(data.content);
 
             // Run again
             if (!manual) {

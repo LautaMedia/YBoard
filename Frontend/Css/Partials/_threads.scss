@@ -38,18 +38,14 @@ body:not(.thread-page) .thread.hidden {
         display: block;
         box-shadow: none;
         margin: 10px 0 0 0;
-        padding: 20px;
-    }
-    > #post-form {
-        margin: 20px 0;
-        padding: 5px;
-    }
-    .replies #post-form {
         background-color: transparent;
         padding: 0;
         #label-subject, h3 {
             display: none
         }
+    }
+    > #post-form {
+        padding: 5px;
     }
 
     > h3 {
@@ -176,7 +172,7 @@ body:not(.thread-page) .thread.hidden {
             background-clip: padding-box;
         }
 
-        &.truncated .message {
+        .truncated {
             max-height: 500px;
         }
     }
