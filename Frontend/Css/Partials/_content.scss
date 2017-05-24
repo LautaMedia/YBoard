@@ -3,7 +3,7 @@ body {
     font: $fontSize $fontFamily;
     color: $textColor;
     word-wrap: break-word;
-    margin: auto;
+    margin: $topMenuHeight auto 0 auto;
     transition:
             background-color $transition,
             color $transition;
