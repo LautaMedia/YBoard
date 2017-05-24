@@ -27,7 +27,7 @@ class Post
 
         // Truncate long posts
         elm.querySelectorAll('.post').forEach(function(elm) {
-            if (elm.clientHeight > 200) {
+            if (elm.clientHeight > 600) {
                 elm.classList.add('truncated');
                 let button = document.createElement('button');
                 button.addEventListener('click', function(e) {
