@@ -89,13 +89,12 @@ class File
             e.target.dataset.expanded = e.target.getAttribute('src');
             changeSrc(e.target, e.target.parentNode.getAttribute('href'));
             e.target.closest('.post-file').classList.remove('thumbnail');
-            e.target.closest('.message').classList.add('full');
+            e.target.closest('.message').classList.remove('truncated');
         } else {
             // Restore thumbnail
             changeSrc(e.target, e.target.dataset.expanded);
             delete e.target.dataset.expanded;
             e.target.closest('.post-file').classList.add('thumbnail');
-            e.target.closest('.message').classList.remove('full');
 
             // Scroll to top of image
             let elmTop = e.target.getBoundingClientRect().top + window.scrollY;

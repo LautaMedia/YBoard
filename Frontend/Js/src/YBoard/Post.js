@@ -24,6 +24,21 @@ class Post
         {
             elm.addEventListener('click', that.refClick);
         });
+
+        // Truncate long posts
+        elm.querySelectorAll('.post').forEach(function(elm) {
+            if (elm.clientHeight > 200) {
+                elm.classList.add('truncated');
+                let button = document.createElement('button');
+                button.addEventListener('click', function(e) {
+                    elm.classList.remove('truncated');
+                    button.remove();
+                });
+                button.classList.add('button');
+                button.innerHTML = 'Show full message';
+                elm.appendChild(button);
+            }
+        });
     }
 
     refClick(e)

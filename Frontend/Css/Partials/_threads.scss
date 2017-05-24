@@ -175,6 +175,10 @@ body:not(.thread-page) .thread.hidden {
             border-top: 100px solid transparent;
             background-clip: padding-box;
         }
+
+        &.truncated .message {
+            max-height: 500px;
+        }
     }
 
     .message {

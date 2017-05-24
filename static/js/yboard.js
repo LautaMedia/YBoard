@@ -1514,6 +1514,21 @@ var Post = function () {
             elm.querySelectorAll('.ref').forEach(function (elm) {
                 elm.addEventListener('click', that.refClick);
             });
+
+            // Truncate long posts
+            elm.querySelectorAll('.post').forEach(function (elm) {
+                if (elm.clientHeight > 200) {
+                    elm.classList.add('truncated');
+                    var button = document.createElement('button');
+                    button.addEventListener('click', function (e) {
+                        elm.classList.remove('truncated');
+                        button.remove();
+                    });
+                    button.classList.add('button');
+                    button.innerHTML = 'Show full message';
+                    elm.appendChild(button);
+                }
+            });
         }
     }, {
         key: 'refClick',
@@ -2195,13 +2210,12 @@ var File = function () {
                 e.target.dataset.expanded = e.target.getAttribute('src');
                 changeSrc(e.target, e.target.parentNode.getAttribute('href'));
                 e.target.closest('.post-file').classList.remove('thumbnail');
-                e.target.closest('.message').classList.add('full');
+                e.target.closest('.message').classList.remove('truncated');
             } else {
                 // Restore thumbnail
                 changeSrc(e.target, e.target.dataset.expanded);
                 delete e.target.dataset.expanded;
                 e.target.closest('.post-file').classList.add('thumbnail');
-                e.target.closest('.message').classList.remove('full');
 
                 // Scroll to top of image
                 var elmTop = e.target.getBoundingClientRect().top + window.scrollY;
