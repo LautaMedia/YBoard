@@ -47,14 +47,6 @@
             <h3><?= htmlspecialchars($user->username) ?></h3>
         <?php endif ?>
         <div class="buttons">
-            <button class="button square icon-alarm open-notifications" title="<?= _('Notifications') ?>"
-            ><span class="unread-notifications unread-count red<?= ($user->notifications['unread'] === 0 ? ' none' : '') ?>"
-                ><?= $user->notifications['unread'] ?></span></button>
-            <a href="/followedthreads/" class="button square icon-bookmark" title="<?= _('Followed threads') ?>"><?php
-                if($user->threadFollow['unreadThreads'] != 0) :
-                    ?><span class="unread-count green"><?= $user->threadFollow['unreadThreads'] ?></span><?php
-                endif
-                ?></a>
             <?php if ($user->isMod): ?>
                 <a class="button square icon-flag" href="/mod/reports" title="<?= _('Reports') ?>"><?php
                     if ($uncheckedReports != 0) :

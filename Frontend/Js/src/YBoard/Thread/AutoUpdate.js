@@ -52,7 +52,7 @@ class AutoUpdate
         let thread = YBoard.Thread.getElm(this.threadId);
         let fromId = thread.querySelectorAll('.reply');
 
-        if (fromId === null) {
+        if (fromId.length === 0) {
             fromId = 0;
         } else {
             fromId = fromId[fromId.length - 1];

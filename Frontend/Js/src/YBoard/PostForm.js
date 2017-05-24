@@ -20,6 +20,7 @@ class PostForm
         this.fileUploadXhr = null;
         this.submitAfterFileUpload = false;
         this.submitInProgress = false;
+        this.skipUnloadWarning = false;
         this.origDestName = false;
         this.origDestValue = false;
 
@@ -34,16 +35,6 @@ class PostForm
         this.elm.querySelector('.e-postform-color-bar').addEventListener('click', function()
         {
             that.toggleBbColorBar();
-        });
-
-        // Confirm page exit when there's text in the post form
-        document.addEventListener('beforeunload', function(e)
-        {
-            if (!that.submitInProgress && that.msgElm.offsetParent !== null && that.msgElm.value.length !== 0) {
-                return messages.confirmUnload;
-            } else {
-                e = null;
-            }
         });
 
         // Create thread
@@ -116,7 +107,7 @@ class PostForm
 
         // Confirm page leave if there's text in the form
         window.addEventListener('beforeunload', function (e) {
-            if (that.msgElm !== null && that.msgElm.value.length !== 0) {
+            if (!that.skipUnloadWarning && that.msgElm !== null && that.msgElm.value.length !== 0) {
                 e.returnValue = messages.confirmPageLeave;
             }
         });
@@ -187,6 +178,7 @@ class PostForm
         if (resetForm) {
             this.elm.reset();
         }
+
         if (this.location !== null) {
             this.locationParent.insertBefore(this.elm, this.location);
         } else {
@@ -378,6 +370,7 @@ class PostForm
         this.elm.querySelector('#file-id').value = '';
         this.elm.querySelector('#file-name').value = '';
         this.updateFileProgressBar(0);
+        this.elm.querySelector('input[type="submit"].button').disabled = false;
         this.fileUploadInProgress = false;
         this.submitAfterFileUpload = false;
     }
@@ -496,12 +489,14 @@ class PostForm
                 that.reset(true);
             } else {
                 if (xhr.responseText.length === 0) {
+                    that.skipUnloadWarning = true;
                     YBoard.pageReload();
                 } else {
                     let data = JSON.parse(xhr.responseText);
                     if (typeof data.message === 'undefined') {
                         Toast.error(messages.errorOccurred);
                     } else {
+                        that.skipUnloadWarning = true;
                         window.location = '/' + fd.get('board') + '/' + data.message;
                     }
                 }

@@ -591,9 +591,11 @@ var YBoard = function () {
                                 tip.position();
 
                                 var referringId = e.target.closest('.post').dataset.id;
-                                var referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
-                                if (referring !== null) {
-                                    referring.classList.add('referring');
+                                if (tip.elm.querySelectorAll('.ref').length > 1) {
+                                    var referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
+                                    if (referring !== null) {
+                                        referring.classList.add('referring');
+                                    }
                                 }
                             }).onError(function (xhr) {
                                 if (xhr.responseText.length !== 0) {
@@ -1205,14 +1207,17 @@ var Tooltip = function () {
                     if (that.elm === null) {
                         return;
                     }
-
-                    document.body.appendChild(that.elm);
-                    that.position();
+                    that.appendTip();
                 }, this.options.openDelay);
             } else {
-                document.body.appendChild(this.elm);
-                this.position();
+                this.appendTip();
             }
+        }
+    }, {
+        key: 'appendTip',
+        value: function appendTip() {
+            document.body.appendChild(this.elm);
+            this.position();
 
             if (typeof this.options.onOpen === 'function') {
                 this.options.onOpen(this);
@@ -1675,6 +1680,7 @@ var PostForm = function () {
         this.fileUploadXhr = null;
         this.submitAfterFileUpload = false;
         this.submitInProgress = false;
+        this.skipUnloadWarning = false;
         this.origDestName = false;
         this.origDestValue = false;
 
@@ -1686,15 +1692,6 @@ var PostForm = function () {
         });
         this.elm.querySelector('.e-postform-color-bar').addEventListener('click', function () {
             that.toggleBbColorBar();
-        });
-
-        // Confirm page exit when there's text in the post form
-        document.addEventListener('beforeunload', function (e) {
-            if (!that.submitInProgress && that.msgElm.offsetParent !== null && that.msgElm.value.length !== 0) {
-                return messages.confirmUnload;
-            } else {
-                e = null;
-            }
         });
 
         // Create thread
@@ -1757,7 +1754,7 @@ var PostForm = function () {
 
         // Confirm page leave if there's text in the form
         window.addEventListener('beforeunload', function (e) {
-            if (that.msgElm !== null && that.msgElm.value.length !== 0) {
+            if (!that.skipUnloadWarning && that.msgElm !== null && that.msgElm.value.length !== 0) {
                 e.returnValue = messages.confirmPageLeave;
             }
         });
@@ -1828,6 +1825,7 @@ var PostForm = function () {
             if (resetForm) {
                 this.elm.reset();
             }
+
             if (this.location !== null) {
                 this.locationParent.insertBefore(this.elm, this.location);
             } else {
@@ -2021,6 +2019,7 @@ var PostForm = function () {
             this.elm.querySelector('#file-id').value = '';
             this.elm.querySelector('#file-name').value = '';
             this.updateFileProgressBar(0);
+            this.elm.querySelector('input[type="submit"].button').disabled = false;
             this.fileUploadInProgress = false;
             this.submitAfterFileUpload = false;
         }
@@ -2138,12 +2137,14 @@ var PostForm = function () {
                     that.reset(true);
                 } else {
                     if (xhr.responseText.length === 0) {
+                        that.skipUnloadWarning = true;
                         _YBoard2.default.pageReload();
                     } else {
                         var data = JSON.parse(xhr.responseText);
                         if (typeof data.message === 'undefined') {
                             _Toast2.default.error(messages.errorOccurred);
                         } else {
+                            that.skipUnloadWarning = true;
                             window.location = '/' + fd.get('board') + '/' + data.message;
                         }
                     }
@@ -2689,7 +2690,7 @@ var AutoUpdate = function () {
             var thread = _YBoard2.default.Thread.getElm(this.threadId);
             var fromId = thread.querySelectorAll('.reply');
 
-            if (fromId === null) {
+            if (fromId.length === 0) {
                 fromId = 0;
             } else {
                 fromId = fromId[fromId.length - 1];

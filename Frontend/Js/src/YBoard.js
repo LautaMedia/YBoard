@@ -137,9 +137,11 @@ class YBoard
                             tip.position();
 
                             let referringId = e.target.closest('.post').dataset.id;
-                            let referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
-                            if (referring !== null) {
-                                referring.classList.add('referring');
+                            if (tip.elm.querySelectorAll('.ref').length > 1) {
+                                let referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
+                                if (referring !== null) {
+                                    referring.classList.add('referring');
+                                }
                             }
                         }).onError(function(xhr)
                         {

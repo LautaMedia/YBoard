@@ -55,14 +55,17 @@ class Tooltip
                 if (that.elm === null) {
                     return;
                 }
-
-                document.body.appendChild(that.elm);
-                that.position();
+                that.appendTip();
             }, this.options.openDelay);
         } else {
-            document.body.appendChild(this.elm);
-            this.position();
+            this.appendTip();
         }
+    }
+
+    appendTip()
+    {
+        document.body.appendChild(this.elm);
+        this.position();
 
         if (typeof this.options.onOpen === 'function') {
             this.options.onOpen(this);
