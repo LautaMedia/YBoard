@@ -181,6 +181,7 @@ body:not(.thread-page) .thread.hidden {
         margin: 5px 0 10px 0;
         overflow: hidden;
         word-wrap: break-word;
+        will-change: contents;
     }
 
     .post-meta {

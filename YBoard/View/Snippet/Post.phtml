@@ -3,55 +3,60 @@
 <div class="post-meta">
     <div class="user-info">
         <span class="username"><?= htmlspecialchars(\YFW\Library\Text::formatUsername($post->username)) ?></span>
-        <?php if ($post->userId == $thread->userId) : ?>
+        <?php if ($post->userId == $thread->userId): ?>
             <span class="text-tag op"><?= _('OP') ?></span>
         <?php endif ?>
     </div>
     <div class="post-info">
         <span class="post-time datetime"><?= $post->time ?></span>
-        <?php if (!isset($tooltip)) : ?>
+        <?php if (!isset($tooltip)): ?>
         <a href="/post-<?= $post->id ?>" class="post-id e-post-reply"><?= _('No.') ?> <?= $post->id ?></a>
-        <?php else : ?>
+        <?php else: ?>
         <a href="/post-<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
         <?php endif ?>
     </div>
 </div>
 
 <blockquote class="message">
-    <?php if (!empty($post->file)) : ?>
+    <?php if (!empty($post->file)): ?>
+    <?php if($post->file->hasThumbnail): ?>
+        <?php $paddingBottom = str_replace(',','.', round($post->file->thumbHeight / $post->file->thumbWidth * 100, 4)) ?>
+    <?php endif ?>
     <?php $fileUrl = $config['url']['files'] . '/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
     <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>">
-        <?php if (in_array($post->file->extension, ['m4a', 'mp4'])) : ?>
-            <a href="<?= $fileUrl ?>" class="media" target="_blank">
-                <?php if ($post->file->hasThumbnail) : ?>
+        <?php if (in_array($post->file->extension, ['m4a', 'mp4'])): ?>
+            <a href="<?= $fileUrl ?>" class="media" target="_blank"
+               style="width:<?= $post->file->thumbWidth ?>px;padding-bottom:<?= $paddingBottom ?>%">
+                <?php if ($post->file->hasThumbnail): ?>
                 <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
-                <?php else : ?>
+                <?php else: ?>
                 <span class="no-thumbnail icon-music-note"></span>
                 <?php endif ?>
                 <span class="overlay center icon-play"></span>
-                <?php if ($post->file->isGif) : ?>
+                <?php if ($post->file->isGif): ?>
                 <span class="overlay bottom right">GIF</span>
-                <?php else : ?>
-                    <?php if ($post->file->hasSound) : ?>
+                <?php else: ?>
+                    <?php if ($post->file->hasSound): ?>
                         <span class="overlay bottom right icon-volume-high"></span>
-                    <?php else : ?>
+                    <?php else: ?>
                         <span class="overlay bottom right icon-mute"></span>
                     <?php endif ?>
                 <?php endif ?>
             </a>
             <button class="button primary e-stop-media"><?= _('Hide media') ?></button>
-        <?php else : ?>
-            <a href="<?= $fileUrl ?>" class="image" target="_blank">
+        <?php else: ?>
+            <a href="<?= $fileUrl ?>" class="image" target="_blank"
+               style="width:<?= $post->file->thumbWidth ?>px;padding-bottom:<?= $paddingBottom ?>%">
                 <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
             </a>
         <?php endif ?>
         <figcaption>
             <a href="<?= $fileUrl ?>" target="_blank"><?= htmlspecialchars($post->file->displayName) ?></a>
             <span>
-            <?php if (!empty($post->file->width)) : ?>
+            <?php if (!empty($post->file->width)): ?>
                 <?= $post->file->width ?>&times;<?= $post->file->height ?>
             <?php endif ?>
-            <?php if (!empty($post->file->duration)) : ?>
+            <?php if (!empty($post->file->duration)): ?>
                 <?= \YFW\Library\Text::formatDuration($post->file->duration) ?>
             <?php endif ?>
                 <?= \YFW\Library\Text::formatBytes($post->file->size) ?>
@@ -63,10 +68,10 @@
     <?= \YFW\Library\Text::formatMessage($post->message) ?>
 </blockquote>
 
-<?php if ($post->postReplies) : ?>
+<?php if ($post->postReplies): ?>
 <div class="post-replies">
     <span><?= _('Replies') ?>:</span>
-    <?php foreach ($post->postReplies as $postReply) : ?>
+    <?php foreach ($post->postReplies as $postReply): ?>
         <a href="/post-<?= $postReply ?>" data-id="<?= $postReply ?>" class="ref">&gt;&gt;<?= $postReply ?></a>
     <?php endforeach ?>
 </div>

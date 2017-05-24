@@ -22,7 +22,7 @@
         <?php endif ?>
     </nav>
     <nav id="user">
-        <?php if (!$user->loggedIn) : ?>
+        <?php if (!$user->loggedIn): ?>
             <h3><?= _('Log in') ?></h3>
             <form id="login" class="ajax" action="/api/user/session/create" method="post">
                 <input type="text" name="username" placeholder="<?= _('Username') ?>" maxlength="<?= $config['user']['usernameMaxLength'] ?>" required>
@@ -43,7 +43,7 @@
                     <button type="button" class="button transparent cancel"><?= _('Cancel') ?></button>
                 </div>
             </form>
-        <?php else : ?>
+        <?php else: ?>
             <h3><?= htmlspecialchars($user->username) ?></h3>
         <?php endif ?>
         <div class="buttons">
@@ -55,7 +55,7 @@
                     ?><span class="unread-count green"><?= $user->threadFollow['unreadThreads'] ?></span><?php
                 endif
                 ?></a>
-            <?php if ($user->isMod) : ?>
+            <?php if ($user->isMod): ?>
                 <a class="button square icon-flag" href="/mod/reports" title="<?= _('Reports') ?>"><?php
                     if ($uncheckedReports != 0) :
                         ?><span class="unread-count red"><?= $uncheckedReports ?></span><?php
@@ -68,7 +68,7 @@
             <a class="button square icon-user" href="/profile/" title="<?= _('Profile') ?>"></a>
             <a class="button square icon-cog" href="/preferences" title="<?= _('Preferences') ?>"></a>
             <button class="button square icon-lamp e-switch-theme" title="<?= _('Switch theme colors') ?>"></button>
-            <?php if ($user->loggedIn) : ?>
+            <?php if ($user->loggedIn): ?>
                 <form id="logout" class="ajax" action="/api/user/session/delete" method="post">
                     <button type="submit" class="button square icon-exit" title="<?= _('Log out') ?>"
                             onclick="if(!confirm(messages.logOutConfirm)){return false}"></button>
@@ -84,7 +84,7 @@
     <nav id="boards">
         <h3><?= _('Discussion boards') ?></h3>
         <div class="columns">
-            <?php foreach($boardList as $board) : ?>
+            <?php foreach($boardList as $board): ?>
                 <a href="/<?= htmlspecialchars($board->url) ?>/"
                     <?= ($board->isNsfw?' class="nsfwboard"':'') ?>><?= htmlspecialchars($board->name) ?><?php if($board->isNsfw) :
                         ?><span class="text-tag nsfw"><?= _('NSFW') ?></span><?php endif ?></a>

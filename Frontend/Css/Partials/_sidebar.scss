@@ -31,7 +31,7 @@ body.sidebar-visible #sidebar {
     left: 0;
     bottom: 0;
     top: 0;
-    will-change: transform;
+    backface-visibility: hidden;
 
     button.link, input.link {
         border: 0;

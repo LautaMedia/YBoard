@@ -2208,7 +2208,9 @@ var File = function () {
                     clearTimeout(e.target.loading);
                     var overlay = e.target.parentNode.querySelector('div.overlay');
                     if (overlay !== null) {
-                        overlay.remove();
+                        requestAnimationFrame(function () {
+                            overlay.remove();
+                        });
                     }
                 }
 
@@ -2217,7 +2219,6 @@ var File = function () {
                     var overlay = document.createElement('div');
                     overlay.classList.add('overlay', 'center');
                     overlay.innerHTML = _YBoard2.default.spinnerHtml();
-
                     img.parentNode.appendChild(overlay);
                 }, 200);
 
@@ -2229,20 +2230,24 @@ var File = function () {
             if (typeof e.target.dataset.expanded === 'undefined') {
                 // Expand
                 e.target.dataset.expanded = e.target.getAttribute('src');
-                changeSrc(e.target, e.target.parentNode.getAttribute('href'));
-                e.target.closest('.post-file').classList.remove('thumbnail');
-                that.Post.unTruncate(e.target.closest('.post').dataset.id);
+                requestAnimationFrame(function () {
+                    changeSrc(e.target, e.target.parentNode.getAttribute('href'));
+                    e.target.closest('.post-file').classList.remove('thumbnail');
+                    that.Post.unTruncate(e.target.closest('.post').dataset.id);
+                });
             } else {
                 // Restore thumbnail
-                changeSrc(e.target, e.target.dataset.expanded);
-                delete e.target.dataset.expanded;
-                e.target.closest('.post-file').classList.add('thumbnail');
+                requestAnimationFrame(function () {
+                    changeSrc(e.target, e.target.dataset.expanded);
+                    e.target.closest('.post-file').classList.add('thumbnail');
+                    delete e.target.dataset.expanded;
 
-                // Scroll to top of image
-                var elmTop = e.target.getBoundingClientRect().top + window.scrollY;
-                if (elmTop < window.scrollY) {
-                    window.scrollTo(0, elmTop);
-                }
+                    // Scroll to top of image
+                    var elmTop = e.target.getBoundingClientRect().top + window.scrollY;
+                    if (elmTop < window.scrollY) {
+                        window.scrollTo(0, elmTop);
+                    }
+                });
             }
         }
     }, {
@@ -2264,13 +2269,14 @@ var File = function () {
                 var overlay = document.createElement('div');
                 overlay.classList.add('overlay', 'bottom', 'left');
                 overlay.innerHTML = _YBoard2.default.spinnerHtml();
-                e.target.appendChild(overlay);
+
+                requestAnimationFrame(function () {
+                    e.target.appendChild(overlay);
+                });
             }, 200);
 
             _YQuery2.default.post('/api/file/getmediaplayer', { 'fileId': fileId }).onLoad(function (xhr) {
                 var figure = e.target.closest('.post-file');
-                figure.classList.remove('thumbnail');
-                figure.classList.add('media-player-container');
                 var message = e.target.closest('.message');
 
                 // Untruncate the message
@@ -2284,7 +2290,6 @@ var File = function () {
 
                 // Bind events etc.
                 _YBoard2.default.initElement(data);
-                figure.insertBefore(data, figure.firstElementChild);
 
                 // Video volume save/restore
                 var video = figure.querySelector('video');
@@ -2298,10 +2303,18 @@ var File = function () {
                         video.volume = volume;
                     }
                 }
+
+                requestAnimationFrame(function () {
+                    figure.classList.remove('thumbnail');
+                    figure.classList.add('media-player-container');
+                    figure.insertBefore(data, figure.firstElementChild);
+                });
             }).onEnd(function () {
                 clearTimeout(loading);
                 e.target.querySelectorAll('div.overlay').forEach(function (elm) {
-                    elm.remove();
+                    requestAnimationFrame(function () {
+                        elm.remove();
+                    });
                 });
                 delete e.target.dataset.loading;
             });
@@ -2314,8 +2327,10 @@ var File = function () {
                 video.pause();
                 video.remove();
 
-                elm.classList.remove('media-player-container');
-                elm.classList.add('thumbnail');
+                requestAnimationFrame(function () {
+                    elm.classList.remove('media-player-container');
+                    elm.classList.add('thumbnail');
+                });
             });
         }
     }]);
@@ -2671,8 +2686,10 @@ var AutoUpdate = function () {
                     that.runCount = 0;
                 }
 
-                thread.querySelector('.replies').appendChild(data);
                 _YBoard2.default.initElement(data);
+                requestAnimationFrame(function () {
+                    thread.querySelector('.replies').appendChild(data);
+                });
 
                 // Run again
                 if (!manual) {

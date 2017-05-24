@@ -26,6 +26,7 @@ class File extends Model
 
     protected static $selectQuery = 'id AS file_id, user_id AS file_user_id, folder AS file_folder, name AS file_name,
         extension AS file_extension, size AS file_size, width AS file_width, height AS file_height,
+        thumb_width AS file_thumb_width, thumb_height AS file_thumb_height,
         duration AS file_duration, in_progress AS file_in_progress, has_sound AS file_has_sound,
         is_gif AS file_is_gif';
 
@@ -59,6 +60,12 @@ class File extends Model
                 case 'file_height':
                     $this->height = (int)$val;
                     break;
+                case 'file_thumb_width':
+                    $this->thumbWidth = (int)$val;
+                    break;
+                case 'file_thumb_height':
+                    $this->thumbHeight = (int)$val;
+                    break;
                 case 'file_display_name':
                     $this->displayName = $val;
                     break;
@@ -85,6 +92,21 @@ class File extends Model
     {
         $q = $this->db->prepare('UPDATE file SET size = :size WHERE id = :id LIMIT 1');
         $q->bindValue(':size', $fileSize, Database::PARAM_INT);
+        $q->bindValue(':id', $this->id, Database::PARAM_INT);
+        $q->execute();
+
+        return true;
+    }
+
+    public function setDimensions(?int $width, ?int $height, ?int $thumbWidth = null, ?int $thumbHeight = null): bool
+    {
+        $q = $this->db->prepare('UPDATE file SET width = :width, height = :height,
+            thumb_width = :thumb_width, thumb_height = :thumb_height
+            WHERE id = :id LIMIT 1');
+        $q->bindValue(':width', $width);
+        $q->bindValue(':height', $height);
+        $q->bindValue(':thumb_width', $thumbWidth);
+        $q->bindValue(':thumb_height', $thumbHeight);
         $q->bindValue(':id', $this->id, Database::PARAM_INT);
         $q->execute();
 

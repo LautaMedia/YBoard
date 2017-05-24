@@ -12,7 +12,7 @@
 
     <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
     <div class="replies">
-    <?php foreach($thread->replies as $reply) : ?>
+    <?php foreach($thread->replies as $reply): ?>
         <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
             <?php $post = $reply; include($viewFilesPath . '/Snippet/Post.phtml') ?>
         </div>
@@ -22,7 +22,7 @@
         <button class="link e-get-replies"><?= _('update') ?></button>
     </div>
 
-    <?php if (!$thread->locked || $user->isMod) : ?>
+    <?php if (!$thread->locked || $user->isMod): ?>
         <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
     <?php endif ?>
 </div>

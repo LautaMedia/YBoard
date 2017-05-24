@@ -4,14 +4,14 @@
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
 
-<?php if ($board->url === 'followedthreads') : ?>
+<?php if ($board->url === 'followedthreads'): ?>
 <div class="board-additional-functions">
     <button class="button primary e-follow-mark-read"><?= _('Mark all as read') ?></button>
 </div>
 <?php endif ?>
 
-<?php if (!empty($threads)) : ?>
-    <?php foreach($threads as $thread) : ?>
+<?php if (!empty($threads)): ?>
+    <?php foreach($threads as $thread): ?>
     <div class="thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
         <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
 
@@ -21,15 +21,15 @@
 
         <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
         <div class="replies">
-        <?php if (!empty($thread->replies)) : ?>
-            <?php if ($thread->replyCount > $config['view']['previewPosts']) : ?>
+        <?php if (!empty($thread->replies)): ?>
+            <?php if ($thread->replyCount > $config['view']['previewPosts']): ?>
             <div class="replies-buttons">
                 <button class="link e-more-replies"><?= _('show more replies') ?></button>
                 <button class="link e-less-replies"><?= _('show less replies') ?></button>
             </div>
             <?php endif ?>
             <div class="more-replies-container"></div>
-            <?php foreach($thread->replies as $reply) : ?>
+            <?php foreach($thread->replies as $reply): ?>
                 <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
                     <?php $post = $reply; include($viewFilesPath . '/Snippet/Post.phtml') ?>
                 </div>
@@ -40,7 +40,7 @@
             <a class="link" href="/<?= $board->url ?>/<?= $thread->id ?><?=
             $user->getThreadLastSeenReply($thread->id) !== null ? '#post-' . $user->getThreadLastSeenReply($thread->id):''
             ?>"><?= _('open') ?></a>
-            <?php if (!$thread->locked || $user->isMod) : ?>
+            <?php if (!$thread->locked || $user->isMod): ?>
             <button class="link e-thread-reply"><?= _('reply') ?></button>
             <button class="link e-get-replies"><?= _('update') ?></button>
             <?php endif ?>
@@ -48,7 +48,7 @@
 
     </div>
     <?php endforeach; unset($thread); ?>
-<?php else : ?>
+<?php else: ?>
     <div class="content-box">
         <h3><?= _('There are no threads here...') ?></h3>
     </div>

@@ -29,7 +29,7 @@
     </div>
 </div>
 
-<?php if ($profile->isRegistered && $user->id == $profile->id) : ?>
+<?php if ($profile->isRegistered && $user->id == $profile->id): ?>
 <div class="content-box settings-profile">
     <h3><?= _('User account') ?></h3>
     <div class="flex">
@@ -58,15 +58,15 @@
 <div class="content-box settings-profile">
     <h3><?= _('Active logins') ?></h3>
     <div class="flex center">
-    <?php foreach ($loginSessions as $session) : ?>
+    <?php foreach ($loginSessions as $session): ?>
         <div class="session" id="<?= bin2hex($session->id) ?>">
             <div><h5><?= _('IP-address') ?></h5><span><?= $session->ip ?></span></div>
             <div><h5><?= _('Login time') ?></h5><span class="datetime"><?= $session->loginTime ?></span></div>
             <div><h5><?= _('Last active') ?></h5><span class="datetime"><?= $session->lastActive ?></span></div>
             <div class="actions">
-                <?php if ($session->id == $user->session->id) : ?>
+                <?php if ($session->id == $user->session->id): ?>
                 <em><?= _('Current session') ?></em>
-                <?php else : ?>
+                <?php else: ?>
                 <form action="/api/user/session/delete" class="sessiondestroy ajax" method="post">
                     <input type="hidden" name="sessionId" value="<?= bin2hex($session->id) ?>">
                     <button class="button primary"><?= _('Log out') ?></button>

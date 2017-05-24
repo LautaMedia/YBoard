@@ -4,12 +4,12 @@
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
 
-<?php if (!empty($threads)) : ?>
+<?php if (!empty($threads)): ?>
 <div class="board-additional-functions">
     <input type="text" id="search-catalog" placeholder="<?= _('Search threads...') ?>">
 </div>
 <div class="catalog">
-    <?php foreach($threads as $thread) : ?>
+    <?php foreach($threads as $thread): ?>
         <div class="thread-box" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
             <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
             <div class="thread-content">
@@ -20,9 +20,9 @@
                     <blockquote class="post">
                         <figure class="post-file thumbnail">
                             <a href="/<?= $board->url ?>/<?= $thread->id ?>">
-                                <?php if (!empty($post->file)) : ?>
+                                <?php if (!empty($post->file)): ?>
                                     <?php $src = $config['url']['files']. '/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
-                                <?php else : ?>
+                                <?php else: ?>
                                     <?php $src = $config['url']['static'] . '/img/norppa_ylilauta.svg' ?>
                                 <?php endif ?>
                                 <img src="<?= $src ?>" alt="">
@@ -36,7 +36,7 @@
         </div>
     <?php endforeach; unset($thread); ?>
 </div>
-<?php else : ?>
+<?php else: ?>
 <div class="content-box">
     <h3><?= _('There are no threads here...') ?></h3>
 </div>

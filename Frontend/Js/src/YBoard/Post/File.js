@@ -61,7 +61,10 @@ class File
                 clearTimeout(e.target.loading);
                 let overlay = e.target.parentNode.querySelector('div.overlay');
                 if (overlay !== null) {
-                    overlay.remove();
+                    requestAnimationFrame(function()
+                    {
+                        overlay.remove();
+                    });
                 }
             }
 
@@ -71,7 +74,6 @@ class File
                 let overlay = document.createElement('div');
                 overlay.classList.add('overlay', 'center');
                 overlay.innerHTML = YBoard.spinnerHtml();
-
                 img.parentNode.appendChild(overlay);
             }, 200);
 
@@ -83,20 +85,26 @@ class File
         if (typeof e.target.dataset.expanded === 'undefined') {
             // Expand
             e.target.dataset.expanded = e.target.getAttribute('src');
-            changeSrc(e.target, e.target.parentNode.getAttribute('href'));
-            e.target.closest('.post-file').classList.remove('thumbnail');
-            that.Post.unTruncate(e.target.closest('.post').dataset.id);
+            requestAnimationFrame(function()
+            {
+                changeSrc(e.target, e.target.parentNode.getAttribute('href'));
+                e.target.closest('.post-file').classList.remove('thumbnail');
+                that.Post.unTruncate(e.target.closest('.post').dataset.id);
+            });
         } else {
             // Restore thumbnail
-            changeSrc(e.target, e.target.dataset.expanded);
-            delete e.target.dataset.expanded;
-            e.target.closest('.post-file').classList.add('thumbnail');
+            requestAnimationFrame(function()
+            {
+                changeSrc(e.target, e.target.dataset.expanded);
+                e.target.closest('.post-file').classList.add('thumbnail');
+                delete e.target.dataset.expanded;
 
-            // Scroll to top of image
-            let elmTop = e.target.getBoundingClientRect().top + window.scrollY;
-            if (elmTop < window.scrollY) {
-                window.scrollTo(0, elmTop);
-            }
+                // Scroll to top of image
+                let elmTop = e.target.getBoundingClientRect().top + window.scrollY;
+                if (elmTop < window.scrollY) {
+                    window.scrollTo(0, elmTop);
+                }
+            });
         }
     }
 
@@ -119,14 +127,16 @@ class File
             let overlay = document.createElement('div');
             overlay.classList.add('overlay', 'bottom', 'left');
             overlay.innerHTML = YBoard.spinnerHtml();
-            e.target.appendChild(overlay);
+
+            requestAnimationFrame(function()
+            {
+                e.target.appendChild(overlay);
+            });
         }, 200);
 
         YQuery.post('/api/file/getmediaplayer', {'fileId': fileId}).onLoad(function(xhr)
         {
             let figure = e.target.closest('.post-file');
-            figure.classList.remove('thumbnail');
-            figure.classList.add('media-player-container');
             let message = e.target.closest('.message');
 
             // Untruncate the message
@@ -140,7 +150,6 @@ class File
 
             // Bind events etc.
             YBoard.initElement(data);
-            figure.insertBefore(data, figure.firstElementChild);
 
             // Video volume save/restore
             let video = figure.querySelector('video');
@@ -155,11 +164,21 @@ class File
                     video.volume = volume;
                 }
             }
+
+            requestAnimationFrame(function()
+            {
+                figure.classList.remove('thumbnail');
+                figure.classList.add('media-player-container');
+                figure.insertBefore(data, figure.firstElementChild);
+            });
         }).onEnd(function()
         {
             clearTimeout(loading);
             e.target.querySelectorAll('div.overlay').forEach(function(elm) {
-                elm.remove();
+                requestAnimationFrame(function()
+                {
+                    elm.remove();
+                });
             });
             delete e.target.dataset.loading;
         });
@@ -172,8 +191,11 @@ class File
             video.pause();
             video.remove();
 
-            elm.classList.remove('media-player-container');
-            elm.classList.add('thumbnail');
+            requestAnimationFrame(function()
+            {
+                elm.classList.remove('media-player-container');
+                elm.classList.add('thumbnail');
+            });
         });
     }
 }

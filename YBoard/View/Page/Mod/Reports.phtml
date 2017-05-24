@@ -1,8 +1,8 @@
 <?php include($viewFilesPath . '/Snippet/PageHeader.phtml') ?>
 
-<?php if (!empty($reports)) : ?>
+<?php if (!empty($reports)): ?>
 <div class="catalog">
-<?php foreach ($reports as $report) : ?>
+<?php foreach ($reports as $report): ?>
 <div class="thread-box report" data-id="<?= $report->postId ?>" id="post-<?= $report->postId ?>">
     <h4><?= htmlspecialchars($report->getReasonText()) ?></h4>
     <p class="additional-info"><?= htmlspecialchars($report->additionalInfo) ?></p>
@@ -23,7 +23,7 @@
 </div>
 <?php endforeach ?>
 </div>
-<?php else : ?>
+<?php else: ?>
 <div class="content-box">
     <h3><?= _('No unchecked reports') ?></h3>
 </div>

@@ -19,7 +19,7 @@
 <div class="content-box front">
     <h3><?= _('Discussion boards') ?></h3>
     <nav id="front-boards">
-        <?php foreach($boardList as $board) : ?>
+        <?php foreach($boardList as $board): ?>
         <a href="/<?= htmlspecialchars($board->url) ?>/"
             <?= ($board->isNsfw?' class="nsfwboard"':'') ?>><?= htmlspecialchars($board->name) ?><?php if($board->isNsfw) :
             ?> <span class="text-tag nsfw"><?= _('NSFW') ?></span><?php endif ?></a>

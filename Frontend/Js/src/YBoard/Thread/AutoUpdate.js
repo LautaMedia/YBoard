@@ -87,8 +87,10 @@ class AutoUpdate
                 that.runCount = 0;
             }
 
-            thread.querySelector('.replies').appendChild(data);
             YBoard.initElement(data);
+            requestAnimationFrame(function() {
+                thread.querySelector('.replies').appendChild(data);
+            });
 
             // Run again
             if (!manual) {

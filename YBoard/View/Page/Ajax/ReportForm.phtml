@@ -3,7 +3,7 @@
     <form class="modal-form" onsubmit="submitReport(event)" method="post" action="/scripts/report/submit">
         <p><?= _('Choose a reason') ?></p>
         <input type="hidden" name="post_id" id="report-post-id">
-        <?php foreach ($reasons as $reasonId => $reason) : ?>
+        <?php foreach ($reasons as $reasonId => $reason): ?>
             <label>
                 <input type="radio" name="reason_id" value="<?= $reasonId ?>" required>
                 <?= $reason['name'] ?>

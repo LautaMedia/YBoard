@@ -1,21 +1,21 @@
 <form class="content-box" id="post-form" action="post">
     <fieldset>
         <input type="hidden" id="file-id" name="file_id">
-<?php if (!empty($thread->id)) : ?>
+<?php if (!empty($thread->id)): ?>
     <h3><?= _('Submit a reply') ?></h3>
     <input type="hidden" id="post-destination" name="thread" value="<?= $thread->id ?>">
-<?php else : ?>
+<?php else: ?>
     <h3><?= _('Create a thread') ?></h3>
-    <?php if ($board->id !== null) : ?>
+    <?php if ($board->id !== null): ?>
     <input type="hidden" id="post-destination" name="board" value="<?= $board->url ?>">
-    <?php else : ?>
+    <?php else: ?>
     <input type="hidden" id="post-destination">
     <div class="input-row" id="label-board">
         <label>
             <span class="label"><?= _('Board') ?></span>
             <select name="board" required>
                 <option value="" selected disabled><?= _('Select') ?></option>
-                <?php foreach ($boardList as $singleBoard) : ?>
+                <?php foreach ($boardList as $singleBoard): ?>
                 <option value="<?= $singleBoard->url ?>"><?= htmlspecialchars($singleBoard->name) ?></option>
                 <?php endforeach ?>
             </select>

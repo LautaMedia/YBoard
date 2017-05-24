@@ -8,7 +8,7 @@
             <a href="/<?= $board->url ?>/<?= $thread->id ?>"><?= htmlspecialchars($thread->subject) ?></a>
         <?php endif ?>
     </div>
-    <?php if (empty($thread->id)) : ?>
+    <?php if (empty($thread->id)): ?>
     <div class="pagination">
         <?php if ($pagination['page'] == 2): ?>
             <a href="/<?= $board->url . $pagination['base'] ?>/" class="icon icon-chevron-left chevron"></a>

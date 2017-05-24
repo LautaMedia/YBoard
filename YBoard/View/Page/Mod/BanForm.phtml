@@ -8,7 +8,7 @@
         <h4><?= _('Reason and length') ?></h4>
         <select name="ban_reason" onchange="$('#ban-length').val($(this).find('option:selected').data('banlength'))" required>
             <option selected disabled><?= _('Choose a reason') ?></option>
-            <?php foreach ($banReasons as $reasonId => $reason) : ?>
+            <?php foreach ($banReasons as $reasonId => $reason): ?>
             <option value="<?= $reasonId ?>" data-banlength="<?= $reason['banLength'] ?>"
                 ><?= $reason['name'] ?></option>
             <?php endforeach ?>
