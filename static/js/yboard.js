@@ -591,8 +591,8 @@ var YBoard = function () {
                                 tip.position();
 
                                 var referringId = e.target.closest('.post').dataset.id;
-                                if (tip.elm.querySelectorAll('.ref').length > 1) {
-                                    var referring = tip.elm.querySelector('.ref[data-id="' + referringId + '"]');
+                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                    var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
                                     if (referring !== null) {
                                         referring.classList.add('referring');
                                     }
