@@ -1,6 +1,8 @@
-body:not(.no-sidebar), body.sidebar-visible {
-    #topbar {
-        left: 220px;
+@media (min-width: 600px) {
+    body:not(.no-sidebar), body.sidebar-visible {
+        #topbar {
+            left: 220px;
+        }
     }
 }
 
