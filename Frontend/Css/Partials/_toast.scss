@@ -17,6 +17,8 @@
         cursor: pointer;
         transition: opacity 0.2s;
         color: #000;
+        will-change: opacity;
+
         &.fading {
             opacity: 0;
         }

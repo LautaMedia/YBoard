@@ -203,6 +203,7 @@ class UploadedFile extends File
 
                 // Get size of the final images
                 [$this->width, $this->height] = getimagesize($this->destination);
+                [$this->thumbWidth, $this->thumbHeight] = getimagesize($this->thumbDestination);
 
                 break;
             case 'm4a':
@@ -226,6 +227,9 @@ class UploadedFile extends File
 
                 $sendMessage = MessageQueue::MSG_TYPE_PROCESS_VIDEO;
 
+                // Get size of the thumbnail
+                [$this->thumbWidth, $this->thumbHeight] = getimagesize($this->thumbDestination);
+
                 break;
             default:
                 throw new FileUploadException(sprintf(_('Unsupported file type: %s'), $this->extension));
@@ -243,6 +247,8 @@ class UploadedFile extends File
         $q->bindValue(':size', $this->size, Database::PARAM_INT);
         $q->bindValue(':width', $this->width, Database::PARAM_INT);
         $q->bindValue(':height', $this->height, Database::PARAM_INT);
+        $q->bindValue(':width', $this->thumbWidth, Database::PARAM_INT);
+        $q->bindValue(':height', $this->thumbHeight, Database::PARAM_INT);
         $q->bindValue(':duration', $this->duration, Database::PARAM_INT);
         $q->bindValue(':has_thumbnail', $this->hasThumbnail, Database::PARAM_INT);
         $q->bindValue(':has_sound', $this->hasSound, Database::PARAM_INT);
