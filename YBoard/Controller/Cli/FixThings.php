@@ -26,7 +26,7 @@ class FixThings extends CliController
 
     public function fileDimensions(): void
     {
-        $glob = glob($this->config['file']['savePath'] . '/[a-z0-9][a-z0-9]/{o,t}/*.*', GLOB_BRACE);
+        $glob = glob($this->config['file']['savePath'] . '/[a-z0-9][a-z0-9]/o/*.*', GLOB_BRACE);
         foreach ($glob AS $filePath) {
             $fileName = pathinfo($filePath, PATHINFO_FILENAME);
 

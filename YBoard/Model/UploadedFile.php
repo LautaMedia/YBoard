@@ -247,8 +247,8 @@ class UploadedFile extends File
         $q->bindValue(':size', $this->size, Database::PARAM_INT);
         $q->bindValue(':width', $this->width, Database::PARAM_INT);
         $q->bindValue(':height', $this->height, Database::PARAM_INT);
-        $q->bindValue(':width', $this->thumbWidth, Database::PARAM_INT);
-        $q->bindValue(':height', $this->thumbHeight, Database::PARAM_INT);
+        $q->bindValue(':thumb_width', $this->thumbWidth);
+        $q->bindValue(':thumb_height', $this->thumbHeight);
         $q->bindValue(':duration', $this->duration, Database::PARAM_INT);
         $q->bindValue(':has_thumbnail', $this->hasThumbnail, Database::PARAM_INT);
         $q->bindValue(':has_sound', $this->hasSound, Database::PARAM_INT);
