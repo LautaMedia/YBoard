@@ -1700,8 +1700,10 @@ var PostForm = function () {
 
         // Cancel post
         this.elm.querySelector('#reset-button').addEventListener('click', function (e) {
-            e.preventDefault();
-            that.reset();
+            if (confirm(messages.confirmPostCancel)) {
+                e.preventDefault();
+                that.reset(true);
+            }
         });
 
         // Upload file after change
@@ -1730,6 +1732,13 @@ var PostForm = function () {
             elm.addEventListener('focus', function (e) {
                 that.renderCaptcha();
             });
+        });
+
+        // Confirm page leave if there's text in the form
+        window.addEventListener('beforeunload', function (e) {
+            if (that.msgElm !== null && that.msgElm.value.length !== 0) {
+                e.returnValue = messages.confirmPageLeave;
+            }
         });
     }
 
@@ -1793,7 +1802,11 @@ var PostForm = function () {
     }, {
         key: 'reset',
         value: function reset() {
-            this.elm.reset();
+            var resetForm = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+            if (resetForm) {
+                this.elm.reset();
+            }
             if (this.location !== null) {
                 this.locationParent.insertBefore(this.elm, this.location);
             } else {
@@ -2101,7 +2114,7 @@ var PostForm = function () {
                 if (thread !== null) {
                     _YBoard2.default.Thread.AutoUpdate.runOnce(thread);
                     // Reset post form
-                    that.reset();
+                    that.reset(true);
                 } else {
                     if (xhr.responseText.length === 0) {
                         _YBoard2.default.pageReload();

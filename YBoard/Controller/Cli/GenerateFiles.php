@@ -62,6 +62,7 @@ class GenerateFiles
             'maxSizeExceeded' => _('Your files exceed the maximum upload size.'),
             'confirmDeletePost' => _('Delete post?'),
             'confirmDeleteFile' => _('Delete file?'),
+            'confirmPostCancel' => _('Cancel your post?'),
             'postSent' => _('Post sent'),
             'postDeleted' => _('Post deleted'),
             'fileDeleted' => _('File deleted'),
@@ -80,6 +81,7 @@ class GenerateFiles
             'passwordsDoNotMatch' => _('The two passwords do not match'),
             'passwordChanged' => _('Password changed'),
             'waitingForFileUpload' => _('Your message will be sent after the file upload is completed.'),
+            'confirmPageLeave' => _('Your message might disappear if you leave this page.'),
             'oldBrowserWarning' => _('You are using an outdated browser which does not support some modern techniques used by this website. Please upgrade your browser.'),
         ];
 
