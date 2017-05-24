@@ -1,5 +1,3 @@
-<?php include($viewFilesPath . '/Snippet/PostButtons.phtml') ?>
-
 <div class="post-meta">
     <div class="user-info">
         <span class="username"><?= htmlspecialchars(\YFW\Library\Text::formatUsername($post->username)) ?></span>
@@ -15,6 +13,7 @@
         <a href="/post-<?= $post->id ?>" class="post-id"><?= _('No.') ?> <?= $post->id ?></a>
         <?php endif ?>
     </div>
+    <?php include($viewFilesPath . '/Snippet/PostButtons.phtml') ?>
 </div>
 
 <blockquote class="message">

@@ -1,4 +1,4 @@
-<div class="post-buttons" data-id="<?= $post->id ?>">
+<div class="post-buttons">
     <?php if (empty($bodyClass) || $bodyClass !== 'board-catalog-page' && (!$thread->locked || $user->isMod)): ?>
         <button class="icon-bubbles e-post-reply" title="<?= _('Reply') ?>"></button>
     <?php endif ?>

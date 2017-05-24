@@ -1542,17 +1542,19 @@ var Post = function () {
         key: 'unTruncate',
         value: function unTruncate(id) {
             var post = document.getElementById('post-' + id);
-            console.log(id);
-            console.log(post);
             if (post === null) {
                 return;
             }
+
             var message = post.querySelector('.message');
-            message.classList.remove('truncated');
             var button = post.querySelector('.e-untruncate');
-            if (button !== null) {
-                button.remove();
-            }
+
+            requestAnimationFrame(function () {
+                message.classList.remove('truncated');
+                if (button !== null) {
+                    button.remove();
+                }
+            });
         }
     }, {
         key: 'refClick',

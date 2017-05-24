@@ -51,17 +51,20 @@ class Post
     unTruncate(id)
     {
         let post = document.getElementById('post-' + id);
-        console.log(id);
-        console.log(post);
         if (post === null) {
             return;
         }
+
         let message = post.querySelector('.message');
-        message.classList.remove('truncated');
         let button = post.querySelector('.e-untruncate');
-        if (button !== null) {
-            button.remove();
-        }
+
+        requestAnimationFrame(function()
+        {
+            message.classList.remove('truncated');
+            if (button !== null) {
+                button.remove();
+            }
+        });
     }
 
     refClick(e)

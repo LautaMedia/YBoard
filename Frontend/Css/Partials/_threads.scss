@@ -185,7 +185,9 @@ body:not(.thread-page) .thread.hidden {
     }
 
     .post-meta {
+        display: flex;
         min-height: $postMetaHeight;
+        align-items: center;
         @if (lightness($textColor) > 50) {
             color: darken($textColor, 40%);
         } @else {
@@ -251,8 +253,8 @@ body:not(.thread-page) .thread.hidden {
 }
 
 .post-buttons {
-    float: right;
-    display: flex;
+    margin-left: auto;
+    display: inline-flex;
     button {
         border: 0;
         padding: 0;
