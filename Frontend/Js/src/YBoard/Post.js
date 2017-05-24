@@ -31,7 +31,11 @@ class Post
         let that = this;
 
         elm.querySelectorAll('.message').forEach(function(elm) {
-            if (elm.clientHeight > 600) {
+            elm.dataset.height = elm.clientHeight;
+        });
+
+        elm.querySelectorAll('.message').forEach(function(elm) {
+            if (elm.dataset.height > 600) {
                 elm.classList.add('truncated');
                 let button = document.createElement('button');
                 button.addEventListener('click', function(e) {
