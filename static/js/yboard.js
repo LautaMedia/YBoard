@@ -2653,10 +2653,12 @@ var AutoUpdate = function () {
             }
 
             var thread = _YBoard2.default.Thread.getElm(this.threadId);
-            var fromId = thread.querySelector('.reply:last-of-type');
+            var fromId = thread.querySelectorAll('.reply');
+
             if (fromId === null) {
                 fromId = 0;
             } else {
+                fromId = fromId[fromId.length - 1];
                 fromId = fromId.getAttribute('id').replace('post-', '');
             }
 
@@ -2678,6 +2680,7 @@ var AutoUpdate = function () {
                 }
 
                 var data = document.createElement('div');
+                data.classList.add('ajax');
                 data.innerHTML = xhr.responseText;
 
                 that.lastUpdateNewReplies = data.querySelectorAll('.post').length;

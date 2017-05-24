@@ -17,6 +17,11 @@ class Text
         return $str;
     }
 
+    public static function countNewlines(string $str): int
+    {
+        return substr_count($str, "\n");
+    }
+
     public static function limitEmptyLines(string $str, int $maxLines = 1): string
     {
         $str = str_replace("\r", '', $str);

@@ -50,10 +50,12 @@ class AutoUpdate
         }
 
         let thread = YBoard.Thread.getElm(this.threadId);
-        let fromId = thread.querySelector('.reply:last-of-type');
+        let fromId = thread.querySelectorAll('.reply');
+
         if (fromId === null) {
             fromId = 0;
         } else {
+            fromId = fromId[fromId.length - 1];
             fromId = fromId.getAttribute('id').replace('post-', '');
         }
 
@@ -76,6 +78,7 @@ class AutoUpdate
             }
 
             let data = document.createElement('div');
+            data.classList.add('ajax');
             data.innerHTML = xhr.responseText;
 
             that.lastUpdateNewReplies = data.querySelectorAll('.post').length;

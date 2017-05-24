@@ -29,6 +29,7 @@ return [
         'usernameMaxLength' => 30,
     ],
     'post' => [
+        'maxNewlines' => 100,
         'subjectMaxLength' => 60,
         'messageMaxLength' => 12000,
         'replyIntervalLimit' => 5,

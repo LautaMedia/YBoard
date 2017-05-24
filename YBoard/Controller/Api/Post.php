@@ -96,6 +96,13 @@ class Post extends ApiController
         $message = isset($_POST['message']) ? trim($_POST['message']) : false;
         $hasMessage = !empty($message) || $message === '0';
 
+        // Check for spam
+        if ($hasMessage) {
+            if (Text::countNewlines($_POST['message']) > $this->config['post']['maxNewlines']) {
+                $this->throwJsonError(403, _('Your message was considered spam and was blocked.'));
+            }
+        }
+
         if (!$isReply) { // Creating a new thread
             // Verify board
             if (empty($_POST['board']) || !Model\Board::exists($this->db, $_POST['board'])) {

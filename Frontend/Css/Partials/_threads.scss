@@ -116,14 +116,15 @@ body:not(.thread-page) .thread.hidden {
         }
     }
 
-    hr {
-        border: 0;
+    .replies > .ajax:last-of-type::before  {
+        content: '';
         $color: #000;
         @if (lightness($contentBgColor) < 50) {
             $color: #ffffff;
         }
         border-top: 1px solid $color;
         margin: 10px 0;
+        display: block;
     }
 
     .reply {
@@ -182,6 +183,11 @@ body:not(.thread-page) .thread.hidden {
         overflow: hidden;
         word-wrap: break-word;
         will-change: contents;
+    }
+
+    .message-buttons {
+        position: sticky;
+        top: 0;
     }
 
     .post-meta {
@@ -269,17 +275,18 @@ body:not(.thread-page) .thread.hidden {
                 color $transition,
                 background-color $transition;
 
-        $hoverBg: darken($contentBgColor, 10%);
-        $bg: darken($contentBgColor, 5%);
+        $hoverBg: rgba(0, 0, 0, 0.1);
+        $bg: rgba(0, 0, 0, 0.05);
         $color: #111111;
         @if (lightness($contentBgColor) < 50) {
-            $hoverBg: lighten($contentBgColor, 10%);
-            $bg: lighten($contentBgColor, 5%);
+            $hoverBg: rgba(255, 255, 255, 0.1);
+            $bg: rgba(255, 255, 255, 0.05);
             $color: #eeeeee;
         }
 
         background-color: $bg;
         color: $color;
+        border-radius: 5px;
         &:hover {
             background-color: $hoverBg;
         }

@@ -1,8 +1,13 @@
-@media (min-width: 600px) {
+@media (min-width: 800px) {
     body:not(.no-sidebar), body.sidebar-visible {
         #topbar {
             left: 220px;
         }
+    }
+}
+@media (min-width: 600px) {
+    body.sidebar-visible #topbar {
+        left: 220px;
     }
 }
 
