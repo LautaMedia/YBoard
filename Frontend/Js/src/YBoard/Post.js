@@ -7,7 +7,7 @@ class Post
 {
     constructor()
     {
-        this.File = new PostFile();
+        this.File = new PostFile(this);
     }
 
     bindEvents(elm)
@@ -28,19 +28,36 @@ class Post
 
     truncateLongPosts(elm)
     {
+        let that = this;
+
         elm.querySelectorAll('.message').forEach(function(elm) {
             if (elm.clientHeight > 600) {
                 elm.classList.add('truncated');
                 let button = document.createElement('button');
                 button.addEventListener('click', function(e) {
-                    elm.classList.remove('truncated');
-                    button.remove();
+                    that.unTruncate(e.target.closest('.post').dataset.id);
                 });
-                button.classList.add('button');
+                button.classList.add('button', 'e-untruncate');
                 button.innerHTML = 'Show full message';
                 elm.parentNode.insertBefore(button, elm.nextSibling);
             }
         });
+    }
+
+    unTruncate(id)
+    {
+        let post = document.getElementById('post-' + id);
+        console.log(id);
+        console.log(post);
+        if (post === null) {
+            return;
+        }
+        let message = post.querySelector('.message');
+        message.classList.remove('truncated');
+        let button = post.querySelector('.e-untruncate');
+        if (button !== null) {
+            button.remove();
+        }
     }
 
     refClick(e)

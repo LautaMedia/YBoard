@@ -78,10 +78,10 @@ class Thread {
             'count': loadCount,
         }).onLoad(function(xhr)
         {
-            let data = document.createElement('template');
+            let data = document.createElement('div');
             data.innerHTML = xhr.responseText;
 
-            let loadedCount = data.content.querySelectorAll('.post').length;
+            let loadedCount = data.querySelectorAll('.post').length;
             if (loadedCount < loadCount) {
                 thread.querySelector('.e-more-replies').hide();
             }
@@ -89,12 +89,12 @@ class Thread {
             let expandContainer = thread.querySelector('.more-replies-container');
             let firstVisibleReply = expandContainer.querySelector('.reply');
             if (firstVisibleReply === null) {
-                expandContainer.appendChild(data.content);
+                expandContainer.appendChild(data);
             } else {
-                thread.querySelector('.more-replies-container').insertBefore(data.content, firstVisibleReply);
+                thread.querySelector('.more-replies-container').insertBefore(data, firstVisibleReply);
             }
 
-            YBoard.initElement(data.content);
+            YBoard.initElement(data);
 
             thread.classList.add('expanded');
         });

@@ -4,15 +4,9 @@ import Toast from '../../Toast';
 
 class File
 {
-    constructor()
+    constructor(Post)
     {
-        let that = this;
-
-        // Video volume change
-        document.addEventListener('volumechange', function()
-        {
-            localStorage.setItem('videoVolume', that.volume);
-        });
+        this.Post = Post;
     }
 
     bindEvents(parent)
@@ -21,13 +15,15 @@ class File
 
         parent.querySelectorAll('.thumbnail .image').forEach(function(elm)
         {
-            elm.addEventListener('click', that.expand);
+            elm.addEventListener('click', function(e) {
+                that.expand(e, that);
+            });
         });
 
         parent.querySelectorAll('.thumbnail .media').forEach(function(elm)
         {
             elm.addEventListener('click', function(e) {
-                that.playMedia(e, that.stopAllMedia);
+                that.playMedia(e, that);
             });
         });
 
@@ -53,7 +49,7 @@ class File
         });
     }
 
-    expand(e)
+    expand(e, that)
     {
         function changeSrc(img, src)
         {
@@ -89,7 +85,7 @@ class File
             e.target.dataset.expanded = e.target.getAttribute('src');
             changeSrc(e.target, e.target.parentNode.getAttribute('href'));
             e.target.closest('.post-file').classList.remove('thumbnail');
-            e.target.closest('.message').classList.remove('truncated');
+            that.Post.unTruncate(e.target.closest('.post').dataset.id);
         } else {
             // Restore thumbnail
             changeSrc(e.target, e.target.dataset.expanded);
@@ -104,11 +100,11 @@ class File
         }
     }
 
-    playMedia(e, stopAllMedia)
+    playMedia(e, that)
     {
         e.preventDefault();
 
-        stopAllMedia();
+        that.stopAllMedia();
 
         let fileId = e.target.closest('figure').dataset.id;
 
@@ -131,19 +127,33 @@ class File
             let figure = e.target.closest('.post-file');
             figure.classList.remove('thumbnail');
             figure.classList.add('media-player-container');
-            e.target.closest('.message').classList.add('full');
+            let message = e.target.closest('.message');
 
-            let data = document.createElement('template');
+            // Untruncate the message
+            that.Post.unTruncate(e.target.closest('.post').dataset.id);
+            if (message.nextElementSibling !== null && message.nextElementSibling.classList.contains('e-untruncate')) {
+                message.nextElementSibling.remove();
+            }
+
+            let data = document.createElement('div');
             data.innerHTML = xhr.responseText;
 
             // Bind events etc.
-            YBoard.initElement(data.content);
+            YBoard.initElement(data);
+            figure.insertBefore(data, figure.firstElementChild);
 
-            figure.insertBefore(data.content, figure.firstElementChild);
+            // Video volume save/restore
+            let video = figure.querySelector('video');
+            if (video !== null) {
+                video.addEventListener('volumechange', function(e)
+                {
+                    localStorage.setItem('videoVolume', e.target.volume);
+                });
 
-            let volume = localStorage.getItem('videoVolume');
-            if (volume !== null) {
-                e.target.parentNode.querySelector('video').volume = volume;
+                let volume = localStorage.getItem('videoVolume');
+                if (volume !== null) {
+                    video.volume = volume;
+                }
             }
         }).onEnd(function()
         {

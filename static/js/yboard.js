@@ -1499,7 +1499,7 @@ var Post = function () {
     function Post() {
         _classCallCheck(this, Post);
 
-        this.File = new _File2.default();
+        this.File = new _File2.default(this);
     }
 
     _createClass(Post, [{
@@ -1519,19 +1519,36 @@ var Post = function () {
     }, {
         key: 'truncateLongPosts',
         value: function truncateLongPosts(elm) {
+            var that = this;
+
             elm.querySelectorAll('.message').forEach(function (elm) {
                 if (elm.clientHeight > 600) {
                     elm.classList.add('truncated');
                     var button = document.createElement('button');
                     button.addEventListener('click', function (e) {
-                        elm.classList.remove('truncated');
-                        button.remove();
+                        that.unTruncate(e.target.closest('.post').dataset.id);
                     });
-                    button.classList.add('button');
+                    button.classList.add('button', 'e-untruncate');
                     button.innerHTML = 'Show full message';
                     elm.parentNode.insertBefore(button, elm.nextSibling);
                 }
             });
+        }
+    }, {
+        key: 'unTruncate',
+        value: function unTruncate(id) {
+            var post = document.getElementById('post-' + id);
+            console.log(id);
+            console.log(post);
+            if (post === null) {
+                return;
+            }
+            var message = post.querySelector('.message');
+            message.classList.remove('truncated');
+            var button = post.querySelector('.e-untruncate');
+            if (button !== null) {
+                button.remove();
+            }
         }
     }, {
         key: 'refClick',
@@ -2134,15 +2151,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var File = function () {
-    function File() {
+    function File(Post) {
         _classCallCheck(this, File);
 
-        var that = this;
-
-        // Video volume change
-        document.addEventListener('volumechange', function () {
-            localStorage.setItem('videoVolume', that.volume);
-        });
+        this.Post = Post;
     }
 
     _createClass(File, [{
@@ -2151,12 +2163,14 @@ var File = function () {
             var that = this;
 
             parent.querySelectorAll('.thumbnail .image').forEach(function (elm) {
-                elm.addEventListener('click', that.expand);
+                elm.addEventListener('click', function (e) {
+                    that.expand(e, that);
+                });
             });
 
             parent.querySelectorAll('.thumbnail .media').forEach(function (elm) {
                 elm.addEventListener('click', function (e) {
-                    that.playMedia(e, that.stopAllMedia);
+                    that.playMedia(e, that);
                 });
             });
 
@@ -2181,7 +2195,7 @@ var File = function () {
         }
     }, {
         key: 'expand',
-        value: function expand(e) {
+        value: function expand(e, that) {
             function changeSrc(img, src) {
                 var eolFn = expandOnLoad;
                 function expandOnLoad(e) {
@@ -2213,7 +2227,7 @@ var File = function () {
                 e.target.dataset.expanded = e.target.getAttribute('src');
                 changeSrc(e.target, e.target.parentNode.getAttribute('href'));
                 e.target.closest('.post-file').classList.remove('thumbnail');
-                e.target.closest('.message').classList.remove('truncated');
+                that.Post.unTruncate(e.target.closest('.post').dataset.id);
             } else {
                 // Restore thumbnail
                 changeSrc(e.target, e.target.dataset.expanded);
@@ -2229,10 +2243,10 @@ var File = function () {
         }
     }, {
         key: 'playMedia',
-        value: function playMedia(e, stopAllMedia) {
+        value: function playMedia(e, that) {
             e.preventDefault();
 
-            stopAllMedia();
+            that.stopAllMedia();
 
             var fileId = e.target.closest('figure').dataset.id;
 
@@ -2253,19 +2267,32 @@ var File = function () {
                 var figure = e.target.closest('.post-file');
                 figure.classList.remove('thumbnail');
                 figure.classList.add('media-player-container');
-                e.target.closest('.message').classList.add('full');
+                var message = e.target.closest('.message');
 
-                var data = document.createElement('template');
+                // Untruncate the message
+                that.Post.unTruncate(e.target.closest('.post').dataset.id);
+                if (message.nextElementSibling !== null && message.nextElementSibling.classList.contains('e-untruncate')) {
+                    message.nextElementSibling.remove();
+                }
+
+                var data = document.createElement('div');
                 data.innerHTML = xhr.responseText;
 
                 // Bind events etc.
-                _YBoard2.default.initElement(data.content);
+                _YBoard2.default.initElement(data);
+                figure.insertBefore(data, figure.firstElementChild);
 
-                figure.insertBefore(data.content, figure.firstElementChild);
+                // Video volume save/restore
+                var video = figure.querySelector('video');
+                if (video !== null) {
+                    video.addEventListener('volumechange', function (e) {
+                        localStorage.setItem('videoVolume', e.target.volume);
+                    });
 
-                var volume = localStorage.getItem('videoVolume');
-                if (volume !== null) {
-                    e.target.parentNode.querySelector('video').volume = volume;
+                    var volume = localStorage.getItem('videoVolume');
+                    if (volume !== null) {
+                        video.volume = volume;
+                    }
                 }
             }).onEnd(function () {
                 clearTimeout(loading);
@@ -2498,10 +2525,10 @@ var Thread = function () {
                 'fromId': fromId,
                 'count': loadCount
             }).onLoad(function (xhr) {
-                var data = document.createElement('template');
+                var data = document.createElement('div');
                 data.innerHTML = xhr.responseText;
 
-                var loadedCount = data.content.querySelectorAll('.post').length;
+                var loadedCount = data.querySelectorAll('.post').length;
                 if (loadedCount < loadCount) {
                     thread.querySelector('.e-more-replies').hide();
                 }
@@ -2509,12 +2536,12 @@ var Thread = function () {
                 var expandContainer = thread.querySelector('.more-replies-container');
                 var firstVisibleReply = expandContainer.querySelector('.reply');
                 if (firstVisibleReply === null) {
-                    expandContainer.appendChild(data.content);
+                    expandContainer.appendChild(data);
                 } else {
-                    thread.querySelector('.more-replies-container').insertBefore(data.content, firstVisibleReply);
+                    thread.querySelector('.more-replies-container').insertBefore(data, firstVisibleReply);
                 }
 
-                _YBoard2.default.initElement(data.content);
+                _YBoard2.default.initElement(data);
 
                 thread.classList.add('expanded');
             });
@@ -2628,10 +2655,10 @@ var AutoUpdate = function () {
                     return;
                 }
 
-                var data = document.createElement('template');
+                var data = document.createElement('div');
                 data.innerHTML = xhr.responseText;
 
-                that.lastUpdateNewReplies = data.content.querySelectorAll('.post').length;
+                that.lastUpdateNewReplies = data.querySelectorAll('.post').length;
                 that.newReplies += that.lastUpdateNewReplies;
 
                 if (that.lastUpdateNewReplies === 0) {
@@ -2640,8 +2667,8 @@ var AutoUpdate = function () {
                     that.runCount = 0;
                 }
 
-                thread.querySelector('.replies').appendChild(data.content);
-                _YBoard2.default.initElement(data.content);
+                thread.querySelector('.replies').appendChild(data);
+                _YBoard2.default.initElement(data);
 
                 // Run again
                 if (!manual) {

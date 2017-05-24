@@ -75,10 +75,10 @@ class AutoUpdate
                 return;
             }
 
-            let data = document.createElement('template');
+            let data = document.createElement('div');
             data.innerHTML = xhr.responseText;
-            
-            that.lastUpdateNewReplies = data.content.querySelectorAll('.post').length;
+
+            that.lastUpdateNewReplies = data.querySelectorAll('.post').length;
             that.newReplies += that.lastUpdateNewReplies;
 
             if (that.lastUpdateNewReplies === 0) {
@@ -87,8 +87,8 @@ class AutoUpdate
                 that.runCount = 0;
             }
 
-            thread.querySelector('.replies').appendChild(data.content);
-            YBoard.initElement(data.content);
+            thread.querySelector('.replies').appendChild(data);
+            YBoard.initElement(data);
 
             // Run again
             if (!manual) {
