@@ -148,3 +148,13 @@
         color: $highlightColor;
     }
 }
+
+.tooltip {
+    // When viewing reflinks
+    .post {
+        padding: 0;
+    }
+    .post-buttons, .post-replies {
+        display: none;
+    }
+}
