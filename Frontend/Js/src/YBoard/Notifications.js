@@ -17,6 +17,7 @@ class Notifications
 
     open()
     {
+        let that = this;
         let postXhr = null;
 
         new Modal({
@@ -34,6 +35,8 @@ class Notifications
                     }
                     modal.setContent(xhr.responseText);
                     modal.elm.style.willChange = '';
+                    that.bindEvents(modal.elm);
+                    that.updateUnreadCount(that.getUnreadCount(modal.elm));
                 }).onError(function(xhr)
                 {
                     if (xhr.responseText.length !== 0) {
@@ -53,39 +56,95 @@ class Notifications
         });
     }
 
-    markRead(id, e)
+    bindEvents(elm)
     {
-        if (typeof e != 'undefined') {
-            e.preventDefault();
-        }
+        let that = this;
 
-        $('#n-' + id).removeClass('not-read').addClass('is-read');
-        $.post('/scripts/notifications/markread', {'id': id}).done(function()
-        {
-            if (typeof e != 'undefined') {
-                window.location = e.target.getAttribute('href');
-            }
+        // Clicking a link to go to the post
+        elm.querySelectorAll('.not-read a').forEach(function(elm) {
+            elm.addEventListener('click', function(e) {
+                let beaconUrl = '/api/user/notification/markread';
+                let data = new FormData();
+                data.append('id', e.target.closest('.notification').dataset.id);
+                data.append('csrfToken', csrfToken);
+                if ('sendBeacon' in navigator) {
+                    // Way faster
+                    navigator.sendBeacon(beaconUrl, data);
+                } else {
+                    // Fallback for IE ... and SAFARI! Sheesh...
+                    e.preventDefault();
+                    YQuery.post(beaconUrl, data).onLoad(function() {
+                        window.location = e.target.getAttribute('href');
+                    });
+                }
+            });
         });
 
-        this.updateUnreadCount($('.notification.not-read').length);
+        // Marking all notifications as read
+        elm.querySelectorAll('.e-mark-all-read').forEach(function(elm) {
+            elm.addEventListener('click', function(e) {
+                that.markAllRead(e, that);
+            });
+        });
+
+        // Marking a single notification as read
+        elm.querySelectorAll('.e-mark-read').forEach(function(elm) {
+            elm.addEventListener('click',  function(e){
+                that.markRead(e, that);
+            });
+        });
+
+        // Everything else
+        YBoard.initElement(elm);
     }
 
-    markAllRead()
+    markRead(e, that)
     {
-        $.post('/scripts/notifications/markallread');
-        this.updateUnreadCount(0);
+        let notification = e.target.closest('.notification');
+        notification.classList.remove('not-read');
+        notification.classList.add('is-read');
+
+        YQuery.post('/api/user/notification/markread', {'id': notification.dataset.id}).onError(function()
+        {
+            notification.classList.add('not-read');
+            notification.classList.remove('is-read');
+        });
+
+        that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notification-list')));
+    }
+
+    markAllRead(e, that)
+    {
+        e.target.closest('.modal').querySelectorAll('.notification.not-read').forEach(function(elm) {
+            elm.classList.remove('not-read');
+            elm.classList.add('is-read');
+        });
+
+        YQuery.post('/api/user/notification/markallread');
+        that.updateUnreadCount(0);
+    }
+
+    getUnreadCount(elm)
+    {
+        return elm.querySelectorAll('.notification.not-read').length;
     }
 
     updateUnreadCount(count)
     {
-        var elm = $('.unread-notifications');
-        elm.html(parseInt(count));
-
-        if (count == 0) {
-            elm.addClass('none');
-        } else {
-            elm.removeClass('none');
+        count = parseInt(count);
+        if (count >= 100) {
+            count = ':D';
         }
+
+        document.querySelectorAll('.unread-notifications').forEach(function(elm) {
+            elm.innerHTML = count;
+
+            if (count === 0) {
+                elm.classList.add('none');
+            } else {
+                elm.classList.remove('none');
+            }
+        });
     }
 }
 

@@ -1,11 +1,13 @@
 .notification {
+    display: flex;
+    align-items: center;
+
     $borderColor: darken($contentBgColor, 10%);
     @if (lightness($contentBgColor) < 50) {
         $borderColor: lighten($contentBgColor, 10%);
     }
     border-bottom: 1px solid $borderColor;
-    position: relative;
-    padding: 5px 20px 5px 5px;
+    padding: 5px;
 
     &.not-read {
         $bgColor: darken($contentBgColor, 5%);
@@ -19,21 +21,30 @@
         border-bottom: 0;
     }
 
-    .mark-read {
-        position: absolute;
-        background: none;
-        border: 0;
-        color: $textColor;
-        top: 5px;
-        right: 5px;
-        cursor: pointer;
-        font-size: 10px;
-        padding: 0;
-        &:hover {
-            color: $highlightColor;
+    .notification-info {
+        flex: 1 0 auto;
+    }
+
+    .notification-buttons {
+        flex: 0 0 auto;
+        margin-left: 40px;
+
+        button {
+            background: none;
+            border: 0;
+            color: $textColor;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            &:hover {
+                color: $highlightColor;
+            }
         }
     }
-    &.is-read .mark-read {
+
+    &.is-read .e-mark-read {
         display: none;
     }
 

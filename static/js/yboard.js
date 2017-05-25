@@ -464,11 +464,14 @@ var YBoard = function () {
                                     tip.position();
                                     tip.elm.style.willChange = '';
 
-                                    var referringId = e.target.closest('.post').dataset.id;
-                                    if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                        var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
-                                        if (referring !== null) {
-                                            referring.classList.add('referring');
+                                    var referringId = e.target.closest('.post');
+                                    if (referringId !== null) {
+                                        referringId = referringId.dataset.id;
+                                        if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                            var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
+                                            if (referring !== null) {
+                                                referring.classList.add('referring');
+                                            }
                                         }
                                     }
                                     that.messagePreviewCache[postId] = xhr.responseText;
@@ -1568,6 +1571,7 @@ var Notifications = function () {
     _createClass(Notifications, [{
         key: 'open',
         value: function open() {
+            var that = this;
             var postXhr = null;
 
             new _Modal2.default({
@@ -1583,6 +1587,8 @@ var Notifications = function () {
                         }
                         modal.setContent(xhr.responseText);
                         modal.elm.style.willChange = '';
+                        that.bindEvents(modal.elm);
+                        that.updateUnreadCount(that.getUnreadCount(modal.elm));
                     }).onError(function (xhr) {
                         if (xhr.responseText.length !== 0) {
                             var json = JSON.parse(xhr.responseText);
@@ -1601,38 +1607,94 @@ var Notifications = function () {
             });
         }
     }, {
-        key: 'markRead',
-        value: function markRead(id, e) {
-            if (typeof e != 'undefined') {
-                e.preventDefault();
-            }
+        key: 'bindEvents',
+        value: function bindEvents(elm) {
+            var that = this;
 
-            $('#n-' + id).removeClass('not-read').addClass('is-read');
-            $.post('/scripts/notifications/markread', { 'id': id }).done(function () {
-                if (typeof e != 'undefined') {
-                    window.location = e.target.getAttribute('href');
-                }
+            // Clicking a link to go to the post
+            elm.querySelectorAll('.not-read a').forEach(function (elm) {
+                elm.addEventListener('click', function (e) {
+                    var beaconUrl = '/api/user/notification/markread';
+                    var data = new FormData();
+                    data.append('id', e.target.closest('.notification').dataset.id);
+                    data.append('csrfToken', csrfToken);
+                    if ('sendBeacon' in navigator) {
+                        // Way faster
+                        navigator.sendBeacon(beaconUrl, data);
+                    } else {
+                        // Fallback for IE ... and SAFARI! Sheesh...
+                        e.preventDefault();
+                        _YQuery2.default.post(beaconUrl, data).onLoad(function () {
+                            window.location = e.target.getAttribute('href');
+                        });
+                    }
+                });
             });
 
-            this.updateUnreadCount($('.notification.not-read').length);
+            // Marking all notifications as read
+            elm.querySelectorAll('.e-mark-all-read').forEach(function (elm) {
+                elm.addEventListener('click', function (e) {
+                    that.markAllRead(e, that);
+                });
+            });
+
+            // Marking a single notification as read
+            elm.querySelectorAll('.e-mark-read').forEach(function (elm) {
+                elm.addEventListener('click', function (e) {
+                    that.markRead(e, that);
+                });
+            });
+
+            // Everything else
+            _YBoard2.default.initElement(elm);
+        }
+    }, {
+        key: 'markRead',
+        value: function markRead(e, that) {
+            var notification = e.target.closest('.notification');
+            notification.classList.remove('not-read');
+            notification.classList.add('is-read');
+
+            _YQuery2.default.post('/api/user/notification/markread', { 'id': notification.dataset.id }).onError(function () {
+                notification.classList.add('not-read');
+                notification.classList.remove('is-read');
+            });
+
+            that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notification-list')));
         }
     }, {
         key: 'markAllRead',
-        value: function markAllRead() {
-            $.post('/scripts/notifications/markallread');
-            this.updateUnreadCount(0);
+        value: function markAllRead(e, that) {
+            e.target.closest('.modal').querySelectorAll('.notification.not-read').forEach(function (elm) {
+                elm.classList.remove('not-read');
+                elm.classList.add('is-read');
+            });
+
+            _YQuery2.default.post('/api/user/notification/markallread');
+            that.updateUnreadCount(0);
+        }
+    }, {
+        key: 'getUnreadCount',
+        value: function getUnreadCount(elm) {
+            return elm.querySelectorAll('.notification.not-read').length;
         }
     }, {
         key: 'updateUnreadCount',
         value: function updateUnreadCount(count) {
-            var elm = $('.unread-notifications');
-            elm.html(parseInt(count));
-
-            if (count == 0) {
-                elm.addClass('none');
-            } else {
-                elm.removeClass('none');
+            count = parseInt(count);
+            if (count >= 100) {
+                count = ':D';
             }
+
+            document.querySelectorAll('.unread-notifications').forEach(function (elm) {
+                elm.innerHTML = count;
+
+                if (count === 0) {
+                    elm.classList.add('none');
+                } else {
+                    elm.classList.remove('none');
+                }
+            });
         }
     }]);
 

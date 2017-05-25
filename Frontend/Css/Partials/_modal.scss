@@ -1,5 +1,6 @@
 #modal-root {
     position: fixed;
+    z-index: 10000;
     top: 0;
     right: 0;
     bottom: 0;
@@ -14,22 +15,38 @@
     .modal {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
         margin: auto;
         z-index: 2;
         box-sizing: border-box;
-        min-height: 300px;
+        min-height: 200px;
         min-width: 300px;
         background: $contentBgColor;
         color: $textColor;
         box-shadow: 0 0 20px -5px black;
         border: 5px solid $sidebarColor;
-        position: relative;
+        overflow: auto;
+        max-height: 100%;
+
+        @media (max-width: 499px) {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+        }
+
         &:not(:last-of-type) {
             display: none;
         }
 
         .title {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             flex: 0 0 auto;
+            width: 100%;
             display: flex;
             font-size: 1.25em;
             background-color: #1cc26d;
@@ -60,13 +77,23 @@
 
         .content {
             flex: 1;
+            width: 100%;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             padding: 10px;
+            .loading {
+                margin: auto;
+                font-size: 40px;
+            }
         }
 
         .buttons {
+            position: sticky;
+            bottom: 0;
+            background-color: $contentBgColor;
             margin-top: auto;
+            padding: 10px 0;
         }
     }
 

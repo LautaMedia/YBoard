@@ -164,7 +164,8 @@ abstract class Controller extends \YFW\Controller
             if ($httpStatus === null) {
                 $httpStatus = 500;
             }
-            $this->throwJsonError($httpStatus, $errorMessage, $errorTitle);
+            HttpResponse::setStatusCode($httpStatus);
+            echo json_encode(['message' => $errorMessage, 'title' => $errorTitle]);
 
             return;
         }
@@ -309,67 +310,6 @@ abstract class Controller extends \YFW\Controller
         if (!$this->user->isMod) {
             $this->notFound();
         }
-    }
-
-    /*
-     * AJAX
-     */
-
-    protected function validateAjaxCsrfToken(): bool
-    {
-        if ($this->user->id === null) {
-            $this->ajaxCsrfValidationFail();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->ajaxCsrfValidationFail();
-        }
-
-        if (empty($_SERVER['HTTP_X_CSRF_TOKEN']) || empty($this->user->session->csrfToken)) {
-            $this->ajaxCsrfValidationFail();
-        }
-
-        if (hash_equals($this->user->session->csrfToken, $_SERVER['HTTP_X_CSRF_TOKEN'])) {
-            return true;
-        }
-
-        $this->ajaxCsrfValidationFail();
-
-        return false;
-    }
-
-    protected function ajaxCsrfValidationFail(): void
-    {
-        $this->throwJsonError(401, _('Your session has expired. Please refresh this page and try again.'));
-        $this->stopExecution();
-    }
-
-    protected function sendJsonPageReload(string $url = null): void
-    {
-        echo json_encode(['reload' => true, 'url' => $url]);
-    }
-
-    protected function sendJsonMessage($message, string $title = null, bool $reload = false, string $url = null): void
-    {
-        $args = [
-            'title' => $title,
-            'message' => $message,
-            'reload' => $reload,
-            'url' => $url,
-        ];
-
-        echo json_encode($args);
-    }
-
-    protected function throwJsonError(int $statusCode, string $message = null, string $title = null): void
-    {
-        HttpResponse::setStatusCode($statusCode);
-
-        if ($message) {
-            $this->sendJsonMessage($message, $title);
-        }
-
-        $this->stopExecution();
     }
 
     /*

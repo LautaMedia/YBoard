@@ -140,12 +140,15 @@ class YBoard
                                 tip.position();
                                 tip.elm.style.willChange = '';
 
-                                let referringId = e.target.closest('.post').dataset.id;
-                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                    let referring = tip.elm.querySelector(
-                                        '.message .ref[data-id="' + referringId + '"]');
-                                    if (referring !== null) {
-                                        referring.classList.add('referring');
+                                let referringId = e.target.closest('.post');
+                                if (referringId !== null) {
+                                    referringId = referringId.dataset.id;
+                                    if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                        let referring = tip.elm.querySelector(
+                                            '.message .ref[data-id="' + referringId + '"]');
+                                        if (referring !== null) {
+                                            referring.classList.add('referring');
+                                        }
                                     }
                                 }
                                 that.messagePreviewCache[postId] = xhr.responseText;

@@ -34,7 +34,7 @@
         <button id="e-sidebar-hide"></button>
         <button id="e-sidebar-toggle" class="icon-menu"></button>
         <div class="right">
-            <button id="notifications-button" class="icon-alarm" title="<?= _('Notifications') ?>">
+            <button class="icon-alarm e-open-notifications" title="<?= _('Notifications') ?>">
                 <span class="unread-notifications unread-count red<?= ($user->notifications['unread'] === 0 ? ' none' : '') ?>">
                 <?= $user->notifications['unread'] ?></span>
             </button>
