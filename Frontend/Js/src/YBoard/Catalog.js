@@ -12,20 +12,22 @@ class Catalog
     {
         let elm = e.target;
         let word = elm.value;
-        let threads = document.querySelectorAll('.thread-box');
+        let threads = document.querySelectorAll('.post');
 
         if (word.length === 0) {
-            threads.show();
+            threads.forEach(function(elm) {
+                elm.style.display = '';
+            });
         } else {
             threads.hide();
             threads.forEach(function(elm)
             {
                 if (elm.querySelector('h3').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-                    elm.show();
+                    elm.show('flex');
                     return true;
                 }
-                if (elm.querySelector('.post').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-                    elm.show();
+                if (elm.querySelector('.message').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+                    elm.show('flex');
                     return true;
                 }
             });

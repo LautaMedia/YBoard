@@ -1485,19 +1485,21 @@ var Catalog = function () {
         value: function search(e) {
             var elm = e.target;
             var word = elm.value;
-            var threads = document.querySelectorAll('.thread-box');
+            var threads = document.querySelectorAll('.post');
 
             if (word.length === 0) {
-                threads.show();
+                threads.forEach(function (elm) {
+                    elm.style.display = '';
+                });
             } else {
                 threads.hide();
                 threads.forEach(function (elm) {
                     if (elm.querySelector('h3').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-                        elm.show();
+                        elm.show('flex');
                         return true;
                     }
-                    if (elm.querySelector('.post').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-                        elm.show();
+                    if (elm.querySelector('.message').innerHTML.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+                        elm.show('flex');
                         return true;
                     }
                 });
@@ -1634,16 +1636,16 @@ var Post = function () {
             var id = post.dataset.id;
             _YQuery2.default.post('/api/post/delete', { 'postId': id }).onLoad(function () {
                 post.remove();
-                if (document.body.classList.contains('thread-page')) {
-                    if (_YBoard2.default.Thread.getElm(id) !== null) {
+                if (_YBoard2.default.Thread.getElm(id) !== null) {
+                    if (document.body.classList.contains('thread-page')) {
                         // We're in the thread we just deleted
                         _YBoard2.default.returnToBoard();
+                    } else {
+                        // The deleted post is a thread and not the opened thread
+                        _YBoard2.default.Thread.getElm(id).remove();
                     }
-                } else {
-                    // The deleted post is not the current thread
-                    _YBoard2.default.Thread.getElm(id).remove();
-                    _Toast2.default.success(messages.postDeleted);
                 }
+                _Toast2.default.success(messages.postDeleted);
             });
         }
     }]);
@@ -2909,7 +2911,7 @@ var Follow = function () {
     }, {
         key: 'toggle',
         value: function toggle(e) {
-            var thread = e.target.closest('.thread');
+            var thread = e.target.closest('.thread, .post');
             var button = e.currentTarget;
 
             var create = true;
@@ -2977,7 +2979,7 @@ var Hide = function () {
     _createClass(Hide, [{
         key: 'toggle',
         value: function toggle(e) {
-            var thread = e.target.closest('.thread');
+            var thread = e.target.closest('.thread, .post');
             var button = e.currentTarget;
 
             var create = true;

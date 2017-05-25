@@ -10,29 +10,24 @@
 </div>
 <div class="catalog">
     <?php foreach($threads as $thread): ?>
-        <div class="thread-box" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
+        <div class="post" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
             <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
-            <div class="thread-content">
-                <div class="op-post" id="post-<?= $thread->id ?>">
-                    <?php $post = $thread ?>
-                    <?php include($viewFilesPath . '/Snippet/PostButtons.phtml') ?>
-
-                    <blockquote class="post">
-                        <figure class="post-file thumbnail">
-                            <a href="/<?= $board->url ?>/<?= $thread->id ?>">
-                                <?php if (!empty($post->file)): ?>
-                                    <?php $src = $config['url']['files']. '/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
-                                <?php else: ?>
-                                    <?php $src = $config['url']['static'] . '/img/norppa_ylilauta.svg' ?>
-                                <?php endif ?>
-                                <img src="<?= $src ?>" alt="">
-                            </a>
-                        </figure>
-                        <?= \YFW\Library\Text::formatMessage($post->message) ?>
-                    </blockquote>
-                </div>
-                <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
-            </div>
+            <?php $post = $thread ?>
+            <?php include($viewFilesPath . '/Snippet/PostButtons.phtml') ?>
+            <figure class="post-file thumbnail">
+                <a href="/<?= $board->url ?>/<?= $thread->id ?>">
+                    <?php if (!empty($post->file)): ?>
+                        <?php $src = $config['url']['files']. '/' . $post->file->folder . '/t/' . $post->file->name . '.jpg' ?>
+                    <?php else: ?>
+                        <?php $src = $config['url']['static'] . '/img/norppa_ylilauta.svg' ?>
+                    <?php endif ?>
+                    <img src="<?= $src ?>" alt="">
+                </a>
+            </figure>
+            <blockquote class="message">
+                <?= \YFW\Library\Text::formatMessage($post->message) ?>
+            </blockquote>
+            <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
         </div>
     <?php endforeach; unset($thread); ?>
 </div>

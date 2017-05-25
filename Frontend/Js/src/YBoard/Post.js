@@ -97,16 +97,16 @@ class Post
         YQuery.post('/api/post/delete', {'postId': id}).onLoad(function()
         {
             post.remove();
-            if (document.body.classList.contains('thread-page')) {
-                if (YBoard.Thread.getElm(id) !== null) {
+            if (YBoard.Thread.getElm(id) !== null) {
+                if (document.body.classList.contains('thread-page')) {
                     // We're in the thread we just deleted
                     YBoard.returnToBoard();
+                } else {
+                    // The deleted post is a thread and not the opened thread
+                    YBoard.Thread.getElm(id).remove();
                 }
-            } else {
-                // The deleted post is not the current thread
-                YBoard.Thread.getElm(id).remove();
-                Toast.success(messages.postDeleted);
             }
+            Toast.success(messages.postDeleted);
         });
     }
 }

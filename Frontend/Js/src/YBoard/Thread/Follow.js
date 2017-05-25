@@ -39,7 +39,7 @@ class Follow
 
     toggle(e)
     {
-        let thread = e.target.closest('.thread');
+        let thread = e.target.closest('.thread, .post');
         let button = e.currentTarget;
 
         let create = true;

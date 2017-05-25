@@ -1,113 +1,132 @@
+body .catalog .post.hidden {
+    opacity: 0.1;
+    &:hover {
+        opacity: 0.5;
+    }
+    .message, .post-file {
+        display: none;
+    }
+}
+
 .catalog {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     margin: -5px;
 
-    .thread-box {
+    .post {
+        display: flex;
+        flex-direction: column;
         flex: 1 1 200px;
         margin: 5px;
+        padding: 0;
         background-color: $contentBgColor;
-        max-height: 300px;
         box-sizing: border-box;
         overflow: hidden;
         transition: background-color $transition;
         position: relative;
+    }
 
-        h3 {
-            $height: 30px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+    h3 {
+        flex: 0 0 auto;
+        display: flex;
+        $height: 30px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        height: $height;
+        line-height: $height;
+        margin: 0;
+        font-size: 1.1em;
+
+        $subjectBgColor: darken($contentBgColor, 5%);
+        @if (lightness($contentBgColor) < 50) {
+            $subjectBgColor: lighten($contentBgColor, 5%);
+        }
+        background-color: $subjectBgColor;
+        transition: background-color $transition;
+
+        .icon {
+            flex: 0 0 auto;
+            width: $height;
             height: $height;
             line-height: $height;
-            margin: 0;
-            font-size: 1.1em;
-            position: relative;
-
-            $subjectBgColor: darken($contentBgColor, 5%);
-            @if (lightness($contentBgColor) < 50) {
-                $subjectBgColor: lighten($contentBgColor, 5%);
-            }
-            background-color: $subjectBgColor;
-            transition: background-color $transition;
-
-            .icon {
-                display: inline-block;
-                width: $height;
-                height: $height;
-                line-height: $height;
-                background-color: $contentBgColor;
-                color: $textColor;
-                font-size: 20px;
-                text-align: center;
-                vertical-align: top;
-            }
-
-            .subject {
-                padding: 0 10px
-            }
-
-            a {
-                display: block;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
-
-            .notification-count {
-                position: absolute;
-                right: 0;
-                min-width: $height;
-                height: $height;
-                padding: 0 5px;
-                text-align: center;
-                box-sizing: border-box;
-                background-color: hsla(hue($highlightColor), saturation($highlightColor), lightness($highlightColor), 0.5);
-                color: #fff;
-            }
-        }
-
-        .post-buttons {
-            justify-content: flex-end;
-            padding: 3px;
-            float: none;
-        }
-
-        .post {
-            margin: 0 5px;
-            font-size: 0.9em;
-
-            .post-file {
-                margin: 0 -5px 5px -5px;
-                text-align: center;
-                $bg: darken($contentBgColor, 5%);
-                @if (lightness($contentBgColor) < 50) {
-                    $bg: lighten($contentBgColor, 5%);
-                }
-                background-color: $bg;
-                transition: background-color $transition;
-
-                img {
-                    max-height: 100px;
-                }
-            }
-        }
-
-        .thread-meta {
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            padding: 0 5px 5px 5px;
             background-color: $contentBgColor;
-            font-size: 0.8em;
-            $color: #777;
-            color: $color;
-            box-shadow: 0 0 10px 10px $contentBgColor;
-            transition:
-                    box-shadow $transition,
-                    background-color $transition;
+            color: $textColor;
+            font-size: 20px;
+            text-align: center;
         }
+
+        .subject {
+            padding: 0 5px
+        }
+
+        a {
+            display: block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .notification-count {
+            margin-left: auto;
+            min-width: $height;
+            height: $height;
+            padding: 0 5px;
+            text-align: center;
+            box-sizing: border-box;
+            background-color: hsla(hue($highlightColor), saturation($highlightColor), lightness($highlightColor), 0.5);
+            color: #fff;
+        }
+    }
+
+    .post-buttons {
+        text-align: right;
+        flex: 0 0 auto;
+        padding: 3px;
+    }
+
+    .post-file {
+        flex: 0 0 auto;
+        float: none;
+        max-width: 100%;
+        margin: 0;
+        text-align: center;
+        $bg: darken($contentBgColor, 5%);
+        @if (lightness($contentBgColor) < 50) {
+            $bg: lighten($contentBgColor, 5%);
+        }
+        background-color: $bg;
+        transition: background-color $transition;
+
+        a {
+            height: auto;
+        }
+        img {
+            max-height: 100px;
+        }
+    }
+
+    .message {
+        padding: 0;
+        margin: 5px;
+        font-size: 0.9em;
+        min-height: 50px;
+        max-height: 200px;
+        overflow: hidden;
+    }
+
+    .thread-meta {
+        margin-top: auto;
+        flex: 0 0 auto;
+        padding: 0 5px 5px 5px;
+        background-color: $contentBgColor;
+        font-size: 0.8em;
+        $color: #777;
+        color: $color;
+        box-shadow: 0 0 10px 10px $contentBgColor;
+        transition:
+                box-shadow $transition,
+                background-color $transition;
     }
 }
