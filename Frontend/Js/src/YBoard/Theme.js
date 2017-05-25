@@ -22,13 +22,24 @@ class Theme
         document.querySelector('#e-sidebar-toggle').addEventListener('click', function () {
             document.body.classList.toggle('sidebar-visible');
         });
+
+        // Hide sidebar
+        document.getElementById('e-sidebar-hide').addEventListener('click', function()
+        {
+            this.toggleSidebar();
+        });
     }
 
     toggleSidebar()
     {
         document.body.classList.toggle('no-sidebar');
+        let hide = document.body.classList.contains('no-sidebar');
+        if (hide) {
+            document.body.classList.remove('sidebar-visible');
+        }
+
         YQuery.post('/api/user/preferences/set', {
-            'hideSidebar': document.body.classList.contains('no-sidebar'),
+            'hideSidebar': hide,
         });
     }
 

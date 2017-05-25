@@ -54,12 +54,6 @@ class YBoard
             });
         }
 
-        // Hide sidebar
-        document.getElementById('e-sidebar-hide').addEventListener('click', function()
-        {
-            that.Theme.toggleSidebar();
-        });
-
         // Go to top
         document.getElementById('scroll-to-top').addEventListener('click', function()
         {

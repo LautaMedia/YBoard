@@ -515,11 +515,6 @@ var YBoard = function () {
             });
         }
 
-        // Hide sidebar
-        document.getElementById('e-sidebar-hide').addEventListener('click', function () {
-            that.Theme.toggleSidebar();
-        });
-
         // Go to top
         document.getElementById('scroll-to-top').addEventListener('click', function () {
             window.scrollTo(0, 0);
@@ -2456,14 +2451,24 @@ var Theme = function () {
         document.querySelector('#e-sidebar-toggle').addEventListener('click', function () {
             document.body.classList.toggle('sidebar-visible');
         });
+
+        // Hide sidebar
+        document.getElementById('e-sidebar-hide').addEventListener('click', function () {
+            this.toggleSidebar();
+        });
     }
 
     _createClass(Theme, [{
         key: 'toggleSidebar',
         value: function toggleSidebar() {
             document.body.classList.toggle('no-sidebar');
+            var hide = document.body.classList.contains('no-sidebar');
+            if (hide) {
+                document.body.classList.remove('sidebar-visible');
+            }
+
             _YQuery2.default.post('/api/user/preferences/set', {
-                'hideSidebar': document.body.classList.contains('no-sidebar')
+                'hideSidebar': hide
             });
         }
     }, {
