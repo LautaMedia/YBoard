@@ -202,7 +202,7 @@ abstract class Controller extends \YFW\Controller
         int $pageNum,
         int $maxPages,
         bool $isLastPage,
-        ?string $base = null
+        bool $catalog = false
     ): void {
         if ($isLastPage) {
             $maxPages = $pageNum;
@@ -221,7 +221,7 @@ abstract class Controller extends \YFW\Controller
         }
 
         $view->setVar('pagination', [
-            'base' => $base,
+            'catalog' => $catalog,
             'page' => $pageNum,
             'maxPages' => $maxPages,
             'startPage' => $startPage,

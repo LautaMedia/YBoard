@@ -70,13 +70,11 @@ class CustomBoard extends Controller
             $maxPages = $this->config['view']['maxPages'];
             $bodyClass = 'board-page';
             $viewFile = 'Board';
-            $paginationBase = '';
             $isLastPage = count($threads) < $this->user->preferences->threadsPerPage;
         } else {
             $maxPages = $this->config['view']['maxCatalogPages'];
             $bodyClass = 'board-catalog';
             $viewFile = 'BoardCatalog';
-            $paginationBase = '/catalog';
             $isLastPage = count($threads) < $this->user->preferences->threadsPerCatalogPage;
         }
 
@@ -87,7 +85,7 @@ class CustomBoard extends Controller
         $view->setVar('pageTitle', $this->board->name);
         $view->setVar('bodyClass', $bodyClass);
 
-        $this->initializePagination($view, $pageNum, $maxPages, $isLastPage, $paginationBase);
+        $this->initializePagination($view, $pageNum, $maxPages, $isLastPage, $catalog);
 
         $view->setVar('board', $this->board);
         $view->setVar('threads', $threads);

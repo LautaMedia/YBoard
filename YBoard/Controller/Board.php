@@ -70,7 +70,7 @@ class Board extends Controller
 
         $this->initializePagination($view, $pageNum,
             $catalog ? $this->config['view']['maxCatalogPages'] : $this->config['view']['maxPages'], $isLastPage,
-            $catalog ? '/catalog' : null);
+            $catalog);
 
         return $view;
     }

@@ -12,7 +12,7 @@ class UserPreferences extends Model
     public $hideSidebar = false;
     public $threadsPerPage = 10;
     public $repliesPerThread = 3;
-    public $threadsPerCatalogPage = 100;
+    public $threadsPerCatalogPage = 2;
     public $hiddenNotificationTypes = [];
 
     // Gold functions
