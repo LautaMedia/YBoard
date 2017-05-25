@@ -1632,7 +1632,7 @@ var Post = function () {
                 return false;
             }
 
-            var post = e.target.closest('.post');
+            var post = e.target.closest('.post, .thread');
             var id = post.dataset.id;
             _YQuery2.default.post('/api/post/delete', { 'postId': id }).onLoad(function () {
                 post.remove();
@@ -2911,7 +2911,7 @@ var Follow = function () {
     }, {
         key: 'toggle',
         value: function toggle(e) {
-            var thread = e.target.closest('.thread, .post');
+            var thread = e.target.closest('.thread');
             var button = e.currentTarget;
 
             var create = true;
@@ -2979,7 +2979,7 @@ var Hide = function () {
     _createClass(Hide, [{
         key: 'toggle',
         value: function toggle(e) {
-            var thread = e.target.closest('.thread, .post');
+            var thread = e.target.closest('.thread');
             var button = e.currentTarget;
 
             var create = true;

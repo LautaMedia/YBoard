@@ -92,7 +92,7 @@ class Post
             return false;
         }
 
-        let post = e.target.closest('.post');
+        let post = e.target.closest('.post, .thread');
         let id = post.dataset.id;
         YQuery.post('/api/post/delete', {'postId': id}).onLoad(function()
         {

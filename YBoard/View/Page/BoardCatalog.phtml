@@ -10,7 +10,7 @@
 </div>
 <div class="catalog">
     <?php foreach($threads as $thread): ?>
-        <div class="post" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
+        <div class="thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
             <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
             <?php $post = $thread ?>
             <?php include($viewFilesPath . '/Snippet/PostButtons.phtml') ?>

@@ -14,7 +14,7 @@ class Hide
 
     toggle(e)
     {
-        let thread = e.target.closest('.thread, .post');
+        let thread = e.target.closest('.thread');
         let button = e.currentTarget;
 
         let create = true;
