@@ -26,7 +26,7 @@ class Theme
         // Hide sidebar
         document.getElementById('e-sidebar-hide').addEventListener('click', function()
         {
-            this.toggleSidebar();
+            that.toggleSidebar();
         });
     }
 
