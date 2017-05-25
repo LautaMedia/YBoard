@@ -81,11 +81,6 @@ class YBoard
         this.initElement(document);
     }
 
-    captchaIsEnabled()
-    {
-        return typeof config.reCaptchaPublicKey !== 'undefined';
-    }
-
     initElement(elm)
     {
         let that = this;

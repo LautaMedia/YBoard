@@ -75,15 +75,17 @@ abstract class Controller extends \YFW\Controller
 
     protected function verifyCaptcha(): bool
     {
-        if ($this->requireCaptcha) {
-            if (empty($_POST["captchaResponse"])) {
-                return false;
-            }
+        if (!$this->requireCaptcha) {
+            return true;
+        }
 
-            $captchaOk = ReCaptcha::verify($_POST['captchaResponse'], $this->config['captcha']['privateKey']);
-            if (!$captchaOk) {
-                return false;
-            }
+        if (empty($_POST["captchaResponse"])) {
+            return false;
+        }
+
+        $captchaOk = ReCaptcha::verify($_POST['captchaResponse'], $this->config['captcha']['privateKey']);
+        if (!$captchaOk) {
+            return false;
         }
 
         return true;

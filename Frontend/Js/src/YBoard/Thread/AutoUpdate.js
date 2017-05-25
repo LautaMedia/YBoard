@@ -112,10 +112,6 @@ class AutoUpdate
             // Notify about new posts on title
             if (!document.hasFocus() && that.newReplies > 0 && document.body.classList.contains('thread-page')) {
                 document.title = '(' + that.newReplies + ') ' + that.originalDocTitle;
-                let replies = document.querySelector('.replies');
-                replies.querySelector('hr').remove();
-                let hr = document.createElement('hr');
-                replies.insertBefore(hr, replies.querySelector('.reply:eq(-' + that.newReplies + ')'));
             } else {
                 if (that.newReplies !== 0) {
                     that.newReplies = 0;

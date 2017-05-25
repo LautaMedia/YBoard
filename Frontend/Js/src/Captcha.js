@@ -13,6 +13,11 @@ class Captcha
         return;
     }
 
+    static isEnabled()
+    {
+        return typeof grecaptcha !== 'undefined';
+    }
+
     execute()
     {
         if (typeof grecaptcha === 'undefined') {

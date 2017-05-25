@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: YBoard 0.1\n"
 "POT-Creation-Date: 2017-05-24 23:49+0200\n"
-"PO-Revision-Date: 2017-05-24 23:51+0200\n"
+"PO-Revision-Date: 2017-05-25 02:34+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -342,7 +342,7 @@ msgstr "Poista tiedosto?"
 
 #: Controller/Cli/GenerateFiles.php:65
 msgid "Cancel your post?"
-msgstr "Peruuta viestisi?"
+msgstr "Peruuta viesti?"
 
 #: Controller/Cli/GenerateFiles.php:66
 msgid "Post sent"

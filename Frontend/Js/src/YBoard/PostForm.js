@@ -99,17 +99,17 @@ class PostForm
             that.submit(e);
         });
 
-        this.elm.querySelectorAll('input, select textarea').forEach(function(elm) {
+        this.elm.querySelectorAll('input, select, textarea').forEach(function(elm)
+        {
             elm.addEventListener('focus', function(e)
             {
-                if (that.captcha !== null) {
-                    that.captcha = new Captcha(that.elm);
-                }
+                that.renderCaptcha();
             });
         });
 
         // Confirm page leave if there's text in the form
-        window.addEventListener('beforeunload', function (e) {
+        window.addEventListener('beforeunload', function(e)
+        {
             if (!that.skipUnloadWarning && that.msgElm !== null && that.msgElm.value.length !== 0) {
                 e.returnValue = messages.confirmPageLeave;
             }
@@ -150,7 +150,7 @@ class PostForm
     renderCaptcha()
     {
         let that = this;
-        if (this.captcha !== null || !YBoard.captchaIsEnabled()) {
+        if (this.captcha !== null || !Captcha.isEnabled()) {
             return;
         }
 
@@ -292,7 +292,8 @@ class PostForm
         }
 
         let fd = new FormData();
-        Array.from(fileList).forEach(file => {
+        Array.from(fileList).forEach(file =>
+        {
             fd.append('files[]', file);
         });
 
@@ -306,12 +307,14 @@ class PostForm
         let fileUpload = YQuery.post('/api/file/create', fd, {
             'timeout': 0,
             'contentType': null,
-            'xhr': function(xhr) {
+            'xhr': function(xhr)
+            {
                 if (!xhr.upload) {
                     return xhr;
                 }
 
-                xhr.upload.addEventListener('progress', function(e) {
+                xhr.upload.addEventListener('progress', function(e)
+                {
                     if (e.lengthComputable) {
                         let percent = Math.round((e.loaded / e.total) * 100);
                         if (percent < 0) {
@@ -326,8 +329,9 @@ class PostForm
                 });
 
                 return xhr;
-            }
-        }).onLoad(function(xhr) {
+            },
+        }).onLoad(function(xhr)
+        {
             that.fileUploadInProgress = false;
             that.updateFileProgressBar(100);
             let data = JSON.parse(xhr.responseText);
@@ -342,7 +346,8 @@ class PostForm
                 that.removeFile();
                 that.updateFileProgressBar(0);
             }
-        }).onError(function() {
+        }).onError(function()
+        {
             that.removeFile();
             that.updateFileProgressBar(0);
         });
@@ -375,7 +380,7 @@ class PostForm
         let fileIdElm = this.elm.querySelector('#file-id');
         if (fileIdElm.value !== '') {
             YQuery.post('/api/file/delete', {
-                'fileId': fileIdElm.value
+                'fileId': fileIdElm.value,
             });
         }
     }
@@ -384,8 +389,10 @@ class PostForm
     {
         if (progress < 0) {
             progress = 0;
-        } else if (progress > 100) {
-            progress = 100;
+        } else {
+            if (progress > 100) {
+                progress = 100;
+            }
         }
 
         let elm = this.elm.querySelector('.file-progress');
@@ -448,6 +455,7 @@ class PostForm
 
         // Invoke the reCAPTCHA if the response is null (= not completed)
         if (this.captcha !== null && captchaResponse === null) {
+            console.log(2);
             this.captcha.execute();
 
             return;
@@ -475,7 +483,7 @@ class PostForm
         fd.append('captchaResponse', captchaResponse);
 
         YQuery.post('/api/post/create', fd, {
-            'contentType': null
+            'contentType': null,
         }).onLoad(function(xhr)
         {
             let dest = document.getElementById('post-destination');
@@ -509,7 +517,9 @@ class PostForm
             submitButton.disabled = false;
             that.submitInProgress = false;
 
-            that.captcha.reset();
+            if (that.captcha !== null) {
+                that.captcha.reset();
+            }
         });
     }
 }

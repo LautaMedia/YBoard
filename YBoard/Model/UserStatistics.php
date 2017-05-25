@@ -76,6 +76,9 @@ class UserStatistics extends Model
                     break;
             }
         }
+
+        $this->totalPosts = $this->createdThreads + $this->sentReplies;
+        $this->messageAverageLength = round($this->messageTotalCharacters / $this->totalPosts, 2);
     }
 
     public function __destruct()

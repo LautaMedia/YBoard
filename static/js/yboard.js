@@ -539,11 +539,6 @@ var YBoard = function () {
     }
 
     _createClass(YBoard, [{
-        key: 'captchaIsEnabled',
-        value: function captchaIsEnabled() {
-            return typeof config.reCaptchaPublicKey !== 'undefined';
-        }
-    }, {
         key: 'initElement',
         value: function initElement(elm) {
             var that = this;
@@ -854,6 +849,11 @@ var Captcha = function () {
             grecaptcha.reset(this.widgetId);
 
             return true;
+        }
+    }], [{
+        key: 'isEnabled',
+        value: function isEnabled() {
+            return typeof grecaptcha !== 'undefined';
         }
     }]);
 
@@ -1772,11 +1772,9 @@ var PostForm = function () {
             that.submit(e);
         });
 
-        this.elm.querySelectorAll('input, select textarea').forEach(function (elm) {
+        this.elm.querySelectorAll('input, select, textarea').forEach(function (elm) {
             elm.addEventListener('focus', function (e) {
-                if (that.captcha !== null) {
-                    that.captcha = new _Captcha2.default(that.elm);
-                }
+                that.renderCaptcha();
             });
         });
 
@@ -1821,7 +1819,7 @@ var PostForm = function () {
         key: 'renderCaptcha',
         value: function renderCaptcha() {
             var that = this;
-            if (this.captcha !== null || !_YBoard2.default.captchaIsEnabled()) {
+            if (this.captcha !== null || !_Captcha2.default.isEnabled()) {
                 return;
             }
 
@@ -2058,8 +2056,10 @@ var PostForm = function () {
         value: function updateFileProgressBar(progress) {
             if (progress < 0) {
                 progress = 0;
-            } else if (progress > 100) {
-                progress = 100;
+            } else {
+                if (progress > 100) {
+                    progress = 100;
+                }
             }
 
             var elm = this.elm.querySelector('.file-progress');
@@ -2125,6 +2125,7 @@ var PostForm = function () {
 
             // Invoke the reCAPTCHA if the response is null (= not completed)
             if (this.captcha !== null && captchaResponse === null) {
+                console.log(2);
                 this.captcha.execute();
 
                 return;
@@ -2184,7 +2185,9 @@ var PostForm = function () {
                 submitButton.disabled = false;
                 that.submitInProgress = false;
 
-                that.captcha.reset();
+                if (that.captcha !== null) {
+                    that.captcha.reset();
+                }
             });
         }
     }]);
@@ -2777,10 +2780,6 @@ var AutoUpdate = function () {
                 // Notify about new posts on title
                 if (!document.hasFocus() && that.newReplies > 0 && document.body.classList.contains('thread-page')) {
                     document.title = '(' + that.newReplies + ') ' + that.originalDocTitle;
-                    var replies = document.querySelector('.replies');
-                    replies.querySelector('hr').remove();
-                    var hr = document.createElement('hr');
-                    replies.insertBefore(hr, replies.querySelector('.reply:eq(-' + that.newReplies + ')'));
                 } else {
                     if (that.newReplies !== 0) {
                         that.newReplies = 0;
