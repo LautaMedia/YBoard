@@ -3,29 +3,7 @@
 <div id="inner">
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 
-<div class="thread" id="thread-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
-    <?php include($viewFilesPath . '/Snippet/ThreadSubject.phtml') ?>
-
-    <div class="post op-post<?= ($thread->userId==$user->id?' own-post':'') ?>" id="post-<?= $thread->id ?>" data-id="<?= $thread->id ?>">
-        <?php $post = $thread; include($viewFilesPath . '/Snippet/Post.phtml') ?>
-    </div>
-
-    <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
-    <div class="replies">
-    <?php foreach($thread->replies as $reply): ?>
-        <div class="post reply<?= ($reply->userId==$user->id?' own-post':'') ?>" id="post-<?= $reply->id ?>" data-id="<?= $reply->id ?>">
-            <?php $post = $reply; include($viewFilesPath . '/Snippet/Post.phtml') ?>
-        </div>
-    <?php endforeach ?>
-    </div>
-    <div class="thread-buttons">
-        <button class="link e-get-replies"><?= _('update') ?></button>
-    </div>
-
-    <?php if (!$thread->locked || $user->isMod): ?>
-        <?php include($viewFilesPath . '/Snippet/PostForm.phtml') ?>
-    <?php endif ?>
-</div>
+<?php include($viewFilesPath . '/Snippet/Thread.phtml') ?>
 
 <?php include($viewFilesPath . '/Snippet/BoardNavigation.phtml') ?>
 </div>

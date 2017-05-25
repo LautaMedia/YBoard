@@ -36,15 +36,19 @@ body:not(.thread-page) .thread.hidden {
     #post-form {
         display: block;
         box-shadow: none;
-        margin: 10px 0 0 0;
         background-color: transparent;
         padding: 0;
+        margin: 0;
         #label-subject, h3 {
             display: none
         }
     }
     > #post-form {
         padding: 5px;
+        margin: 0;
+    }
+    .post #post-form {
+        margin-top: 20px;
     }
 
     > h3 {

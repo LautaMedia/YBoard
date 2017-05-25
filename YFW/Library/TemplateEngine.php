@@ -41,10 +41,10 @@ class TemplateEngine
         if (!preg_match('/^[a-z0-9_\-\/]+$/i', $viewFile)) {
             throw new \Exception('Invalid view file: ' . $viewFile . '.');
         }
-        $viewFile = $this->viewFilesPath . '/Page/' . $viewFile . '.phtml';
+        $viewFilePath = $this->viewFilesPath . '/Page/' . $viewFile . '.phtml';
 
-        if (!file_exists($viewFile)) {
-            throw new \Exception('Error loading the view file ' . $viewFile . ': file does not exist.');
+        if (!file_exists($viewFilePath)) {
+            throw new \Exception('Error loading the view file "' . $viewFile . '"": file does not exist.');
         }
 
         // Extract variables set for template
@@ -53,7 +53,7 @@ class TemplateEngine
 
         // Needs output buffering to just get the executed content as a variable
         ob_start();
-        require($viewFile);
+        require($viewFilePath);
 
         // $output is used inside the template file
         $output = ob_get_clean();

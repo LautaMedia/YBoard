@@ -78,7 +78,9 @@ class UserStatistics extends Model
         }
 
         $this->totalPosts = $this->createdThreads + $this->sentReplies;
-        $this->messageAverageLength = round($this->messageTotalCharacters / $this->totalPosts, 2);
+        if ($this->totalPosts > 0) {
+            $this->messageAverageLength = round($this->messageTotalCharacters / $this->totalPosts, 2);
+        }
     }
 
     public function __destruct()
