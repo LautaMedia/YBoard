@@ -151,25 +151,25 @@ class File
             // Bind events etc.
             YBoard.initElement(data);
 
-            // Video volume save/restore
-            let video = figure.querySelector('video');
-            if (video !== null) {
-                video.addEventListener('volumechange', function(e)
-                {
-                    localStorage.setItem('videoVolume', e.target.volume);
-                });
-
-                let volume = localStorage.getItem('videoVolume');
-                if (volume !== null) {
-                    video.volume = volume;
-                }
-            }
-
             requestAnimationFrame(function()
             {
                 figure.classList.remove('thumbnail');
                 figure.classList.add('media-player-container');
                 figure.insertBefore(data, figure.firstElementChild);
+
+                // Video volume save/restore
+                let video = figure.querySelector('video');
+                if (video !== null) {
+                    video.addEventListener('volumechange', function(e)
+                    {
+                        localStorage.setItem('videoVolume', e.target.volume);
+                    });
+
+                    let volume = localStorage.getItem('videoVolume');
+                    if (volume !== null) {
+                        video.volume = volume;
+                    }
+                }
             });
         }).onEnd(function()
         {
