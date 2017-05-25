@@ -1,6 +1,7 @@
 import YQuery from '../YQuery';
 import YBoard from '../YBoard';
 import Toast from '../Toast';
+import Captcha from '../Captcha';
 
 class PostForm
 {
@@ -12,7 +13,7 @@ class PostForm
             return;
         }
 
-        this.captchaRendered = false;
+        this.captcha = null;
         this.locationParent = this.elm.parentNode;
         this.location = this.elm.nextElementSibling;
         this.msgElm = this.elm.querySelector('#post-message');
@@ -101,7 +102,9 @@ class PostForm
         this.elm.querySelectorAll('input, select textarea').forEach(function(elm) {
             elm.addEventListener('focus', function(e)
             {
-                that.renderCaptcha();
+                if (that.captcha !== null) {
+                    that.captcha = new Captcha(that.elm);
+                }
             });
         });
 
@@ -147,19 +150,11 @@ class PostForm
     renderCaptcha()
     {
         let that = this;
-        if (!YBoard.Captcha.isEnabled()) {
+        if (this.captcha !== null || !YBoard.captchaIsEnabled()) {
             return;
         }
 
-        let button = this.elm.querySelector('.g-recaptcha');
-        if (!button || this.captchaRendered) {
-            return;
-        }
-
-        this.captchaRendered = true;
-
-        // Button exists and captcha not rendered
-        YBoard.Captcha.render(button, {
+        this.captcha = new Captcha(this.elm.querySelector('.captcha'), {
             'size': 'invisible',
             'callback': function(response)
             {
@@ -444,11 +439,18 @@ class PostForm
         this.msgElm.insertAtCaret(append);
     }
 
-    submit(e)
+    submit(e = null, captchaResponse = null)
     {
         let that = this;
         if (typeof e === 'object' && e !== null) {
             e.preventDefault();
+        }
+
+        // Invoke the reCAPTCHA if the response is null (= not completed)
+        if (this.captcha !== null && captchaResponse === null) {
+            this.captcha.execute();
+
+            return;
         }
 
         let submitButton = this.elm.querySelector('input[type="submit"].button');
@@ -470,6 +472,7 @@ class PostForm
         this.elm.querySelector('#post-files').value = '';
 
         let fd = new FormData(this.elm);
+        fd.append('captchaResponse', captchaResponse);
 
         YQuery.post('/api/post/create', fd, {
             'contentType': null
@@ -506,7 +509,7 @@ class PostForm
             submitButton.disabled = false;
             that.submitInProgress = false;
 
-            YBoard.Captcha.reset();
+            that.captcha.reset();
         });
     }
 }

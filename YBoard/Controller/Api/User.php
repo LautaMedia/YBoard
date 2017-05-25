@@ -17,21 +17,13 @@ class User extends ApiController
             $this->throwJsonError(400, _('Missing username or password'), _('Signup failed'));
         }
 
+        if (!$this->verifyCaptcha()) {
+            $this->throwJsonError(403, _('Validating the CAPTCHA response failed. Please try again.'), _('Signup failed'));
+        }
+
         if ($_POST['password'] !== $_POST['repassword']) {
             $this->throwJsonError(400, _('The two passwords do not match'), _('Signup failed'));
         }
-
-        if ($this->requireCaptcha) {
-            if (empty($_POST["g-recaptcha-response"])) {
-                $this->throwJsonError(400, _('Please fill the CAPTCHA'), _('Signup failed'));
-            }
-
-            $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['reCaptcha']['privateKey']);
-            if (!$captchaOk) {
-                $this->throwJsonError(400, _('Invalid CAPTCHA response, please try again'), _('Signup failed'));
-            }
-        }
-
         if (mb_strlen($_POST['username']) > $this->config['user']['usernameMaxLength']) {
             $this->throwJsonError(400, _('Username is too long'), _('Signup failed'));
         }

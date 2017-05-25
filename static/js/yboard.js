@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -436,10 +436,6 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Captcha = __webpack_require__(8);
-
-var _Captcha2 = _interopRequireDefault(_Captcha);
-
 var _Theme = __webpack_require__(13);
 
 var _Theme2 = _interopRequireDefault(_Theme);
@@ -460,13 +456,17 @@ var _PostForm = __webpack_require__(11);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
 
-var _Tooltip = __webpack_require__(7);
+var _Tooltip = __webpack_require__(8);
 
 var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
 var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
+
+var _Captcha = __webpack_require__(3);
+
+var _Captcha2 = _interopRequireDefault(_Captcha);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -477,8 +477,7 @@ var YBoard = function () {
         _classCallCheck(this, YBoard);
 
         var that = this;
-        this.Catalog = new _Catalog2.default();
-        this.Captcha = new _Captcha2.default();
+        new _Catalog2.default();
         this.Theme = new _Theme2.default();
         this.Thread = new _Thread2.default();
         this.Post = new _Post2.default();
@@ -540,6 +539,11 @@ var YBoard = function () {
     }
 
     _createClass(YBoard, [{
+        key: 'captchaIsEnabled',
+        value: function captchaIsEnabled() {
+            return typeof config.reCaptchaPublicKey !== 'undefined';
+        }
+    }, {
         key: 'initElement',
         value: function initElement(elm) {
             var that = this;
@@ -710,26 +714,39 @@ var YBoard = function () {
         key: 'submitForm',
         value: function submitForm(e) {
             var form = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-            var that = this;
+            var captchaResponse = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
             if (e !== null) {
                 e.preventDefault();
                 form = e.target;
             }
 
+            if (captchaResponse === false && typeof form.captcha !== 'undefined') {
+                // Validate captchas
+                form.captcha.execute();
+
+                return;
+            }
+
             if (form === false) {
                 return false;
             }
 
+            if (typeof form.dataset.action === 'undefined') {
+                return false;
+            }
+
             var fd = new FormData(form);
+            if (captchaResponse !== false) {
+                fd.append('captchaResponse', captchaResponse);
+            }
 
             var overlay = document.createElement('div');
             overlay.classList.add('form-overlay');
             overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
             form.appendChild(overlay);
 
-            _YQuery2.default.post(form.getAttribute('action'), fd).onLoad(function (xhr) {
+            _YQuery2.default.post(form.dataset.action, fd).onLoad(function (xhr) {
                 var data = JSON.parse(xhr.responseText);
                 if (data.reload) {
                     if (data.url) {
@@ -742,17 +759,20 @@ var YBoard = function () {
                     _Toast2.default.success(data.message);
                     form.reset();
                 }
-            }).onError(function (xhr) {
+            }).onError(function () {
                 overlay.remove();
+            }).onEnd(function () {
+                if (typeof form.captcha !== 'undefined') {
+                    form.captcha.reset();
+                }
             });
         }
     }, {
         key: 'signup',
         value: function signup(e, show) {
-            var that = this;
             // Signup form in sidebar
+            var that = this;
             e.preventDefault();
-            var elm = e.target;
 
             var loginForm = document.getElementById('login');
             var signupForm = document.getElementById('signup');
@@ -761,10 +781,10 @@ var YBoard = function () {
                 signupForm.show('flex');
                 loginForm.hide();
 
-                this.Captcha.render(signupForm.querySelector('.g-recaptcha'), {
+                signupForm.captcha = new _Captcha2.default(signupForm.querySelector('.captcha'), {
                     'size': 'invisible',
                     'callback': function callback(response) {
-                        that.submitForm(null, signupForm);
+                        that.submitForm(null, signupForm, response);
                     }
                 });
             } else {
@@ -781,6 +801,69 @@ exports.default = new YBoard();
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Captcha = function () {
+    function Captcha(elm) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        _classCallCheck(this, Captcha);
+
+        if (typeof grecaptcha === 'undefined' || !elm || elm.innerHTML.length !== 0) {
+            // Captcha not enabled, grecaptcha -library not loaded, captcha element not found or already rendered
+            return;
+        }
+
+        options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
+        this.widgetId = grecaptcha.render(elm, options);
+
+        return;
+    }
+
+    _createClass(Captcha, [{
+        key: 'execute',
+        value: function execute() {
+            if (typeof grecaptcha === 'undefined') {
+                // Captcha not enabled or grecaptcha -library not loaded
+                return false;
+            }
+
+            grecaptcha.execute(this.widgetId);
+
+            return true;
+        }
+    }, {
+        key: 'reset',
+        value: function reset() {
+            if (typeof grecaptcha === 'undefined') {
+                // Captcha not enabled or grecaptcha -library not loaded
+                return false;
+            }
+
+            grecaptcha.reset(this.widgetId);
+
+            return true;
+        }
+    }]);
+
+    return Captcha;
+}();
+
+exports.default = Captcha;
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -918,7 +1001,7 @@ var Modal = function () {
 exports.default = new Modal();
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -965,7 +1048,7 @@ if (typeof Element.prototype.closest !== 'function') {
 }
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1062,15 +1145,15 @@ NodeList.prototype.remove = function () {
 };
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(4);
-
 __webpack_require__(5);
+
+__webpack_require__(6);
 
 var _YQuery = __webpack_require__(0);
 
@@ -1084,7 +1167,7 @@ var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Modal = __webpack_require__(3);
+var _Modal = __webpack_require__(4);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -1134,7 +1217,7 @@ window.Toast = _Toast2.default;
 window.Modal = _Modal2.default;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1373,67 +1456,6 @@ var Tooltip = function () {
 exports.default = Tooltip;
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Captcha = function () {
-    function Captcha() {
-        _classCallCheck(this, Captcha);
-    }
-
-    _createClass(Captcha, [{
-        key: 'render',
-        value: function render(elm) {
-            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            if (!this.isEnabled() || typeof grecaptcha === 'undefined' || !elm || !!elm.dataset.rendered) {
-                // Captcha not enabled, grecaptcha -library not loaded, captcha element not found or already rendered
-                return false;
-            }
-
-            elm.dataset.rendered = true;
-
-            options = Object.assign({ 'sitekey': config.reCaptchaPublicKey }, options);
-            grecaptcha.render(elm, options);
-
-            return true;
-        }
-    }, {
-        key: 'reset',
-        value: function reset() {
-            if (!this.isEnabled() || typeof grecaptcha === 'undefined') {
-                // Captcha not enabled or grecaptcha -library not loaded
-                return false;
-            }
-
-            grecaptcha.reset();
-
-            return true;
-        }
-    }, {
-        key: 'isEnabled',
-        value: function isEnabled() {
-            return typeof config.reCaptchaPublicKey !== 'undefined';
-        }
-    }]);
-
-    return Captcha;
-}();
-
-exports.default = Captcha;
-
-/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1658,6 +1680,10 @@ var _Toast = __webpack_require__(1);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
+var _Captcha = __webpack_require__(3);
+
+var _Captcha2 = _interopRequireDefault(_Captcha);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1672,7 +1698,7 @@ var PostForm = function () {
             return;
         }
 
-        this.captchaRendered = false;
+        this.captcha = null;
         this.locationParent = this.elm.parentNode;
         this.location = this.elm.nextElementSibling;
         this.msgElm = this.elm.querySelector('#post-message');
@@ -1748,7 +1774,9 @@ var PostForm = function () {
 
         this.elm.querySelectorAll('input, select textarea').forEach(function (elm) {
             elm.addEventListener('focus', function (e) {
-                that.renderCaptcha();
+                if (that.captcha !== null) {
+                    that.captcha = new _Captcha2.default(that.elm);
+                }
             });
         });
 
@@ -1793,19 +1821,11 @@ var PostForm = function () {
         key: 'renderCaptcha',
         value: function renderCaptcha() {
             var that = this;
-            if (!_YBoard2.default.Captcha.isEnabled()) {
+            if (this.captcha !== null || !_YBoard2.default.captchaIsEnabled()) {
                 return;
             }
 
-            var button = this.elm.querySelector('.g-recaptcha');
-            if (!button || this.captchaRendered) {
-                return;
-            }
-
-            this.captchaRendered = true;
-
-            // Button exists and captcha not rendered
-            _YBoard2.default.Captcha.render(button, {
+            this.captcha = new _Captcha2.default(this.elm.querySelector('.captcha'), {
                 'size': 'invisible',
                 'callback': function callback(response) {
                     that.submit(null, response);
@@ -2094,10 +2114,20 @@ var PostForm = function () {
         }
     }, {
         key: 'submit',
-        value: function submit(e) {
+        value: function submit() {
+            var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+            var captchaResponse = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
             var that = this;
             if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object' && e !== null) {
                 e.preventDefault();
+            }
+
+            // Invoke the reCAPTCHA if the response is null (= not completed)
+            if (this.captcha !== null && captchaResponse === null) {
+                this.captcha.execute();
+
+                return;
             }
 
             var submitButton = this.elm.querySelector('input[type="submit"].button');
@@ -2119,6 +2149,7 @@ var PostForm = function () {
             this.elm.querySelector('#post-files').value = '';
 
             var fd = new FormData(this.elm);
+            fd.append('captchaResponse', captchaResponse);
 
             _YQuery2.default.post('/api/post/create', fd, {
                 'contentType': null
@@ -2153,7 +2184,7 @@ var PostForm = function () {
                 submitButton.disabled = false;
                 that.submitInProgress = false;
 
-                _YBoard2.default.Captcha.reset();
+                that.captcha.reset();
             });
         }
     }]);

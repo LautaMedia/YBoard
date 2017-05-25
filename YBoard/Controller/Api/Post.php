@@ -134,15 +134,8 @@ class Post extends ApiController
             }
         }
 
-        if ($this->requireCaptcha) {
-            if (empty($_POST["g-recaptcha-response"])) {
-                $this->throwJsonError(400, _('Empty CAPTCHA response. Please try again.'));
-            }
-
-            $captchaOk = ReCaptcha::verify($_POST["g-recaptcha-response"], $this->config['captcha']['privateKey']);
-            if (!$captchaOk) {
-                $this->throwJsonError(403, _('Validating the CAPTCHA response failed. Please try again.'));
-            }
+        if (!$this->verifyCaptcha()) {
+            $this->throwJsonError(403, _('Validating the CAPTCHA response failed. Please try again.'));
         }
 
         // IP2Location

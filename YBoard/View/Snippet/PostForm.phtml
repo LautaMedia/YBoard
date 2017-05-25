@@ -1,4 +1,4 @@
-<form class="content-box" id="post-form" action="post">
+<form class="content-box" id="post-form" method="post">
     <fieldset>
         <input type="hidden" id="file-id" name="file_id">
 <?php if (!empty($thread->id)): ?>
@@ -73,9 +73,7 @@
     <div class="buttons">
         <button type="button" class="button gray toggle-options"><?= _('Options') ?></button>
         <button type="button" id="reset-button" class="button gray"><?= _('Cancel') ?></button>
-        <input type="submit" class="button primary<?=
-            $requireCaptcha ? ' g-recaptcha"' : '"'
-        ?> value="<?= _('Submit') ?>">
+        <input type="submit" class="button primary" value="<?= _('Submit') ?>">
     </div>
     <div id="post-options">
         <h4><?= _('Functions') ?></h4>
@@ -98,4 +96,7 @@
         </label>
     </div>
     </fieldset>
+    <?php if($requireCaptcha): ?>
+    <div class="captcha"></div>
+    <?php endif ?>
 </form>

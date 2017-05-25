@@ -15,6 +15,7 @@ use YFW\Library\BotDetection;
 use YFW\Library\Database;
 use YFW\Library\HttpResponse;
 use YFW\Library\i18n;
+use YFW\Library\ReCaptcha;
 use YFW\Library\TemplateEngine;
 
 abstract class Controller extends \YFW\Controller
@@ -70,6 +71,22 @@ abstract class Controller extends \YFW\Controller
         } else {
             //error_log($resourceUsage);
         }
+    }
+
+    protected function verifyCaptcha(): bool
+    {
+        if ($this->requireCaptcha) {
+            if (empty($_POST["captchaResponse"])) {
+                return false;
+            }
+
+            $captchaOk = ReCaptcha::verify($_POST['captchaResponse'], $this->config['captcha']['privateKey']);
+            if (!$captchaOk) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function loadUser(): bool
@@ -129,6 +146,10 @@ abstract class Controller extends \YFW\Controller
 
         return true;
     }
+
+    /*
+     * Templates / themes
+     */
 
     protected function dieWithMessage(
         string $errorTitle,

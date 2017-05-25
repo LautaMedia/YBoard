@@ -1,5 +1,4 @@
 import YQuery from './YQuery';
-import Captcha from './YBoard/Captcha';
 import Theme from './YBoard/Theme';
 import Catalog from './YBoard/Catalog';
 import Thread from './YBoard/Thread';
@@ -7,14 +6,14 @@ import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
 import Tooltip from './Tooltip';
 import Toast from './Toast';
+import Captcha from './Captcha';
 
 class YBoard
 {
     constructor()
     {
         let that = this;
-        this.Catalog = new Catalog();
-        this.Captcha = new Captcha();
+        new Catalog();
         this.Theme = new Theme();
         this.Thread = new Thread();
         this.Post = new Post();
@@ -80,6 +79,11 @@ class YBoard
         });
 
         this.initElement(document);
+    }
+
+    captchaIsEnabled()
+    {
+        return typeof config.reCaptchaPublicKey !== 'undefined';
     }
 
     initElement(elm)
@@ -250,27 +254,39 @@ class YBoard
         return '<span class="' + classes + 'loading icon-loading spin"></span>';
     }
 
-    submitForm(e, form = false)
+    submitForm(e, form = false, captchaResponse = false)
     {
-        let that = this;
-
         if (e !== null) {
             e.preventDefault();
             form = e.target;
+        }
+
+        if (captchaResponse === false && typeof form.captcha !== 'undefined') {
+            // Validate captchas
+            form.captcha.execute();
+
+            return;
         }
 
         if (form === false) {
             return false;
         }
 
+        if (typeof form.dataset.action === 'undefined') {
+            return false;
+        }
+
         let fd = new FormData(form);
+        if (captchaResponse !== false) {
+            fd.append('captchaResponse', captchaResponse);
+        }
 
         let overlay = document.createElement('div');
         overlay.classList.add('form-overlay');
         overlay.innerHTML = '<div>' + this.spinnerHtml() + '</div></div>';
         form.appendChild(overlay);
 
-        YQuery.post(form.getAttribute('action'), fd).onLoad(function(xhr)
+        YQuery.post(form.dataset.action, fd).onLoad(function(xhr)
         {
             let data = JSON.parse(xhr.responseText);
             if (data.reload) {
@@ -284,18 +300,22 @@ class YBoard
                 Toast.success(data.message);
                 form.reset();
             }
-        }).onError(function(xhr)
+        }).onError(function()
         {
             overlay.remove();
+        }).onEnd(function()
+        {
+            if (typeof form.captcha !== 'undefined') {
+                form.captcha.reset();
+            }
         });
     }
 
     signup(e, show)
     {
-        let that = this;
         // Signup form in sidebar
+        let that = this;
         e.preventDefault();
-        let elm = e.target;
 
         let loginForm = document.getElementById('login');
         let signupForm = document.getElementById('signup');
@@ -304,11 +324,11 @@ class YBoard
             signupForm.show('flex');
             loginForm.hide();
 
-            this.Captcha.render(signupForm.querySelector('.g-recaptcha'), {
+            signupForm.captcha = new Captcha(signupForm.querySelector('.captcha'), {
                 'size': 'invisible',
                 'callback': function(response)
                 {
-                    that.submitForm(null, signupForm);
+                    that.submitForm(null, signupForm, response);
                 }
             });
         } else {

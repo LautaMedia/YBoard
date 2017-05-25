@@ -22,6 +22,10 @@ body:not(.thread-page) .thread.hidden {
         $shadowColor: lighten($bgColor, 5%);
     }
     box-shadow: 0 0 10px 0 $shadowColor;
+    transition:
+            box-shadow $transition,
+            color $transition,
+            background-color $transition;
 
     &:not(.expanded) {
         .e-less-replies {
