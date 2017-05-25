@@ -22,7 +22,7 @@
         <?php $paddingBottom = str_replace(',','.', round($post->file->thumbHeight / $post->file->thumbWidth * 100, 4)) ?>
     <?php endif ?>
     <?php $fileUrl = $config['url']['files'] . '/' . $post->file->folder . '/o/' . $post->file->name . '/' . rawurlencode($post->file->displayName) . '.' . $post->file->extension; ?>
-    <figure class="post-file thumbnail" data-id="<?= $post->file->id ?>" style="width:<?= $post->file->thumbWidth ?>px">
+    <figure class="post-file<?= $post->file->hasThumbnail ? ' thumbnail' : '' ?>" data-id="<?= $post->file->id ?>" style="width:<?= $post->file->thumbWidth ?>px">
         <?php if (in_array($post->file->extension, ['m4a', 'mp4'])): ?>
             <a href="<?= $fileUrl ?>" class="media" target="_blank"
                style="padding-bottom:<?= $paddingBottom ?>%">

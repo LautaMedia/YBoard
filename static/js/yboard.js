@@ -482,6 +482,7 @@ var YBoard = function () {
         this.Thread = new _Thread2.default();
         this.Post = new _Post2.default();
         this.PostForm = new _PostForm2.default();
+        this.messagePreviewCache = {};
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -569,38 +570,47 @@ var YBoard = function () {
                     }
                     var postXhr = null;
                     new _Tooltip2.default(e, {
-                        'openDelay': 100,
+                        'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                         'position': 'bottom',
                         'content': that.spinnerHtml(),
                         'onOpen': function onOpen(tip) {
-                            postXhr = _YQuery2.default.post('/api/post/get', {
-                                'postId': postId
-                            }, {
-                                'errorFunction': null
-                            }).onLoad(function (xhr) {
-                                if (tip.elm === null) {
-                                    return;
-                                }
-                                tip.setContent(xhr.responseText);
+                            tip.elm.style.willChange = 'contents';
+                            if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                                tip.setContent(that.messagePreviewCache[postId]);
                                 tip.position();
-
-                                var referringId = e.target.closest('.post').dataset.id;
-                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                    var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
-                                    if (referring !== null) {
-                                        referring.classList.add('referring');
+                                tip.elm.style.willChange = '';
+                            } else {
+                                postXhr = _YQuery2.default.post('/api/post/get', {
+                                    'postId': postId
+                                }, {
+                                    'errorFunction': null
+                                }).onLoad(function (xhr) {
+                                    if (tip.elm === null) {
+                                        return;
                                     }
-                                }
-                            }).onError(function (xhr) {
-                                if (xhr.responseText.length !== 0) {
-                                    var json = JSON.parse(xhr.responseText);
-                                    tip.setContent(json.message);
-                                } else {
-                                    tip.setContent(messages.errorOccurred);
-                                }
-                                tip.position();
-                            });
-                            postXhr = postXhr.getXhrObject();
+                                    tip.setContent(xhr.responseText);
+                                    tip.position();
+                                    tip.elm.style.willChange = '';
+
+                                    var referringId = e.target.closest('.post').dataset.id;
+                                    if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                        var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
+                                        if (referring !== null) {
+                                            referring.classList.add('referring');
+                                        }
+                                    }
+                                    that.messagePreviewCache[postId] = xhr.responseText;
+                                }).onError(function (xhr) {
+                                    if (xhr.responseText.length !== 0) {
+                                        var json = JSON.parse(xhr.responseText);
+                                        tip.setContent(json.message);
+                                    } else {
+                                        tip.setContent(messages.errorOccurred);
+                                    }
+                                    tip.position();
+                                });
+                                postXhr = postXhr.getXhrObject();
+                            }
                         },
                         'onClose': function onClose() {
                             if (postXhr !== null && postXhr.readyState !== 4) {

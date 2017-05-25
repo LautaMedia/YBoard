@@ -39,7 +39,7 @@
                 <?= $user->notifications['unread'] ?></span>
             </button>
             <a href="/followedthreads/" class="icon-bookmark" title="<?= _('Followed threads') ?>">
-                <?php if($user->threadFollow['unreadThreads'] != 0): ?>
+                <?php if($user->threadFollow['unreadThreads'] > 0): ?>
                     <span class="unread-count green"><?= $user->threadFollow['unreadThreads'] ?></span>
                 <?php endif ?>
             </a>

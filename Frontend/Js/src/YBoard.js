@@ -18,6 +18,7 @@ class YBoard
         this.Thread = new Thread();
         this.Post = new Post();
         this.PostForm = new PostForm();
+        this.messagePreviewCache = {};
 
         if (this.isBadBrowser()) {
             this.browserWarning();
@@ -112,41 +113,51 @@ class YBoard
                 }
                 let postXhr = null;
                 new Tooltip(e, {
-                    'openDelay': 100,
+                    'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                     'position': 'bottom',
                     'content': that.spinnerHtml(),
                     'onOpen': function(tip)
                     {
-                        postXhr = YQuery.post('/api/post/get', {
-                            'postId': postId,
-                        }, {
-                            'errorFunction': null,
-                        }).onLoad(function(xhr)
-                        {
-                            if (tip.elm === null) {
-                                return;
-                            }
-                            tip.setContent(xhr.responseText);
+                        tip.elm.style.willChange = 'contents';
+                        if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                            tip.setContent(that.messagePreviewCache[postId]);
                             tip.position();
-
-                            let referringId = e.target.closest('.post').dataset.id;
-                            if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                let referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
-                                if (referring !== null) {
-                                    referring.classList.add('referring');
+                            tip.elm.style.willChange = '';
+                        } else {
+                            postXhr = YQuery.post('/api/post/get', {
+                                'postId': postId,
+                            }, {
+                                'errorFunction': null,
+                            }).onLoad(function(xhr)
+                            {
+                                if (tip.elm === null) {
+                                    return;
                                 }
-                            }
-                        }).onError(function(xhr)
-                        {
-                            if (xhr.responseText.length !== 0) {
-                                let json = JSON.parse(xhr.responseText);
-                                tip.setContent(json.message);
-                            } else {
-                                tip.setContent(messages.errorOccurred)
-                            }
-                            tip.position();
-                        });
-                        postXhr = postXhr.getXhrObject();
+                                tip.setContent(xhr.responseText);
+                                tip.position();
+                                tip.elm.style.willChange = '';
+
+                                let referringId = e.target.closest('.post').dataset.id;
+                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                    let referring = tip.elm.querySelector(
+                                        '.message .ref[data-id="' + referringId + '"]');
+                                    if (referring !== null) {
+                                        referring.classList.add('referring');
+                                    }
+                                }
+                                that.messagePreviewCache[postId] = xhr.responseText;
+                            }).onError(function(xhr)
+                            {
+                                if (xhr.responseText.length !== 0) {
+                                    let json = JSON.parse(xhr.responseText);
+                                    tip.setContent(json.message);
+                                } else {
+                                    tip.setContent(messages.errorOccurred)
+                                }
+                                tip.position();
+                            });
+                            postXhr = postXhr.getXhrObject();
+                        }
                     },
                     'onClose': function() {
                         if (postXhr !== null && postXhr.readyState !== 4) {

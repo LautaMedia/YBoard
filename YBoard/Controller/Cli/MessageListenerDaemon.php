@@ -38,6 +38,7 @@ class MessageListenerDaemon
         $message = null;
 
         while ($mq->receive(MessageQueue::MSG_TYPE_ALL, $msgType, 102400, $message)) {
+            echo 'GOT MESSAGE ' . $msgType . ':' . json_encode($message) . "\n";
             $this->connectDb();
             try {
                 switch ($msgType) {
@@ -167,7 +168,7 @@ class MessageListenerDaemon
 
     protected function addPostNotification(array $message): bool
     {
-        // Message should be [notificationType, postId, [userId], skipUsers]
+        // Message should be [notificationType, postId, skipUsers]
         if (!is_array($message)) {
             return false;
         }
@@ -176,7 +177,7 @@ class MessageListenerDaemon
             return false;
         }
 
-        list($notificationType, $postId, $skipUsers) = $message;
+        [$notificationType, $postId, $skipUsers] = $message;
 
         if (!is_array($postId)) {
             $repliedPost = Post::get($this->db, $postId, false);
@@ -187,15 +188,18 @@ class MessageListenerDaemon
             if (in_array($repliedPost->userId, $skipUsers)) {
                 return true;
             }
-            UserNotification::add($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
+
+            UserNotification::create($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
+            echo 'Added User: '. $repliedPost->userId . "\n";
         } else {
-            $repliedPosts = Post::get($this->db, $postId, false);
-            foreach ($repliedPosts as $repliedPost) {
+            foreach ($postId as $repliedPost) {
+                $repliedPost = Post::get($this->db, $repliedPost, false);
                 if (in_array($repliedPost->userId, $skipUsers)) {
                     continue;
                 }
 
-                UserNotification::add($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
+                UserNotification::create($this->db, $repliedPost->userId, $notificationType, null, $repliedPost->id);
+                echo 'Added User: '. $repliedPost->userId . "\n";
                 $skipUsers[] = $repliedPost->userId;
             }
         }
