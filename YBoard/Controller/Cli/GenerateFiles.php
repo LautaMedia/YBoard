@@ -19,7 +19,7 @@ class GenerateFiles
 
         $outPath = ROOT_PATH . '/static/js/locale';
         if (!is_dir($outPath)) {
-            mkdir($outPath, 0774, true);
+            mkdir($outPath, 2774, true);
         }
 
         foreach ($i18n->listLocales() as $locale => $domains) {
