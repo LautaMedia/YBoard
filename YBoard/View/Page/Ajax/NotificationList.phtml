@@ -1,15 +1,14 @@
 <div class="notifications-list">
-    <h3><?= _('Notifications') ?></h3>
-    <?php if (empty($notifications)): ?>
+    <?php if (empty($notifications['list'])): ?>
     <p><?= _('You don\'t have any notifications...') ?></p>
     <?php else: ?>
-    <?php foreach ($notifications as $notification): ?>
+    <?php foreach ($notifications['list'] as $notification): ?>
     <div class="notification <?= (!$notification->isRead?'not-read':'is-read') ?>" id="n-<?= $notification->id ?>">
         <?php if (!empty($notification->postId)): ?>
             <a href="/post-<?= $notification->postId ?>"
-                <?php if (!$notification->isRead) :
-                    ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
-                endif ?>>
+                <?php if (!$notification->isRead): ?>
+                    onclick="markNotificationRead(<?= $notification->id ?>, event)"
+                <?php endif ?>>
                 <?= htmlspecialchars(sprintf($notification->text, $notification->count)) ?>
             </a>
         <?php else: ?>
@@ -19,17 +18,19 @@
             <span class="datetime"><?= $notification->time ?></span>
             <?php if (!empty($notification->postId)): ?>
                 <a href="/post-<?= $notification->postId ?>" class="ref"
-                   <?php if (!$notification->isRead) :
-                       ?>onclick="markNotificationRead(<?= $notification->id ?>, event)"<?php
-                    endif ?>
+                   <?php if (!$notification->isRead): ?>
+                       onclick="markNotificationRead(<?= $notification->id ?>, event)"
+                   <?php endif ?>
                    data-id="<?= $notification->postId ?>">&gt;&gt;<?= $notification->postId ?></a>
             <?php endif ?>
         </div>
         <?php if (!$notification->isRead): ?>
-        <button class="mark-read icon-checkmark-circle" onclick="markNotificationRead(<?= $notification->id ?>)"></button>
+        <button class="e-mark-read icon-checkmark-circle" data-id="<?= $notification->id ?>"></button>
         <?php endif ?>
     </div>
     <?php endforeach ?>
     <?php endif ?>
 </div>
-<button class="button primary right close-modal" onclick="markAllNotificationsRead()"><?= _('Mark all as read') ?></button>
+<div class="buttons">
+    <button class="button primary close-modal e-mark-all-read"><?= _('Mark all as read') ?></button>
+</div>

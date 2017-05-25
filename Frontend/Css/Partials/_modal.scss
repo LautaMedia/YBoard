@@ -12,36 +12,37 @@
     overflow: auto;
 
     .modal {
+        display: flex;
+        flex-direction: column;
         margin: auto;
         z-index: 2;
         box-sizing: border-box;
-        min-height: 200px;
-        min-width: 200px;
-        background: #ffffff;
+        min-height: 300px;
+        min-width: 300px;
+        background: $contentBgColor;
+        color: $textColor;
         box-shadow: 0 0 20px -5px black;
-        border: 1px solid $red;
+        border: 5px solid $sidebarColor;
         position: relative;
         &:not(:last-of-type) {
             display: none;
         }
 
         .title {
+            flex: 0 0 auto;
+            display: flex;
             font-size: 1.25em;
             background-color: #1cc26d;
-            padding: 5px 10px;
-        }
-        .content {
-            padding: 10px;
+            span {
+                padding: 5px 10px;
+            }
         }
 
         .close {
+            flex: 0 0 auto;
+            margin-left: auto;
             cursor: pointer;
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: block;
             width: 40px;
-            height: 26px;
             border: 0;
             background: none;
             &:focus {
@@ -55,6 +56,17 @@
                 color: #fff;
                 background-color: lighten($red, 10%);
             }
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .buttons {
+            margin-top: auto;
         }
     }
 

@@ -1,12 +1,14 @@
 import YQuery from './YQuery';
+import Tooltip from './Tooltip';
+import Toast from './Toast';
+import Captcha from './Captcha';
+
 import Theme from './YBoard/Theme';
 import Catalog from './YBoard/Catalog';
 import Thread from './YBoard/Thread';
 import Post from './YBoard/Post';
 import PostForm from './YBoard/PostForm';
-import Tooltip from './Tooltip';
-import Toast from './Toast';
-import Captcha from './Captcha';
+import Notifications from './YBoard/Notifications';
 
 class YBoard
 {
@@ -18,6 +20,7 @@ class YBoard
         this.Thread = new Thread();
         this.Post = new Post();
         this.PostForm = new PostForm();
+        this.Notifications = new Notifications();
         this.messagePreviewCache = {};
 
         if (this.isBadBrowser()) {

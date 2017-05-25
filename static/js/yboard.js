@@ -295,139 +295,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Toast = function () {
-    function Toast() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, Toast);
-
-        this.options = Object.assign({
-            'displayTime': 3000,
-            'fadeTime': 2000
-        }, options);
-    }
-
-    _createClass(Toast, [{
-        key: 'success',
-        value: function success(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('success', message, title, options);
-        }
-    }, {
-        key: 'info',
-        value: function info(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('info', message, title, options);
-        }
-    }, {
-        key: 'warning',
-        value: function warning(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('warning', message, title, options);
-        }
-    }, {
-        key: 'error',
-        value: function error(message) {
-            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            this._show('error', message, title, options);
-        }
-    }, {
-        key: '_show',
-        value: function _show(type, message, title, options) {
-            var that = this;
-
-            options = Object.assign({}, this.options, options);
-
-            var toastRoot = document.getElementById('toast-root');
-            if (toastRoot === null) {
-                toastRoot = document.createElement('div');
-                toastRoot.id = 'toast-root';
-                document.body.appendChild(toastRoot);
-            }
-
-            var toast = document.createElement('div');
-            toast.classList.add('toast', type);
-
-            var toastContent = document.createElement('div');
-            toastContent.classList.add('toast-content');
-            toast.appendChild(toastContent);
-
-            if (title !== false) {
-                var toastTitle = document.createElement('h3');
-                toastTitle.innerHTML = title;
-                toastContent.appendChild(toastTitle);
-            }
-
-            var toastMessage = document.createElement('p');
-            toastMessage.innerHTML = message;
-            toastContent.appendChild(toastMessage);
-
-            toastRoot.appendChild(toast);
-
-            toast.addEventListener('click', function (e) {
-                e.currentTarget.removeToast();
-            });
-
-            toast.removeToast = function () {
-                toast.remove();
-
-                if (toastRoot.querySelector('.toast') === null) {
-                    toastRoot.remove();
-                }
-            };
-
-            toast.startFade = function () {
-                toast.classList.add('fading');
-                toast.style.transitionDuration = that.options.fadeTime / 1000 + 's';
-            };
-
-            var fading = void 0,
-                removing = void 0;
-            fading = setTimeout(toast.startFade, options.displayTime);
-            removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
-
-            toast.addEventListener('mouseover', function (e) {
-                clearTimeout(fading);
-                clearTimeout(removing);
-                e.currentTarget.classList.remove('fading');
-                e.currentTarget.style.transitionDuration = '';
-            });
-
-            toast.addEventListener('mouseout', function (e) {
-                fading = setTimeout(toast.startFade, options.displayTime);
-                removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
-            });
-        }
-    }]);
-
-    return Toast;
-}();
-
-exports.default = new Toast();
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -436,7 +303,19 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Theme = __webpack_require__(13);
+var _Tooltip = __webpack_require__(8);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
+var _Toast = __webpack_require__(2);
+
+var _Toast2 = _interopRequireDefault(_Toast);
+
+var _Captcha = __webpack_require__(4);
+
+var _Captcha2 = _interopRequireDefault(_Captcha);
+
+var _Theme = __webpack_require__(14);
 
 var _Theme2 = _interopRequireDefault(_Theme);
 
@@ -444,29 +323,21 @@ var _Catalog = __webpack_require__(9);
 
 var _Catalog2 = _interopRequireDefault(_Catalog);
 
-var _Thread = __webpack_require__(14);
+var _Thread = __webpack_require__(15);
 
 var _Thread2 = _interopRequireDefault(_Thread);
 
-var _Post = __webpack_require__(10);
+var _Post = __webpack_require__(11);
 
 var _Post2 = _interopRequireDefault(_Post);
 
-var _PostForm = __webpack_require__(11);
+var _PostForm = __webpack_require__(12);
 
 var _PostForm2 = _interopRequireDefault(_PostForm);
 
-var _Tooltip = __webpack_require__(8);
+var _Notifications = __webpack_require__(10);
 
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
-
-var _Toast = __webpack_require__(1);
-
-var _Toast2 = _interopRequireDefault(_Toast);
-
-var _Captcha = __webpack_require__(3);
-
-var _Captcha2 = _interopRequireDefault(_Captcha);
+var _Notifications2 = _interopRequireDefault(_Notifications);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -482,6 +353,7 @@ var YBoard = function () {
         this.Thread = new _Thread2.default();
         this.Post = new _Post2.default();
         this.PostForm = new _PostForm2.default();
+        this.Notifications = new _Notifications2.default();
         this.messagePreviewCache = {};
 
         if (this.isBadBrowser()) {
@@ -800,7 +672,279 @@ var YBoard = function () {
 exports.default = new YBoard();
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Toast = function () {
+    function Toast() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, Toast);
+
+        this.options = Object.assign({
+            'displayTime': 3000,
+            'fadeTime': 2000
+        }, options);
+    }
+
+    _createClass(Toast, [{
+        key: 'success',
+        value: function success(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('success', message, title, options);
+        }
+    }, {
+        key: 'info',
+        value: function info(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('info', message, title, options);
+        }
+    }, {
+        key: 'warning',
+        value: function warning(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('warning', message, title, options);
+        }
+    }, {
+        key: 'error',
+        value: function error(message) {
+            var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+            this._show('error', message, title, options);
+        }
+    }, {
+        key: '_show',
+        value: function _show(type, message, title, options) {
+            var that = this;
+
+            options = Object.assign({}, this.options, options);
+
+            var toastRoot = document.getElementById('toast-root');
+            if (toastRoot === null) {
+                toastRoot = document.createElement('div');
+                toastRoot.id = 'toast-root';
+                document.body.appendChild(toastRoot);
+            }
+
+            var toast = document.createElement('div');
+            toast.classList.add('toast', type);
+
+            var toastContent = document.createElement('div');
+            toastContent.classList.add('toast-content');
+            toast.appendChild(toastContent);
+
+            if (title !== false) {
+                var toastTitle = document.createElement('h3');
+                toastTitle.innerHTML = title;
+                toastContent.appendChild(toastTitle);
+            }
+
+            var toastMessage = document.createElement('p');
+            toastMessage.innerHTML = message;
+            toastContent.appendChild(toastMessage);
+
+            toastRoot.appendChild(toast);
+
+            toast.addEventListener('click', function (e) {
+                e.currentTarget.removeToast();
+            });
+
+            toast.removeToast = function () {
+                toast.remove();
+
+                if (toastRoot.querySelector('.toast') === null) {
+                    toastRoot.remove();
+                }
+            };
+
+            toast.startFade = function () {
+                toast.classList.add('fading');
+                toast.style.transitionDuration = that.options.fadeTime / 1000 + 's';
+            };
+
+            var fading = void 0,
+                removing = void 0;
+            fading = setTimeout(toast.startFade, options.displayTime);
+            removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
+
+            toast.addEventListener('mouseover', function (e) {
+                clearTimeout(fading);
+                clearTimeout(removing);
+                e.currentTarget.classList.remove('fading');
+                e.currentTarget.style.transitionDuration = '';
+            });
+
+            toast.addEventListener('mouseout', function (e) {
+                fading = setTimeout(toast.startFade, options.displayTime);
+                removing = setTimeout(toast.removeToast, options.displayTime + options.fadeTime);
+            });
+        }
+    }]);
+
+    return Toast;
+}();
+
+exports.default = new Toast();
+
+/***/ }),
 /* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Modal = function () {
+    function Modal() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, Modal);
+
+        var that = this;
+        if (typeof window.modals === 'undefined') {
+            window.modals = [];
+        }
+
+        var modal = {};
+        modal.options = Object.assign({
+            'content': null,
+            'title': null,
+            'onOpen': null,
+            'onClose': null
+        }, options);
+
+        // This is global, create the modal root if it does not exist
+        this.modalRoot = document.getElementById('modal-root');
+        if (this.modalRoot === null) {
+            this.modalRoot = document.createElement('div');
+            this.modalRoot.id = 'modal-root';
+
+            // Bind closing click to container
+            this.modalRoot.addEventListener('click', function (e) {
+                if (e.currentTarget === e.target) {
+                    that.closeLatest();
+                }
+            });
+
+            // Bind esc to close
+            document.addEventListener('keydown', keyDownListener);
+
+            document.body.style.overflow = 'hidden';
+            document.body.appendChild(this.modalRoot);
+        }
+
+        function keyDownListener(e) {
+            if (e.keyCode !== 27) {
+                return;
+            }
+
+            that.closeLatest();
+        }
+        modal.close = function () {
+            if (typeof modal.options.onClose === 'function') {
+                modal.options.onClose(this);
+            }
+
+            modal.elm.remove();
+
+            if (that.modalRoot.querySelector('.modal') === null) {
+                document.removeEventListener('keydown', keyDownListener);
+                that.modalRoot.remove();
+                document.body.style.overflow = '';
+            }
+        };
+
+        modal.setTitle = function (title) {
+            modal.options.title = title;
+            modal.titleTextElm.innerHTML = title;
+        };
+
+        modal.setContent = function (content) {
+            modal.content.innerHTML = content;
+        };
+
+        // Create modal element
+        modal.elm = document.createElement('div');
+        modal.elm.classList.add('modal');
+        this.modalRoot.appendChild(modal.elm);
+
+        // Create close button
+        modal.closeButton = document.createElement('button');
+        modal.closeButton.classList.add('close', 'icon-cross');
+        modal.closeButton.addEventListener('click', modal.close);
+
+        // Create title element, if needed
+        if (modal.options.title !== null) {
+            modal.titleElm = document.createElement('div');
+            modal.titleElm.classList.add('title');
+            modal.elm.appendChild(modal.titleElm);
+
+            modal.titleTextElm = document.createElement('span');
+            modal.titleTextElm.innerHTML = modal.options.title;
+            modal.titleElm.appendChild(modal.titleTextElm);
+
+            modal.titleElm.appendChild(modal.closeButton);
+        } else {
+            modal.elm.appendChild(modal.closeButton);
+        }
+
+        // Create element for the content
+        modal.content = document.createElement('div');
+        modal.content.classList.add('content');
+        modal.content.innerHTML = modal.options.content;
+        modal.elm.appendChild(modal.content);
+
+        if (typeof modal.options.onOpen === 'function') {
+            modal.options.onOpen(modal);
+        }
+
+        window.modals.push(modal);
+
+        return modal;
+    }
+
+    _createClass(Modal, [{
+        key: 'closeLatest',
+        value: function closeLatest() {
+            var latest = window.modals.pop();
+            if (typeof latest !== 'undefined') {
+                latest.close();
+            }
+        }
+    }]);
+
+    return Modal;
+}();
+
+exports.default = Modal;
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -866,144 +1010,6 @@ var Captcha = function () {
 }();
 
 exports.default = Captcha;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Modal = function () {
-    function Modal() {
-        _classCallCheck(this, Modal);
-
-        this.modals = [];
-    }
-
-    _createClass(Modal, [{
-        key: 'open',
-        value: function open() {
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            var that = this;
-
-            // This is global, create the modal root if it does not exist
-            this.modalRoot = document.getElementById('modal-root');
-            if (this.modalRoot === null) {
-                this.modalRoot = document.createElement('div');
-                this.modalRoot.id = 'modal-root';
-
-                // Bind closing click to container
-                this.modalRoot.addEventListener('click', function (e) {
-                    if (e.currentTarget === e.target) {
-                        that.closeLatest();
-                    }
-                });
-
-                // Bind esc to close
-                document.addEventListener('keydown', keyDownListener);
-
-                document.body.style.overflow = 'hidden';
-                document.body.appendChild(this.modalRoot);
-            }
-
-            function keyDownListener(e) {
-                if (e.keyCode !== 27) {
-                    return;
-                }
-
-                that.closeLatest();
-            }
-
-            var modal = {};
-            modal.options = Object.assign({
-                'content': null,
-                'title': null,
-                'onOpen': null,
-                'onClose': null
-            }, options);
-
-            modal.close = function () {
-                if (typeof modal.options.onClose === 'function') {
-                    modal.options.onClose(this);
-                }
-
-                modal.elm.remove();
-
-                if (that.modalRoot.querySelector('.modal') === null) {
-                    document.removeEventListener('keydown', keyDownListener);
-                    that.modalRoot.remove();
-                    document.body.style.overflow = '';
-                }
-            };
-
-            modal.setTitle = function (title) {
-                modal.options.title = title;
-                modal.titleTextElm.innerHTML = title;
-            };
-
-            // Create modal element
-            modal.elm = document.createElement('div');
-            modal.elm.classList.add('modal');
-            this.modalRoot.appendChild(modal.elm);
-
-            // Create close button
-            modal.closeButton = document.createElement('button');
-            modal.closeButton.classList.add('close', 'icon-cross');
-            modal.closeButton.addEventListener('click', modal.close);
-
-            // Create title element, if needed
-            if (modal.options.title !== null) {
-                modal.titleElm = document.createElement('div');
-                modal.titleElm.classList.add('title');
-                modal.elm.appendChild(modal.titleElm);
-
-                modal.titleTextElm = document.createElement('span');
-                modal.titleTextElm.innerHTML = modal.options.title;
-                modal.titleElm.appendChild(modal.titleTextElm);
-
-                modal.titleElm.appendChild(modal.closeButton);
-            } else {
-                modal.elm.appendChild(modal.closeButton);
-            }
-
-            // Create element for the content
-            modal.content = document.createElement('div');
-            modal.content.classList.add('content');
-            modal.content.innerHTML = modal.options.content;
-            modal.elm.appendChild(modal.content);
-
-            if (typeof modal.options.onOpen === 'function') {
-                modal.options.onOpen(modal);
-            }
-
-            this.modals.push(modal);
-
-            return modal;
-        }
-    }, {
-        key: 'closeLatest',
-        value: function closeLatest() {
-            var latest = this.modals.pop();
-            if (typeof latest !== 'undefined') {
-                latest.close();
-            }
-        }
-    }]);
-
-    return Modal;
-}();
-
-exports.default = new Modal();
 
 /***/ }),
 /* 5 */
@@ -1164,15 +1170,15 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(2);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(1);
+var _Toast = __webpack_require__(2);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Modal = __webpack_require__(4);
+var _Modal = __webpack_require__(3);
 
 var _Modal2 = _interopRequireDefault(_Modal);
 
@@ -1530,19 +1536,137 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Modal = __webpack_require__(3);
+
+var _Modal2 = _interopRequireDefault(_Modal);
+
+var _YBoard = __webpack_require__(1);
+
+var _YBoard2 = _interopRequireDefault(_YBoard);
+
 var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(2);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Notifications = function () {
+    function Notifications() {
+        _classCallCheck(this, Notifications);
+
+        var that = this;
+
+        document.querySelectorAll('.e-open-notifications').forEach(function (elm) {
+            elm.addEventListener('click', function () {
+                that.open();
+            });
+        });
+    }
+
+    _createClass(Notifications, [{
+        key: 'open',
+        value: function open() {
+            var postXhr = null;
+
+            new _Modal2.default({
+                'title': messages.notifications,
+                'content': _YBoard2.default.spinnerHtml(),
+                'onOpen': function onOpen(modal) {
+                    modal.elm.style.willChange = 'contents';
+                    postXhr = _YQuery2.default.post('/api/user/notification/getall', {}, {
+                        'errorFunction': null
+                    }).onLoad(function (xhr) {
+                        if (modal.elm === null) {
+                            return;
+                        }
+                        modal.setContent(xhr.responseText);
+                        modal.elm.style.willChange = '';
+                    }).onError(function (xhr) {
+                        if (xhr.responseText.length !== 0) {
+                            var json = JSON.parse(xhr.responseText);
+                            modal.setContent(json.message);
+                        } else {
+                            modal.setContent(messages.errorOccurred);
+                        }
+                    });
+                    postXhr = postXhr.getXhrObject();
+                },
+                'onClose': function onClose() {
+                    if (postXhr !== null && postXhr.readyState !== 4) {
+                        postXhr.abort();
+                    }
+                }
+            });
+        }
+    }, {
+        key: 'markRead',
+        value: function markRead(id, e) {
+            if (typeof e != 'undefined') {
+                e.preventDefault();
+            }
+
+            $('#n-' + id).removeClass('not-read').addClass('is-read');
+            $.post('/scripts/notifications/markread', { 'id': id }).done(function () {
+                if (typeof e != 'undefined') {
+                    window.location = e.target.getAttribute('href');
+                }
+            });
+
+            this.updateUnreadCount($('.notification.not-read').length);
+        }
+    }, {
+        key: 'markAllRead',
+        value: function markAllRead() {
+            $.post('/scripts/notifications/markallread');
+            this.updateUnreadCount(0);
+        }
+    }, {
+        key: 'updateUnreadCount',
+        value: function updateUnreadCount(count) {
+            var elm = $('.unread-notifications');
+            elm.html(parseInt(count));
+
+            if (count == 0) {
+                elm.addClass('none');
+            } else {
+                elm.removeClass('none');
+            }
+        }
+    }]);
+
+    return Notifications;
+}();
+
+exports.default = Notifications;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _YQuery = __webpack_require__(0);
+
+var _YQuery2 = _interopRequireDefault(_YQuery);
+
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(1);
+var _Toast = __webpack_require__(2);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _File = __webpack_require__(12);
+var _File = __webpack_require__(13);
 
 var _File2 = _interopRequireDefault(_File);
 
@@ -1661,7 +1785,7 @@ var Post = function () {
 exports.default = Post;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1679,15 +1803,15 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(2);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(1);
+var _Toast = __webpack_require__(2);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
-var _Captcha = __webpack_require__(3);
+var _Captcha = __webpack_require__(4);
 
 var _Captcha2 = _interopRequireDefault(_Captcha);
 
@@ -2205,7 +2329,7 @@ var PostForm = function () {
 exports.default = PostForm;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2221,11 +2345,11 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(2);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _Toast = __webpack_require__(1);
+var _Toast = __webpack_require__(2);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -2420,7 +2544,7 @@ var File = function () {
 exports.default = File;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2525,7 +2649,7 @@ var Theme = function () {
 exports.default = Theme;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2541,19 +2665,19 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _YBoard = __webpack_require__(2);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
-var _AutoUpdate = __webpack_require__(15);
+var _AutoUpdate = __webpack_require__(16);
 
 var _AutoUpdate2 = _interopRequireDefault(_AutoUpdate);
 
-var _Hide = __webpack_require__(17);
+var _Hide = __webpack_require__(18);
 
 var _Hide2 = _interopRequireDefault(_Hide);
 
-var _Follow = __webpack_require__(16);
+var _Follow = __webpack_require__(17);
 
 var _Follow2 = _interopRequireDefault(_Follow);
 
@@ -2662,7 +2786,7 @@ var Thread = function () {
 exports.default = Thread;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2674,7 +2798,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _YBoard = __webpack_require__(2);
+var _YBoard = __webpack_require__(1);
 
 var _YBoard2 = _interopRequireDefault(_YBoard);
 
@@ -2682,7 +2806,7 @@ var _YQuery = __webpack_require__(0);
 
 var _YQuery2 = _interopRequireDefault(_YQuery);
 
-var _Toast = __webpack_require__(1);
+var _Toast = __webpack_require__(2);
 
 var _Toast2 = _interopRequireDefault(_Toast);
 
@@ -2869,7 +2993,7 @@ var AutoUpdate = function () {
 exports.default = AutoUpdate;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2960,7 +3084,7 @@ var Follow = function () {
 exports.default = Follow;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

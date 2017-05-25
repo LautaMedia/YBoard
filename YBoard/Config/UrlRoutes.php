@@ -54,6 +54,11 @@ return [
     '#^/api/user/thread/hide/create$#' => ['Api\UserThreadHide', 'create'],
     '#^/api/user/thread/hide/delete$#' => ['Api\UserThreadHide', 'delete'],
 
+    // Notifications
+    '#^/api/user/notification/getall$#' => ['Api\UserNotification', 'getAll'],
+    '#^/api/user/notification/markread$#' => ['Api\UserNotification', 'markRead'],
+    '#^/api/user/notification/markallread$#' => ['Api\UserNotification', 'markAllRead'],
+
     // File scripts
     '#^/api/file/create#' => ['Api\File', 'create'],
     '#^/api/file/delete$#' => ['Api\File', 'delete'],
@@ -69,11 +74,6 @@ return [
     // Threads
     '#^/api/thread/getreplies$#' => ['Api\Thread', 'getReplies'],
     '#^/api/thread/update$#' => ['Api\Thread', 'update'],
-
-    // Notifications
-    '#^/api/notification/getall$#' => ['Notification', 'getAll'],
-    '#^/api/notification/markread$#' => ['Notification', 'markRead'],
-    '#^/api/notification/markallread$#' => ['Notification', 'markAllRead'],
 
     // Boards
     //--------

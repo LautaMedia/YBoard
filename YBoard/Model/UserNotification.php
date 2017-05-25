@@ -56,6 +56,8 @@ class UserNotification extends Model
                     break;
             }
         }
+
+        $this->text = static::getTitle($this);
     }
 
     public static function decrementCountByPostId(Database $db, int $postId, int $type = null): bool
@@ -169,6 +171,20 @@ class UserNotification extends Model
         $q->execute();
 
         return true;
+    }
+
+    public static function get(Database $db, int $id): ?self
+    {
+        $q = $db->prepare("SELECT id, time, type, post_id, custom_data, count, is_read FROM user_notification
+            WHERE id = :id LIMIT 1");
+        $q->bindValue(':id', $id);
+        $q->execute();
+
+        if ($q->rowCount() === 0) {
+            return null;
+        }
+
+        return new self($db, $q->fetch());
     }
 
     public static function getByUser(Database $db, int $userId, ?array $hiddenTypes = null): array

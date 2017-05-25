@@ -1,13 +1,19 @@
 class Modal
 {
-    constructor()
-    {
-        this.modals = [];
-    }
-
-    open(options = {})
+    constructor(options = {})
     {
         let that = this;
+        if (typeof window.modals === 'undefined') {
+            window.modals = [];
+        }
+
+        let modal = {};
+        modal.options = Object.assign({
+            'content': null,
+            'title': null,
+            'onOpen': null,
+            'onClose': null,
+        }, options);
 
         // This is global, create the modal root if it does not exist
         this.modalRoot = document.getElementById('modal-root');
@@ -38,15 +44,6 @@ class Modal
 
             that.closeLatest();
         }
-
-        let modal = {};
-        modal.options = Object.assign({
-            'content': null,
-            'title': null,
-            'onOpen': null,
-            'onClose': null,
-        }, options);
-
         modal.close = function()
         {
             if (typeof modal.options.onClose === 'function') {
@@ -66,6 +63,11 @@ class Modal
         {
             modal.options.title = title;
             modal.titleTextElm.innerHTML = title;
+        };
+
+        modal.setContent = function(content)
+        {
+            modal.content.innerHTML = content;
         };
 
         // Create modal element
@@ -103,18 +105,18 @@ class Modal
             modal.options.onOpen(modal);
         }
 
-        this.modals.push(modal);
+        window.modals.push(modal);
 
         return modal;
     }
 
     closeLatest()
     {
-        let latest = this.modals.pop();
+        let latest = window.modals.pop();
         if (typeof latest !== 'undefined') {
             latest.close();
         }
     }
 }
 
-export default new Modal();
+export default Modal;

@@ -1,26 +1,54 @@
 import Modal from '../Modal';
+import YBoard from '../YBoard';
+import YQuery from '../YQuery';
 
 class Notifications
 {
     constructor()
     {
         let that = this;
-        let button = document.getElementById('notifications-button');
-        if (button) {
-            button.addEventListener('click', function() {
+
+        document.querySelectorAll('.e-open-notifications').forEach(function(elm) {
+            elm.addEventListener('click', function() {
                 that.open();
             });
-        }
-
+        });
     }
 
     open()
     {
-        let that = this;
-        Modal.open('/scripts/notifications/get', {
-            'onAjaxComplete': function()
+        let postXhr = null;
+
+        new Modal({
+            'title': messages.notifications,
+            'content': YBoard.spinnerHtml(),
+            'onOpen': function(modal)
             {
-                that.updateUnreadCount($('.notifications-list .not-read').length);
+                modal.elm.style.willChange = 'contents';
+                postXhr = YQuery.post('/api/user/notification/getall', {}, {
+                    'errorFunction': null,
+                }).onLoad(function(xhr)
+                {
+                    if (modal.elm === null) {
+                        return;
+                    }
+                    modal.setContent(xhr.responseText);
+                    modal.elm.style.willChange = '';
+                }).onError(function(xhr)
+                {
+                    if (xhr.responseText.length !== 0) {
+                        let json = JSON.parse(xhr.responseText);
+                        modal.setContent(json.message);
+                    } else {
+                        modal.setContent(messages.errorOccurred)
+                    }
+                });
+                postXhr = postXhr.getXhrObject();
+            },
+            'onClose': function() {
+                if (postXhr !== null && postXhr.readyState !== 4) {
+                    postXhr.abort();
+                }
             },
         });
     }
@@ -60,3 +88,5 @@ class Notifications
         }
     }
 }
+
+export default Notifications;

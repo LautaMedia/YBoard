@@ -59,6 +59,7 @@ class GenerateFiles
             'signUp' => _('Sign up'),
             'cancel' => _('Cancel'),
             'logIn' => _('Log_in'),
+            'notifications' => _('Notifications'),
             'maxSizeExceeded' => _('Your files exceed the maximum upload size.'),
             'confirmDeletePost' => _('Delete post?'),
             'confirmDeleteFile' => _('Delete file?'),
