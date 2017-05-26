@@ -293,7 +293,7 @@ abstract class Controller extends \YFW\Controller
         // Preload hints, TODO: fix locale and theme hints
         header('Link: <' . $this->config['url']['static'] . $this->config['app']['logo'] . '>; rel=preload; as=image; nopush',
             false);
-        header('Link: <' . $this->config['url']['static'] . '/font/icomoon.woff>; rel=preload; as=font; crossorigin; nopush',
+        header('Link: <' . $this->config['url']['static'] . '/font/icomoon.woff2>; rel=preload; as=font; crossorigin; nopush',
             false);
         header('Link: <' . $this->config['url']['static'] . '/js/config.js>; rel=preload; as=script; nopush', false);
         header('Link: <' . $this->config['url']['static'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
