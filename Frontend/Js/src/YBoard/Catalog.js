@@ -12,7 +12,7 @@ class Catalog
     {
         let elm = e.target;
         let word = elm.value;
-        let threads = document.querySelectorAll('.post');
+        let threads = document.querySelectorAll('.thread');
 
         if (word.length === 0) {
             threads.forEach(function(elm) {

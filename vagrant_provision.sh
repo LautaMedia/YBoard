@@ -111,7 +111,7 @@ EOM
 ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 # PHP config
-sed -i -e 's/;\?opcache.enable=.*/opcache.enable=1/g' /etc/php/7.1/fpm/php.ini
+#sed -i -e 's/;\?opcache.enable=.*/opcache.enable=1/g' /etc/php/7.1/fpm/php.ini
 sed -i -e 's/upload_max_filesize \?= \?.*/upload_max_filesize = 200M/g' /etc/php/7.1/fpm/php.ini
 sed -i -e 's/post_max_size \?= \?.*/post_max_size = 200M/g' /etc/php/7.1/fpm/php.ini
 sed -i -e 's/error_reporting \?= \?.*/error_reporting = E_ALL/g' /etc/php/7.1/fpm/php.ini

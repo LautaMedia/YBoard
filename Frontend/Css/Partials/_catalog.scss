@@ -8,11 +8,29 @@ body .catalog .thread.hidden {
     }
 }
 
+.board-additional-functions {
+    display: flex;
+}
+#search-catalog {
+    flex: 1 1 auto;
+    margin: 5px;
+    padding: 5px;
+    background-color: $contentBgColor;
+    color: $textColor;
+    display: block;
+    box-sizing: border-box;
+
+    $shadowColor: #ccc;
+    @if (lightness($contentBgColor) < 50) {
+        $shadowColor: #333;
+    }
+    @include input-shadow($shadowColor);
+}
+
 .catalog {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin: -5px;
 
     .thread {
         display: flex;
@@ -104,6 +122,10 @@ body .catalog .thread.hidden {
         }
         img {
             max-height: 100px;
+        }
+        .no-image {
+            font-size: 80px;
+            padding: 10px;
         }
     }
 

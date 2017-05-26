@@ -1499,7 +1499,7 @@ var Catalog = function () {
         value: function search(e) {
             var elm = e.target;
             var word = elm.value;
-            var threads = document.querySelectorAll('.post');
+            var threads = document.querySelectorAll('.thread');
 
             if (word.length === 0) {
                 threads.forEach(function (elm) {

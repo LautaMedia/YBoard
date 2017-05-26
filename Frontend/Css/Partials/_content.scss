@@ -188,24 +188,6 @@ h4 {
     }
 }
 
-.board-additional-functions {
-    margin: 5px 0;
-
-    input {
-        color: $textColor;
-        width: 100%;
-        padding: 5px;
-        box-sizing: border-box;
-        background-color: $contentBgColor;
-
-        $shadowColor: #ccc;
-        @if (lightness($contentBgColor) < 50) {
-            $shadowColor: #333;
-        }
-        @include input-shadow($shadowColor);
-    }
-}
-
 #banned {
     background-color: $red;
     text-align: center;

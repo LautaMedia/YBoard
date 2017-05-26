@@ -32,13 +32,13 @@
                     <?php if($post->file->hasThumbnail): ?>style="padding-bottom:<?= $paddingBottom ?>%"<?php endif ?>
                 >
                     <?php if ($post->file->hasThumbnail): ?>
-                    <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
+                        <img src="<?= $config['url']['files'] ?>/<?= $post->file->folder ?>/t/<?= $post->file->name ?>.jpg" alt="">
                     <?php else: ?>
-                    <span class="image icon-music-note"></span>
+                        <span class="no-image icon-music-note"></span>
                     <?php endif ?>
                     <span class="overlay center icon-play"></span>
                     <?php if ($post->file->isGif): ?>
-                    <span class="overlay bottom right">GIF</span>
+                        <span class="overlay bottom right">GIF</span>
                     <?php else: ?>
                         <?php if ($post->file->hasSound): ?>
                             <span class="overlay bottom right icon-volume-high"></span>

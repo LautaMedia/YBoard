@@ -19,7 +19,7 @@ body:not(.thread-page) .thread.hidden {
     background-color: $contentBgColor;
     $shadowColor: darken($bgColor, 20%);
     @if (lightness($bgColor) < 10) {
-        $shadowColor: lighten($bgColor, 20%);
+        $shadowColor: lighten($bgColor, 10%);
     }
     box-shadow: 0 0 20px 0 $shadowColor;
     transition:
