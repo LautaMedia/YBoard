@@ -15,13 +15,13 @@ body:not(.thread-page) .thread.hidden {
     padding: 0;
     overflow: hidden;
     color: $textColor;
-    margin: 20px 0;
+    margin: 40px 0;
     background-color: $contentBgColor;
-    $shadowColor: darken($bgColor, 5%);
+    $shadowColor: darken($bgColor, 20%);
     @if (lightness($bgColor) < 10) {
-        $shadowColor: lighten($bgColor, 5%);
+        $shadowColor: lighten($bgColor, 20%);
     }
-    box-shadow: 0 0 10px 0 $shadowColor;
+    box-shadow: 0 0 20px 0 $shadowColor;
     transition:
             box-shadow $transition,
             color $transition,

@@ -3,7 +3,7 @@
     line-height: $linkSize;
     font-size: 1rem;
     overflow: hidden;
-    margin: 20px 0;
+    margin: 40px 20px;
 
     $color: darken($bgColor, 30%);
     @if (lightness($bgColor) < 50) {

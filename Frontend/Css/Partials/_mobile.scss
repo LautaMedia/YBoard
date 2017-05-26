@@ -10,10 +10,6 @@
         display: inline;
     }
 
-    #inner {
-        padding: 0;
-    }
-
     .content-box {
         padding: 20px;
     }
@@ -100,39 +96,28 @@
     }
 
     .thread {
-        padding: 0;
-        .post-meta {
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        .first-post,
-        .thread-meta,
-        .replies,
-        .thread-buttons {
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-
-        .post-meta {
-            .post-info {
-                font-size: 0.8em;
-                display: block;
-                .post-time {
-                    margin-left: 0;
-                }
-            }
+        .post-info {
+            font-size: 0.8em;
         }
 
         .post-file {
-            &.thumbnail {
+            &.thumbnail, &.no-thumbnail {
                 @media (max-width:339px) {
+                    .image {
+                        font-size: 40px;
+                    }
                     max-width: 80px;
                 }
                 @media (min-width:340px) and (max-width:499px) {
+                    .image {
+                        font-size: 60px;
+                    }
                     max-width: 120px;
                 }
                 @media (min-width:500px) and (max-width:599px) {
+                    .image {
+                        font-size: 80px;
+                    }
                     max-width: 160px;
                 }
                 @media (min-width:600px) {

@@ -48,13 +48,14 @@
         }
     }
 
-    .no-thumbnail {
+    &.no.thumbnail .image {
         display: block;
         font-size: 100px;
         padding: 20px;
         background-color: #ddd;
         color: #444;
     }
+
     &:not(.media-player-container) .e-stop-media {
         display: none;
     }
@@ -70,10 +71,10 @@
         max-width: 100%;
         min-width: 240px;
     }
-    &.thumbnail {
+    &:not(.no).thumbnail {
         max-width: 240px;
     }
-    &.thumbnail a {
+    &:not(.no).thumbnail a {
         height: 0;
     }
     &:not(.thumbnail) {
