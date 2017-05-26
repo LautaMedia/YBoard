@@ -45,10 +45,14 @@ class Tooltip
 
         this.setContent(this.options.content);
 
-        this.event.target.addEventListener(this.options.closeEvent, function()
+        let closeEventFn = function()
         {
+            that.event.target.removeEventListener(that.options.closeEvent, closeEventFn);
             that.close(that);
-        });
+        };
+
+        this.event.target.addEventListener(this.options.closeEvent, closeEventFn);
+        this.event.target.tooltip = this;
 
         if (this.options.openDelay !== 0) {
             setTimeout(function() {
@@ -81,15 +85,15 @@ class Tooltip
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
     }
 
-    close(tooltip)
+    close()
     {
         if (typeof this.options.onClose === 'function') {
             this.options.onClose(this);
         }
 
-        tooltip.elm = null;
+        this.elm = null;
 
-        let tip = document.querySelector('.tooltip[data-id="' + tooltip.id + '"]');
+        let tip = document.querySelector('.tooltip[data-id="' + this.id + '"]');
 
         if (tip !== null) {
             tip.remove();

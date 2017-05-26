@@ -1,8 +1,5 @@
 .post {
     padding: 10px;
-    transition:
-            color $transition,
-            background-color $transition;
 
     // Highlighted posts
     &:target {

@@ -7,6 +7,7 @@ class Notifications
     constructor()
     {
         let that = this;
+        this.modal = null;
 
         document.querySelectorAll('.e-open-notifications').forEach(function(elm) {
             elm.addEventListener('click', function() {
@@ -20,7 +21,7 @@ class Notifications
         let that = this;
         let postXhr = null;
 
-        new Modal({
+        this.modal = new Modal({
             'title': messages.notifications,
             'content': YBoard.spinnerHtml(),
             'onOpen': function(modal)
@@ -61,21 +62,34 @@ class Notifications
         let that = this;
 
         // Clicking a link to go to the post
-        elm.querySelectorAll('.not-read a').forEach(function(elm) {
+        elm.querySelectorAll('a').forEach(function(elm) {
             elm.addEventListener('click', function(e) {
-                let beaconUrl = '/api/user/notification/markread';
-                let data = new FormData();
-                data.append('id', e.target.closest('.notification').dataset.id);
-                data.append('csrfToken', csrfToken);
-                if ('sendBeacon' in navigator) {
-                    // Way faster
-                    navigator.sendBeacon(beaconUrl, data);
-                } else {
-                    // Fallback for IE ... and SAFARI! Sheesh...
-                    e.preventDefault();
-                    YQuery.post(beaconUrl, data).onLoad(function() {
-                        window.location = e.target.getAttribute('href');
-                    });
+
+                // Close modal, just in case we are just highlighting something
+                if (that.modal !== null) {
+                    if (typeof e.target.tooltip !== 'undefined') {
+                        e.target.tooltip.close();
+                    }
+                    that.modal.close();
+                }
+
+                // Mark as read
+                if (e.target.classList.contains('not-read')) {
+                    let beaconUrl = '/api/user/notification/markread';
+                    let data = new FormData();
+                    data.append('id', e.target.closest('.notification').dataset.id);
+                    data.append('csrfToken', csrfToken);
+                    if ('sendBeacon' in navigator) {
+                        // Way faster
+                        navigator.sendBeacon(beaconUrl, data);
+                    } else {
+                        // Fallback for IE ... and SAFARI! Sheesh...
+                        e.preventDefault();
+                        YQuery.post(beaconUrl, data).onLoad(function()
+                        {
+                            window.location = e.target.getAttribute('href');
+                        });
+                    }
                 }
             });
         });
@@ -122,6 +136,7 @@ class Notifications
 
         YQuery.post('/api/user/notification/markallread');
         that.updateUnreadCount(0);
+        that.modal.close();
     }
 
     getUnreadCount(elm)

@@ -25,6 +25,9 @@
     right: 0;
     font-size: 20px;
     backface-visibility: hidden;
+    transition:
+            color $transition,
+            background-color $transition;
 
     button, a {
         text-align: center;

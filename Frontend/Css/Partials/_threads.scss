@@ -85,6 +85,9 @@ body:not(.thread-page) .thread.hidden {
             background-color: $contentBgColor;
             color: $textColor;
             text-align: center;
+            transition:
+                    color $transition,
+                    background-color $transition;
         }
 
         .notification-count {

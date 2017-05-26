@@ -1295,9 +1295,13 @@ var Tooltip = function () {
 
             this.setContent(this.options.content);
 
-            this.event.target.addEventListener(this.options.closeEvent, function () {
+            var closeEventFn = function closeEventFn() {
+                that.event.target.removeEventListener(that.options.closeEvent, closeEventFn);
                 that.close(that);
-            });
+            };
+
+            this.event.target.addEventListener(this.options.closeEvent, closeEventFn);
+            this.event.target.tooltip = this;
 
             if (this.options.openDelay !== 0) {
                 setTimeout(function () {
@@ -1331,14 +1335,14 @@ var Tooltip = function () {
         }
     }, {
         key: 'close',
-        value: function close(tooltip) {
+        value: function close() {
             if (typeof this.options.onClose === 'function') {
                 this.options.onClose(this);
             }
 
-            tooltip.elm = null;
+            this.elm = null;
 
-            var tip = document.querySelector('.tooltip[data-id="' + tooltip.id + '"]');
+            var tip = document.querySelector('.tooltip[data-id="' + this.id + '"]');
 
             if (tip !== null) {
                 tip.remove();
@@ -1560,6 +1564,7 @@ var Notifications = function () {
         _classCallCheck(this, Notifications);
 
         var that = this;
+        this.modal = null;
 
         document.querySelectorAll('.e-open-notifications').forEach(function (elm) {
             elm.addEventListener('click', function () {
@@ -1574,7 +1579,7 @@ var Notifications = function () {
             var that = this;
             var postXhr = null;
 
-            new _Modal2.default({
+            this.modal = new _Modal2.default({
                 'title': messages.notifications,
                 'content': _YBoard2.default.spinnerHtml(),
                 'onOpen': function onOpen(modal) {
@@ -1612,21 +1617,33 @@ var Notifications = function () {
             var that = this;
 
             // Clicking a link to go to the post
-            elm.querySelectorAll('.not-read a').forEach(function (elm) {
+            elm.querySelectorAll('a').forEach(function (elm) {
                 elm.addEventListener('click', function (e) {
-                    var beaconUrl = '/api/user/notification/markread';
-                    var data = new FormData();
-                    data.append('id', e.target.closest('.notification').dataset.id);
-                    data.append('csrfToken', csrfToken);
-                    if ('sendBeacon' in navigator) {
-                        // Way faster
-                        navigator.sendBeacon(beaconUrl, data);
-                    } else {
-                        // Fallback for IE ... and SAFARI! Sheesh...
-                        e.preventDefault();
-                        _YQuery2.default.post(beaconUrl, data).onLoad(function () {
-                            window.location = e.target.getAttribute('href');
-                        });
+
+                    // Close modal, just in case we are just highlighting something
+                    if (that.modal !== null) {
+                        if (typeof e.target.tooltip !== 'undefined') {
+                            e.target.tooltip.close();
+                        }
+                        that.modal.close();
+                    }
+
+                    // Mark as read
+                    if (e.target.classList.contains('not-read')) {
+                        var beaconUrl = '/api/user/notification/markread';
+                        var data = new FormData();
+                        data.append('id', e.target.closest('.notification').dataset.id);
+                        data.append('csrfToken', csrfToken);
+                        if ('sendBeacon' in navigator) {
+                            // Way faster
+                            navigator.sendBeacon(beaconUrl, data);
+                        } else {
+                            // Fallback for IE ... and SAFARI! Sheesh...
+                            e.preventDefault();
+                            _YQuery2.default.post(beaconUrl, data).onLoad(function () {
+                                window.location = e.target.getAttribute('href');
+                            });
+                        }
                     }
                 });
             });
@@ -1672,6 +1689,7 @@ var Notifications = function () {
 
             _YQuery2.default.post('/api/user/notification/markallread');
             that.updateUnreadCount(0);
+            that.modal.close();
         }
     }, {
         key: 'getUnreadCount',
