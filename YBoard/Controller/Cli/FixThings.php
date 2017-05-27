@@ -75,20 +75,24 @@ class FixThings extends CliController
         $q = $this->db->query('SELECT * FROM post_reply');
 
         while ($reply = $q->fetch()) {
+            $replyingPost = Post::get($this->db, $reply->post_id);
             $repliedPost = Post::get($this->db, $reply->post_id_replied);
             if ($repliedPost === null) {
                 echo 'INVALID REPLY ' . $reply->post_id . ' --> ' . $reply->post_id_replied . "\n";
             }
 
-            $userId = $repliedPost->userId;
+            $userId = $replyingPost->userId;
+            $userIdReplied = $repliedPost->userId;
 
-            if ($userId === $reply->user_id) {
+            if ($userId === $reply->user_id && $userIdReplied === $reply->user_id_replied) {
                 continue;
             }
 
-            $update = $this->db->prepare('UPDATE post_reply SET user_id = :user_id
+            $update = $this->db->prepare('UPDATE post_reply
+                SET user_id = :user_id, user_id_replied = :user_id_replied
                 WHERE post_id = :post_id AND post_id_replied = :post_id_replied LIMIT 1');
             $update->bindValue(':user_id', $userId, Database::PARAM_INT);
+            $update->bindValue(':user_id_replied', $userIdReplied, Database::PARAM_INT);
             $update->bindValue(':post_id', $reply->post_id, Database::PARAM_INT);
             $update->bindValue(':post_id_replied', $reply->post_id_replied, Database::PARAM_INT);
             $update->execute();

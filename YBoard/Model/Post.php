@@ -28,8 +28,8 @@ class Post extends Model
         c.height AS file_height, c.duration AS file_duration, c.has_thumbnail AS file_has_thumbnail,
         c.has_sound AS file_has_sound, c.is_gif AS file_is_gif, c.in_progress AS file_in_progress, d.read_count,
         d.reply_count, d.distinct_reply_count, e.url AS board_url,
-        (SELECT GROUP_CONCAT(post_id) FROM post_reply WHERE post_id_replied = a.id) AS post_replies,
-        (SELECT GROUP_CONCAT(CONCAT(post_id_replied, '|', IFNULL(user_id, 0))) FROM post_reply WHERE post_id = a.id) AS replied_posts
+        (SELECT GROUP_CONCAT(CONCAT(post_id, '|', IFNULL(user_id, 0))) FROM post_reply WHERE post_id_replied = a.id) AS post_replies,
+        (SELECT GROUP_CONCAT(CONCAT(post_id_replied, '|', IFNULL(user_id_replied, 0))) FROM post_reply WHERE post_id = a.id) AS replied_posts
         FROM post a
         LEFT JOIN post_file b ON a.id = b.post_id
         LEFT JOIN file c ON b.file_id = c.id
@@ -71,8 +71,6 @@ class Post extends Model
                         $this->message = $val;
                         break;
                     case 'post_replies':
-                        $this->postReplies = empty($val) ? null : explode(',', $val);
-                        break;
                     case 'replied_posts':
                         $replies = empty($val) ? null : explode(',', $val);
                         if ($replies !== null) {
@@ -83,7 +81,11 @@ class Post extends Model
                                 $reply->userId = $tmp[1] === null ? null : (int)$tmp[1];
                             }
                         }
-                        $this->repliedPosts = $replies;
+                        if ($key === 'post_replies') {
+                            $this->postReplies = $replies;
+                        } else {
+                            $this->repliedPosts = $replies;
+                        }
                         break;
                 }
             }
@@ -146,13 +148,18 @@ class Post extends Model
             return true;
         }
 
-        $query = str_repeat('(?,?),', count($replies));
+        $query = str_repeat('(?,?,?,?),', count($replies));
         $query = substr($query, 0, -1);
 
-        $queryVars = [];
-        foreach ($replies as $repliedId) {
+        $in = $this->db->buildIn($replies);
+        $q = $this->db->prepare('SELECT id, user_id FROM post WHERE id IN(' . $in . ')');
+        $q->execute($replies);
+
+        while ($replied = $q->fetch()) {
             $queryVars[] = $this->id;
-            $queryVars[] = $repliedId;
+            $queryVars[] = $replied->id;
+            $queryVars[] = $this->userId;
+            $queryVars[] = $replied->user_id;
         }
 
         if ($clearOld) {
@@ -161,7 +168,7 @@ class Post extends Model
             $q->execute();
         }
 
-        $q = $this->db->prepare("INSERT IGNORE INTO post_reply (post_id, post_id_replied) VALUES " . $query);
+        $q = $this->db->prepare("INSERT IGNORE INTO post_reply (post_id, post_id_replied, user_id, user_id_replied) VALUES " . $query);
         $q->execute($queryVars);
 
         return true;

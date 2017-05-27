@@ -168,10 +168,16 @@ CREATE TABLE `post_file` (
 CREATE TABLE `post_reply` (
     `post_id` int(10) unsigned NOT NULL,
     `post_id_replied` int(10) unsigned NOT NULL,
+    `user_id` int(10) unsigned DEFAULT NULL,
+    `user_id_replied` int(10) unsigned DEFAULT NULL,
     PRIMARY KEY (`post_id`,`post_id_replied`),
-    KEY (`post_id_replied`),
+    KEY `post_id_replied` (`post_id_replied`),
+    KEY `user_id` (`user_id_replied`),
+    KEY `user_id_2` (`user_id`),
     CONSTRAINT FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`post_id_replied`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FOREIGN KEY (`post_id_replied`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `post_report` (

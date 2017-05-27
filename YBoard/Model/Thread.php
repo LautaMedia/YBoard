@@ -125,6 +125,12 @@ class Thread extends Post
 
         $reply = new Reply($this->db);
         $reply->id = $this->db->lastInsertId();
+        $reply->userId = $userId;
+        $reply->threadId = $this->id;
+        $reply->ip = $_SERVER['REMOTE_ADDR'];
+        $reply->countryCode = $countryCode;
+        $reply->username = $username;
+        $reply->message = $message;
 
         return $reply;
     }
