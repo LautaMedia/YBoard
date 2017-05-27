@@ -142,7 +142,8 @@ CREATE TABLE `post_deleted` (
     `message` text NOT NULL,
     `time_deleted` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY (`time`)
+    KEY (`time`),
+    KEY (`thread_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 CREATE TABLE `post_edited` (

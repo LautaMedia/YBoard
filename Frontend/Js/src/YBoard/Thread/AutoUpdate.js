@@ -50,14 +50,18 @@ class AutoUpdate
         }
 
         let thread = YBoard.Thread.getElm(this.threadId);
-        let fromId = thread.querySelectorAll('.reply');
+        let replies = thread.querySelectorAll('.reply');
 
-        if (fromId.length === 0) {
-            fromId = 0;
-        } else {
-            fromId = fromId[fromId.length - 1];
+        let fromId = 0;
+        if (replies.length !== 0) {
+            fromId = replies[replies.length - 1];
             fromId = fromId.getAttribute('id').replace('post-', '');
         }
+
+        let visibleReplies = [];
+        replies.forEach(function(elm) {
+            visibleReplies.push(elm.dataset.id);
+        });
 
         this.nowLoading = true;
         let that = this;
@@ -70,8 +74,21 @@ class AutoUpdate
 
                 return xhr;
             },
+            'visibleReplies': visibleReplies,
         }).onLoad(function(xhr)
         {
+            // Remove deleted replies
+            let deletedReplies = xhr.getResponseHeader('X-Deleted-Replies');
+            if (deletedReplies !== null) {
+                deletedReplies.split(',').forEach(function(id) {
+                    console.log(id);
+                    let post = document.getElementById('post-' + id);
+                    if (post !== null) {
+                        post.remove();
+                    }
+                });
+            }
+
             if (manual && xhr.responseText.length === 0) {
                 Toast.info(messages.noNewReplies);
                 return;
@@ -102,8 +119,15 @@ class AutoUpdate
                     that.start();
                 }, that.nextLoadDelay);
             }
-        }).onError(function()
+        }).onError(function(xhr)
         {
+            if (xhr.status === 410) {
+                // Thread was deleted
+                let thread = document.getElementById('thread-' + that.threadId);
+                if (thread !== null) {
+                    thread.remove();
+                }
+            }
             that.stop();
         }).onEnd(function()
         {

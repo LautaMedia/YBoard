@@ -32,7 +32,9 @@ YQuery.ajaxSetup({
             }
         }
 
-        if (xhr.status === 418) {
+        if (xhr.status === 410) {
+            Toast.warning(errorMessage);
+        } else if (xhr.status === 418) {
             Toast.error(errorMessage);
         } else {
             Toast.error(errorMessage, errorTitle);

@@ -178,6 +178,25 @@ class Thread extends Post
         return $replies;
     }
 
+    public function getDeletedReplies(?array $visiblePosts): ?array
+    {
+        if ($visiblePosts === null) {
+            $q = $this->db->prepare('SELECT id FROM post_deleted WHERE thread_id = :thread_id');
+            $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+            $q->execute();
+        } else {
+            $in = $this->db->buildIn($visiblePosts);
+            $q = $this->db->prepare('SELECT id FROM post_deleted WHERE id IN (' . $in . ')');
+            $q->execute($visiblePosts);
+        }
+
+        if ($q->rowCount() == 0) {
+            return null;
+        }
+
+        return $q->fetchAll(Database::FETCH_COLUMN);
+    }
+
     public function updateStats(string $key, int $val = 1): bool
     {
         switch ($key) {

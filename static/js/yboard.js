@@ -1140,7 +1140,9 @@ _YQuery2.default.ajaxSetup({
             }
         }
 
-        if (xhr.status === 418) {
+        if (xhr.status === 410) {
+            _Toast2.default.warning(errorMessage);
+        } else if (xhr.status === 418) {
             _Toast2.default.error(errorMessage);
         } else {
             _Toast2.default.error(errorMessage, errorTitle);
@@ -2737,14 +2739,18 @@ var AutoUpdate = function () {
         }
 
         var thread = _YBoard2.default.Thread.getElm(this.threadId);
-        var fromId = thread.querySelectorAll('.reply');
+        var replies = thread.querySelectorAll('.reply');
 
-        if (fromId.length === 0) {
-            fromId = 0;
-        } else {
-            fromId = fromId[fromId.length - 1];
+        var fromId = 0;
+        if (replies.length !== 0) {
+            fromId = replies[replies.length - 1];
             fromId = fromId.getAttribute('id').replace('post-', '');
         }
+
+        var visibleReplies = [];
+        replies.forEach(function (elm) {
+            visibleReplies.push(elm.dataset.id);
+        });
 
         this.nowLoading = true;
         var that = this;
@@ -2756,8 +2762,21 @@ var AutoUpdate = function () {
                 _xhr.responseType = 'document';
 
                 return _xhr;
-            }
+            },
+            'visibleReplies': visibleReplies
         }).onLoad(function (xhr) {
+            // Remove deleted replies
+            var deletedReplies = xhr.getResponseHeader('X-Deleted-Replies');
+            if (deletedReplies !== null) {
+                deletedReplies.split(',').forEach(function (id) {
+                    console.log(id);
+                    var post = document.getElementById('post-' + id);
+                    if (post !== null) {
+                        post.remove();
+                    }
+                });
+            }
+
             if (manual && xhr.responseText.length === 0) {
                 _Toast2.default.info(messages.noNewReplies);
                 return;
@@ -2787,7 +2806,14 @@ var AutoUpdate = function () {
                     that.start();
                 }, that.nextLoadDelay);
             }
-        }).onError(function () {
+        }).onError(function (xhr) {
+            if (xhr.status === 410) {
+                // Thread was deleted
+                var _thread = document.getElementById('thread-' + that.threadId);
+                if (_thread !== null) {
+                    _thread.remove();
+                }
+            }
             that.stop();
         }).onEnd(function () {
             that.nowLoading = false;

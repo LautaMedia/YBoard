@@ -76,6 +76,7 @@ class GenerateFiles
             'threadUnlocked' => _('Thread unlocked'),
             'threadStickied' => _('Thread stickied'),
             'threadUnstickied' => _('Thread unstickied'),
+            'threadDeleted' => _('This thread has been deleted'),
             'reportCleared' => _('Report cleared'),
             'banAdded' => _('Ban added'),
             'confirmUnload' => _('Your message will be lost.'),
