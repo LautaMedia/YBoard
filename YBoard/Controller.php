@@ -295,10 +295,14 @@ abstract class Controller extends \YFW\Controller
             false);
         header('Link: <' . $this->config['url']['static'] . '/font/icomoon.woff2>; rel=preload; as=font; crossorigin; nopush',
             false);
-        header('Link: <' . $this->config['url']['static'] . '/js/config.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['url']['static'] . '/js/config.js>; rel=preload; as=script; nopush',
+            false);
+        header('Link: <' . $this->config['url']['static'] . '/img/header_bg.jpg>; rel=preload; as=image; nopush',
+            false);
         header('Link: <' . $this->config['url']['static'] . '/js/locale/'. $this->locale . '.' . $this->localeDomain . '.js>; rel=preload; as=script; nopush',
             false);
-        header('Link: <' . $this->config['url']['static'] . '/js/yboard.min.js>; rel=preload; as=script; nopush', false);
+        header('Link: <' . $this->config['url']['static'] . '/js/yboard' . (APP_ENV !== 'development' ? '.min' : '') . '.js>; rel=preload; as=script; nopush',
+            false);
         header('Link: <' . $this->config['url']['static'] . $activeStylesheet . '>; rel=preload; as=style; nopush',
             false);
 

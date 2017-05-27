@@ -109,11 +109,25 @@ class Text
 
     public static function formatMessage(string $message): string
     {
+        $hasQuotes = strpos($message, '>') !== false || strpos($message, '<') !== false;
+        if ($hasQuotes) {
+            $hasReflinks = strpos($message, '>>') !== false;
+        } else {
+            $hasReflinks = false;
+        }
+
         $message = htmlspecialchars($message);
         $message = nl2br($message);
         $message = static::clickableLinks($message);
-        $message = static::addQuotes($message);
-        $message = static::addReflinks($message);
+
+        if ($hasQuotes) {
+            $message = static::addQuotes($message);
+        }
+
+        if ($hasReflinks) {
+            $message = static::addReflinks($message);
+        }
+
         $message = BbCode::format($message);
 
         return $message;
@@ -121,10 +135,6 @@ class Text
 
     public static function addQuotes(string $message): string
     {
-        if (strpos($message, '&gt;') === false && strpos($message, '&lt;') === false) {
-            return $message;
-        }
-
         $search = [
             '/(^|[\n\]])(&gt;)(?!&gt;[0-9]+)([^\n]+)/is',
             '/(^|[\n\]])(&lt;)([^\n]+)/is',
@@ -139,10 +149,6 @@ class Text
 
     public static function addReflinks(string $message): string
     {
-        if (strpos($message, '&gt;&gt;') === false) {
-            return $message;
-        }
-
         $search = '/(&gt;&gt;)([0-9]+)/is';
         $replace = '<a href="/post-$2" data-id="$2" class="ref">$1$2</a>';
 

@@ -18,7 +18,7 @@
 
     <script src="<?= $config['url']['static'] ?>/js/locale/<?= $locale['name'] . '.' . $locale['domain'] ?>.js" defer></script>
     <script src="<?= $config['url']['static'] ?>/js/config.js" defer></script>
-    <script src="<?= $config['url']['static'] ?>/js/yboard.min.js" defer></script>
+    <script src="<?= $config['url']['static'] ?>/js/yboard<?= APP_ENV !== 'development' ? '.min' : '' ?>.js" defer></script>
     <script>let csrfToken='<?= $user->session->csrfToken ?>';</script>
 
     <?php if ($requireCaptcha): ?>
