@@ -108,7 +108,7 @@ class YBoard
             }
             let postXhr = null;
             new Tooltip(e, {
-                'openDelay': typeof that.messagePreviewCache.postId === 'undefined' ? 50 : 0,
+                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                 'position': 'bottom',
                 'content': that.spinnerHtml(),
                 'onOpen': opened,
@@ -117,8 +117,8 @@ class YBoard
 
             function opened(tip)
             {
-                if (typeof that.messagePreviewCache.postId  !== 'undefined') {
-                    tip.setContent(that.messagePreviewCache.postId );
+                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                    tip.setContent(that.messagePreviewCache[postId] );
 
                     return;
                 }
@@ -148,7 +148,7 @@ class YBoard
                             reflinkInTip.classList.add('referring');
                         }
                     }
-                    that.messagePreviewCache.postId = tip.getContent();
+                    that.messagePreviewCache[postId] = tip.getContent();
                 }
 
                 function ajaxError(xhr)

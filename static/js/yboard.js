@@ -415,7 +415,7 @@ var YBoard = function () {
             }
             var postXhr = null;
             new _Tooltip2.default(e, {
-                'openDelay': typeof that.messagePreviewCache.postId === 'undefined' ? 50 : 0,
+                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                 'position': 'bottom',
                 'content': that.spinnerHtml(),
                 'onOpen': opened,
@@ -423,8 +423,8 @@ var YBoard = function () {
             });
 
             function opened(tip) {
-                if (typeof that.messagePreviewCache.postId !== 'undefined') {
-                    tip.setContent(that.messagePreviewCache.postId);
+                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                    tip.setContent(that.messagePreviewCache[postId]);
 
                     return;
                 }
@@ -448,7 +448,7 @@ var YBoard = function () {
                             reflinkInTip.classList.add('referring');
                         }
                     }
-                    that.messagePreviewCache.postId = tip.getContent();
+                    that.messagePreviewCache[postId] = tip.getContent();
                 }
 
                 function ajaxError(xhr) {
@@ -1246,11 +1246,12 @@ var Tooltip = function () {
 
     Tooltip.prototype.appendTip = function appendTip() {
         document.body.appendChild(this.elm);
-        this.position();
 
         if (typeof this.options.onOpen === 'function') {
             this.options.onOpen(this);
         }
+
+        this.position();
     };
 
     Tooltip.prototype.setContent = function setContent(content) {
@@ -1259,7 +1260,6 @@ var Tooltip = function () {
         }
 
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
-        this.position();
     };
 
     Tooltip.prototype.getContent = function getContent() {
@@ -1313,6 +1313,11 @@ var Tooltip = function () {
             case 'top':
             case 'bottom':
                 this.x = this.targetRect.right - this.targetRect.width / 2 - this.tipRect.width / 2;
+
+                if (this.x + this.tipRect.width > window.innerWidth) {
+                    this.x = window.innerWidth - this.tipRect.width;
+                }
+
                 if (this.x < 0) {
                     this.x = 0;
                 }

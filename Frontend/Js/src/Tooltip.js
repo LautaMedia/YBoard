@@ -69,11 +69,12 @@ class Tooltip
     appendTip()
     {
         document.body.appendChild(this.elm);
-        this.position();
 
         if (typeof this.options.onOpen === 'function') {
             this.options.onOpen(this);
         }
+
+        this.position();
     }
 
     setContent(content)
@@ -83,7 +84,6 @@ class Tooltip
         }
 
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
-        this.position();
     }
 
     getContent()
@@ -141,6 +141,11 @@ class Tooltip
             case 'top':
             case 'bottom':
                 this.x = this.targetRect.right - this.targetRect.width / 2 - this.tipRect.width / 2;
+
+                if (this.x + this.tipRect.width > window.innerWidth) {
+                    this.x = window.innerWidth - this.tipRect.width;
+                }
+
                 if (this.x < 0) {
                     this.x = 0;
                 }
