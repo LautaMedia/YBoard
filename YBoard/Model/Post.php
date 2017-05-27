@@ -148,14 +148,16 @@ class Post extends Model
             return true;
         }
 
-        $query = str_repeat('(?,?,?,?),', count($replies));
-        $query = substr($query, 0, -1);
+        $replies = array_values($replies);
 
         $in = $this->db->buildIn($replies);
-        $q = $this->db->prepare('SELECT id, user_id FROM post WHERE id IN(' . $in . ')');
+        $q = $this->db->prepare('SELECT id, user_id FROM post WHERE id IN (' . $in . ')');
         $q->execute($replies);
 
+        $queryVars = [];
+        $count = 0;
         while ($replied = $q->fetch()) {
+            ++$count;
             $queryVars[] = $this->id;
             $queryVars[] = $replied->id;
             $queryVars[] = $this->userId;
@@ -167,6 +169,13 @@ class Post extends Model
             $q->bindValue(':post_id', $this->id, Database::PARAM_INT);
             $q->execute();
         }
+
+        if ($count === 0) {
+            return true;
+        }
+
+        $query = str_repeat('(?,?,?,?),', $count);
+        $query = substr($query, 0, -1);
 
         $q = $this->db->prepare("INSERT IGNORE INTO post_reply (post_id, post_id_replied, user_id, user_id_replied) VALUES " . $query);
         $q->execute($queryVars);
@@ -191,6 +200,8 @@ class Post extends Model
                 $message = str_replace('&gt;&gt;' . $id, $replace, $message);
             }
         }
+
+        $message = preg_replace('/(^|[^>]+)(&gt;&gt;[0-9]+)/s', '$1<span class="invalid-ref">$2</span>', $message);
 
         return $message;
     }

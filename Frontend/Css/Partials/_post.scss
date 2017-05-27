@@ -114,6 +114,9 @@
         border-bottom: 1px dotted green;
         font-weight: bold;
     }
+    .invalid-ref {
+        text-decoration: line-through;
+    }
 }
 
 @import 'Posts/file';
