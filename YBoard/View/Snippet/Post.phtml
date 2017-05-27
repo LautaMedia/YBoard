@@ -69,7 +69,7 @@
             </figcaption>
         </figure>
     <?php endif ?>
-    <?= \YFW\Library\Text::formatMessage($post->message) ?>
+    <?= $post->getFormattedMessage($user->id) ?>
 </blockquote>
 
 <?php if ($post->postReplies): ?>

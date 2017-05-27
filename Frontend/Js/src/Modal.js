@@ -32,7 +32,7 @@ class Modal
             // Bind esc to close
             document.addEventListener('keydown', keyDownListener);
 
-            //document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
             document.body.appendChild(this.modalRoot);
         }
 
@@ -55,7 +55,7 @@ class Modal
             if (that.modalRoot.querySelector('.modal') === null) {
                 document.removeEventListener('keydown', keyDownListener);
                 that.modalRoot.remove();
-                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
             }
         };
 

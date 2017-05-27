@@ -37,7 +37,7 @@
             </figure>
         <?php endif ?>
         <blockquote class="message">
-            <?= \YFW\Library\Text::formatMessage($post->message) ?>
+            <?= $post->getFormattedMessage() ?>
         </blockquote>
         <?php include($viewFilesPath . '/Snippet/ThreadMeta.phtml') ?>
     </div>

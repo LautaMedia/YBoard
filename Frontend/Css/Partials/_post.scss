@@ -1,19 +1,41 @@
 .post {
     padding: 10px;
 
+    // Thread replies
+    &.reply {
+        $bg: darken($contentBgColor, 4%);
+        @if (lightness($contentBgColor) < 50) {
+            $bg: lighten($contentBgColor, 4%);
+        }
+        background-color: $bg;
+        transition: background-color $transition;
+
+        overflow: hidden;
+        margin-bottom: 5px;
+
+        // Own reply
+        &.own-post {
+            $bg: darken($contentBgColor, 6%);
+            @if (lightness($contentBgColor) < 50) {
+                $bg: lighten($contentBgColor, 6%);
+            }
+            background-color: $bgColor;
+        }
+    }
+
     // Highlighted posts
     &:target {
         $bgColor: $contentBgColor;
         @if (lightness($contentBgColor) > 95) {
-            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) - 3%);
+            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) - 7%);
         } @else if (lightness($contentBgColor) < 5) {
-            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) + 3%);
+            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) + 5%);
         } @else if (lightness($contentBgColor) < 15) {
-            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) - 2%);
+            $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor) - 5%);
         } @else {
             $bgColor: hsl(hue($highlightColor), saturation($highlightColor), lightness($contentBgColor));
         }
-        background-color: $bgColor;
+        background-color: $bgColor !important;
         margin-top: -100px;
         border-top: 100px solid transparent;
         background-clip: padding-box;

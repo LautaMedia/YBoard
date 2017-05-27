@@ -3,6 +3,7 @@ namespace YBoard\Model;
 
 use YBoard\Model;
 use YFW\Library\Database;
+use YFW\Library\Text;
 
 class Post extends Model
 {
@@ -15,8 +16,9 @@ class Post extends Model
     public $time;
     public $username;
     public $message;
-    public $postReplies;
-    public $file;
+    public $postReplies = null;
+    public $repliedPosts = null;
+    public $file = null;
 
     protected const POST_QUERY = "SELECT
         a.id, a.board_id, a.thread_id, a.user_id, a.ip, a.country_code, a.time, a.locked, a.sticky, a.username,
@@ -26,7 +28,8 @@ class Post extends Model
         c.height AS file_height, c.duration AS file_duration, c.has_thumbnail AS file_has_thumbnail,
         c.has_sound AS file_has_sound, c.is_gif AS file_is_gif, c.in_progress AS file_in_progress, d.read_count,
         d.reply_count, d.distinct_reply_count, e.url AS board_url,
-        (SELECT GROUP_CONCAT(post_id) FROM post_reply WHERE post_id_replied = a.id) AS post_replies
+        (SELECT GROUP_CONCAT(post_id) FROM post_reply WHERE post_id_replied = a.id) AS post_replies,
+        (SELECT GROUP_CONCAT(CONCAT(post_id_replied, '|', IFNULL(user_id, 0))) FROM post_reply WHERE post_id = a.id) AS replied_posts
         FROM post a
         LEFT JOIN post_file b ON a.id = b.post_id
         LEFT JOIN file c ON b.file_id = c.id
@@ -56,7 +59,7 @@ class Post extends Model
                         $this->boardId = (int)$val;
                         break;
                     case 'thread_id':
-                        $this->threadId = (int)$val;
+                        $this->threadId = $val === null ? null : (int)$val;
                         break;
                     case 'time':
                         $this->time = $val;
@@ -69,6 +72,18 @@ class Post extends Model
                         break;
                     case 'post_replies':
                         $this->postReplies = empty($val) ? null : explode(',', $val);
+                        break;
+                    case 'replied_posts':
+                        $replies = empty($val) ? null : explode(',', $val);
+                        if ($replies !== null) {
+                            foreach ($replies as &$reply) {
+                                $tmp = explode('|', $reply);
+                                $reply = new \stdClass();
+                                $reply->postId = (int)$tmp[0];
+                                $reply->userId = $tmp[1] === null ? null : (int)$tmp[1];
+                            }
+                        }
+                        $this->repliedPosts = $replies;
                         break;
                 }
             }
@@ -150,6 +165,27 @@ class Post extends Model
         $q->execute($queryVars);
 
         return true;
+    }
+
+    public function getFormattedMessage(?int $currentUserId = null): string
+    {
+        $message = Text::formatMessage($this->message);
+
+        if ($this->repliedPosts !== null && $currentUserId !== null) {
+            foreach ($this->repliedPosts as $reply) {
+                $id = $reply->postId;
+                $replace = '<a href="/post-' . $id . '" data-id="' . $id . '" class="ref">&gt;&gt;' . $id;
+                if ($reply->userId === $currentUserId) {
+                    $replace .= ' (' . _('You') . ')';
+                } elseif ($reply->postId === $this->threadId) {
+                    $replace .= ' (' . _('OP') . ')';
+                }
+                $replace .= '</a>';
+                $message = str_replace('&gt;&gt;' . $id, $replace, $message);
+            }
+        }
+
+        return $message;
     }
 
     public static function get(Database $db, int $postId, bool $allData = true)

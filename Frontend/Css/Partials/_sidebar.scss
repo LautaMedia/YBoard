@@ -155,6 +155,8 @@ body.sidebar-visible #sidebar {
         > * {
             width: 100%;
             position: relative;
+            max-width: 60px;
+            display: inline-block;
         }
         form button {
             width: 100%;

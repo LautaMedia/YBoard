@@ -64,6 +64,8 @@ class GenerateFiles
             'confirmDeletePost' => _('Delete post?'),
             'confirmDeleteFile' => _('Delete file?'),
             'confirmPostCancel' => _('Cancel your post?'),
+            'op' => _('OP'),
+            'you' => _('You'),
             'postSent' => _('Post sent'),
             'postDeleted' => _('Post deleted'),
             'fileDeleted' => _('File deleted'),

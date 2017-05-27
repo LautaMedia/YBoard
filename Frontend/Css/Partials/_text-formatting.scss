@@ -1,36 +1,34 @@
-.thread {
-    .underline {
-        text-decoration: underline;
+.underline {
+    text-decoration: underline;
+}
+.line-through {
+    text-decoration: line-through;
+}
+.spoiler {
+    $color: #000000;
+    @if (lightness($contentBgColor) < 5) {
+        $color: #333;
     }
-    .line-through {
-        text-decoration: line-through;
-    }
-    .spoiler {
-        $color: #000000;
-        @if (lightness($contentBgColor) < 5) {
-            $color: #333;
-        }
-        background-color: $color;
-        display: inline;
-        vertical-align: top;
-        overflow: hidden;
+    background-color: $color;
+    display: inline;
+    vertical-align: top;
+    overflow: hidden;
+    color: $color;
+    .quote, a {
         color: $color;
+    }
+    &:hover, &.spoiled {
+        color: invert($color);
         .quote, a {
-            color: $color;
-        }
-        &:hover, &.spoiled {
             color: invert($color);
-            .quote, a {
-                color: invert($color);
-            }
         }
     }
-    .big {
-        font-size: 1.25rem;
-    }
-    .small {
-        font-size: 0.65rem;
-    }
+}
+.big {
+    font-size: 1.25rem;
+}
+.small {
+    font-size: 0.65rem;
 }
 
 .black {

@@ -415,54 +415,54 @@ var YBoard = function () {
                 'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                 'position': 'bottom',
                 'content': that.spinnerHtml(),
-                'onOpen': function onOpen(tip) {
-                    tip.elm.style.willChange = 'contents';
-                    if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                        tip.setContent(that.messagePreviewCache[postId]);
-                        tip.position();
-                        tip.elm.style.willChange = '';
-                    } else {
-                        postXhr = _YQuery2.default.post('/api/post/get', {
-                            'postId': postId
-                        }, {
-                            'errorFunction': null
-                        }).onLoad(function (xhr) {
-                            if (tip.elm === null) {
-                                return;
-                            }
-                            tip.setContent(xhr.responseText);
-                            tip.position();
-                            tip.elm.style.willChange = '';
+                'onOpen': opened,
+                'onClose': closed
+            });
 
-                            var referringId = e.target.closest('.post');
-                            if (referringId !== null) {
-                                referringId = referringId.dataset.id;
-                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                    var referring = tip.elm.querySelector('.message .ref[data-id="' + referringId + '"]');
-                                    if (referring !== null) {
-                                        referring.classList.add('referring');
-                                    }
-                                }
-                            }
-                            that.messagePreviewCache[postId] = xhr.responseText;
-                        }).onError(function (xhr) {
-                            if (xhr.responseText.length !== 0) {
-                                var json = JSON.parse(xhr.responseText);
-                                tip.setContent(json.message);
-                            } else {
-                                tip.setContent(messages.errorOccurred);
-                            }
-                            tip.position();
-                        });
-                        postXhr = postXhr.getXhrObject();
+            function opened(tip) {
+                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                    tip.setContent(that.messagePreviewCache[postId]);
+
+                    return;
+                }
+
+                tip.elm.style.willChange = 'contents';
+                postXhr = _YQuery2.default.post('/api/post/get', { 'postId': postId }, { 'errorFunction': null }).onLoad(ajaxLoaded).onError(ajaxError);
+                postXhr = postXhr.getXhrObject();
+
+                function ajaxLoaded(xhr) {
+                    if (tip.elm === null) {
+                        return;
                     }
-                },
-                'onClose': function onClose() {
-                    if (postXhr !== null && postXhr.readyState !== 4) {
-                        postXhr.abort();
+                    that.initElement(tip.elm);
+                    tip.setContent(xhr.responseText);
+                    tip.elm.style.willChange = '';
+
+                    var referringPost = e.target.closest('.post');
+                    if (referringPost !== null) {
+                        var reflinkInTip = tip.elm.querySelector('.message .ref[data-id="' + referringPost.dataset.id + '"]');
+                        if (reflinkInTip !== null) {
+                            reflinkInTip.classList.add('referring');
+                        }
+                    }
+                    that.messagePreviewCache[postId] = tip.getContent();
+                }
+
+                function ajaxError(xhr) {
+                    if (xhr.responseText.length !== 0) {
+                        var json = JSON.parse(xhr.responseText);
+                        tip.setContent(json.message);
+                    } else {
+                        tip.setContent(messages.errorOccurred);
                     }
                 }
-            });
+            }
+
+            function closed() {
+                if (postXhr !== null && postXhr.readyState !== 4) {
+                    postXhr.abort();
+                }
+            }
         }
     };
 
@@ -799,7 +799,7 @@ var Modal = function () {
             // Bind esc to close
             document.addEventListener('keydown', keyDownListener);
 
-            //document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
             document.body.appendChild(this.modalRoot);
         }
 
@@ -820,7 +820,7 @@ var Modal = function () {
             if (that.modalRoot.querySelector('.modal') === null) {
                 document.removeEventListener('keydown', keyDownListener);
                 that.modalRoot.remove();
-                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
             }
         };
 
@@ -1254,6 +1254,15 @@ var Tooltip = function () {
         }
 
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
+        this.position();
+    };
+
+    Tooltip.prototype.getContent = function getContent() {
+        if (this.elm === null) {
+            return;
+        }
+
+        return this.elm.querySelector('.tooltip-content').innerHTML;
     };
 
     Tooltip.prototype.close = function close() {

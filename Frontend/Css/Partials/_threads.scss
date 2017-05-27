@@ -132,23 +132,4 @@ body:not(.thread-page) .thread.hidden {
         margin: 10px 0;
         display: block;
     }
-
-    .reply {
-        $bg: darken($contentBgColor, 2%);
-        @if (lightness($contentBgColor) < 50) {
-            $bg: lighten($contentBgColor, 2%);
-        }
-        background-color: $bg;
-        transition: background-color $transition;
-
-        overflow: hidden;
-        margin-bottom: 5px;
-        &.own-post:not(:target) {
-            $bgColor: darken($contentBgColor, 7%);
-            @if (lightness($contentBgColor) < 50) {
-                $bgColor: lighten($contentBgColor, 7%);
-            }
-            background-color: $bgColor;
-        }
-    }
 }

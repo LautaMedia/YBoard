@@ -83,6 +83,16 @@ class Tooltip
         }
 
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
+        this.position();
+    }
+
+    getContent()
+    {
+        if (this.elm === null) {
+            return;
+        }
+
+        return this.elm.querySelector('.tooltip-content').innerHTML;
     }
 
     close()

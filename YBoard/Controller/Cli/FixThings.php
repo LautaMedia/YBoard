@@ -3,6 +3,8 @@ namespace YBoard\Controller\Cli;
 
 use YBoard\CliController;
 use YBoard\Model\File;
+use YBoard\Model\Post;
+use YFW\Library\Database;
 use YFW\Library\FileHandler;
 
 class FixThings extends CliController
@@ -65,6 +67,33 @@ class FixThings extends CliController
             $file->setDimensions($width, $height, $thumbWidth, $thumbHeight);
 
             echo $filePath . " updated\n";
+        }
+    }
+
+    public function refLinks(): void
+    {
+        $q = $this->db->query('SELECT * FROM post_reply');
+
+        while ($reply = $q->fetch()) {
+            $repliedPost = Post::get($this->db, $reply->post_id_replied);
+            if ($repliedPost === null) {
+                echo 'INVALID REPLY ' . $reply->post_id . ' --> ' . $reply->post_id_replied . "\n";
+            }
+
+            $userId = $repliedPost->userId;
+
+            if ($userId === $reply->user_id) {
+                continue;
+            }
+
+            $update = $this->db->prepare('UPDATE post_reply SET is_op = :is_op, user_id = :user_id
+                WHERE post_id = :post_id AND post_id_replied = :post_id_replied LIMIT 1');
+            $update->bindValue(':user_id', $userId, Database::PARAM_INT);
+            $update->bindValue(':post_id', $reply->post_id, Database::PARAM_INT);
+            $update->bindValue(':post_id_replied', $reply->post_id_replied, Database::PARAM_INT);
+            $update->execute();
+
+            echo $reply->post_id . ' --> ' . $reply->post_id_replied . " updated\n";
         }
     }
 }

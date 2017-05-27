@@ -41,7 +41,8 @@ class YBoard
             }
         });
 
-        YQuery.on('submit', 'form.ajax', function (event) {
+        YQuery.on('submit', 'form.ajax', function(event)
+        {
             that.submitForm(event);
         });
 
@@ -73,7 +74,7 @@ class YBoard
         // Reload page
         document.getElementById('reload-page').addEventListener('click', function()
         {
-            that.pageReload()
+            that.pageReload();
         });
 
         this.initElement(document);
@@ -108,70 +109,75 @@ class YBoard
                 'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
                 'position': 'bottom',
                 'content': that.spinnerHtml(),
-                'onOpen': function(tip)
-                {
-                    tip.elm.style.willChange = 'contents';
-                    if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                        tip.setContent(that.messagePreviewCache[postId]);
-                        tip.position();
-                        tip.elm.style.willChange = '';
-                    } else {
-                        postXhr = YQuery.post('/api/post/get', {
-                            'postId': postId,
-                        }, {
-                            'errorFunction': null,
-                        }).onLoad(function(xhr)
-                        {
-                            if (tip.elm === null) {
-                                return;
-                            }
-                            tip.setContent(xhr.responseText);
-                            tip.position();
-                            tip.elm.style.willChange = '';
-
-                            let referringId = e.target.closest('.post');
-                            if (referringId !== null) {
-                                referringId = referringId.dataset.id;
-                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                    let referring = tip.elm.querySelector(
-                                        '.message .ref[data-id="' + referringId + '"]');
-                                    if (referring !== null) {
-                                        referring.classList.add('referring');
-                                    }
-                                }
-                            }
-                            that.messagePreviewCache[postId] = xhr.responseText;
-                        }).onError(function(xhr)
-                        {
-                            if (xhr.responseText.length !== 0) {
-                                let json = JSON.parse(xhr.responseText);
-                                tip.setContent(json.message);
-                            } else {
-                                tip.setContent(messages.errorOccurred)
-                            }
-                            tip.position();
-                        });
-                        postXhr = postXhr.getXhrObject();
-                    }
-                },
-                'onClose': function() {
-                    if (postXhr !== null && postXhr.readyState !== 4) {
-                        postXhr.abort();
-                    }
-                },
+                'onOpen': opened,
+                'onClose': closed,
             });
+
+            function opened(tip)
+            {
+                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                    tip.setContent(that.messagePreviewCache[postId]);
+
+                    return;
+                }
+
+                tip.elm.style.willChange = 'contents';
+                postXhr = YQuery.post(
+                    '/api/post/get',
+                    {'postId': postId},
+                    {'errorFunction': null}
+                ).onLoad(ajaxLoaded).onError(ajaxError);
+                postXhr = postXhr.getXhrObject();
+
+                function ajaxLoaded(xhr)
+                {
+                    if (tip.elm === null) {
+                        return;
+                    }
+                    that.initElement(tip.elm);
+                    tip.setContent(xhr.responseText);
+                    tip.elm.style.willChange = '';
+
+                    let referringPost = e.target.closest('.post');
+                    if (referringPost !== null) {
+                        let reflinkInTip = tip.elm.querySelector(
+                            '.message .ref[data-id="' + referringPost.dataset.id + '"]');
+                        if (reflinkInTip !== null) {
+                            reflinkInTip.classList.add('referring');
+                        }
+                    }
+                    that.messagePreviewCache[postId] = tip.getContent();
+                }
+
+                function ajaxError(xhr)
+                {
+                    if (xhr.responseText.length !== 0) {
+                        let json = JSON.parse(xhr.responseText);
+                        tip.setContent(json.message);
+                    } else {
+                        tip.setContent(messages.errorOccurred);
+                    }
+                }
+            }
+
+            function closed()
+            {
+                if (postXhr !== null && postXhr.readyState !== 4) {
+                    postXhr.abort();
+                }
+            }
         }
     }
 
     localizeDatetime(elm)
     {
-        elm.innerHTML =  new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
+        elm.innerHTML = new Date(elm.innerHTML.replace(' ', 'T') + 'Z').toLocaleString();
     }
 
     localizeNumber(elm)
     {
         elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString(undefined, {
-            minimumFractionDigits: 0
+            minimumFractionDigits: 0,
         });
     }
 
@@ -184,7 +190,7 @@ class YBoard
 
         elm.innerHTML = parseFloat(elm.innerHTML).toLocaleString(undefined, {
             'style': 'currency',
-            'currency': currency
+            'currency': currency,
         });
     }
 
@@ -323,7 +329,7 @@ class YBoard
                 'callback': function(response)
                 {
                     that.submitForm(null, signupForm, response);
-                }
+                },
             });
         } else {
             signupForm.hide();
