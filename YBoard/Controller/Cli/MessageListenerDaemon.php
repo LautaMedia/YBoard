@@ -181,7 +181,7 @@ class MessageListenerDaemon
 
         if (!is_array($postId)) {
             $repliedPost = Post::get($this->db, $postId, false);
-            if (!$repliedPost || empty($repliedPost->userId)) {
+            if ($repliedPost === null || empty($repliedPost->userId)) {
                 return false;
             }
 
@@ -194,6 +194,10 @@ class MessageListenerDaemon
         } else {
             foreach ($postId as $repliedPost) {
                 $repliedPost = Post::get($this->db, $repliedPost, false);
+                if ($repliedPost === null || empty($repliedPost->userId)) {
+                    continue;
+                }
+
                 if (in_array($repliedPost->userId, $skipUsers)) {
                     continue;
                 }

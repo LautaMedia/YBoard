@@ -90,7 +90,6 @@ class YBoard
         let tooltips = elm.querySelectorAll('.tip, .ref');
 
         this.PostForm.bindPostEvents(elm);
-        this.Post.truncateLongPosts(elm);
         this.Post.bindEvents(elm);
 
         tooltips.forEach(function(elm)
@@ -205,7 +204,7 @@ class YBoard
             }
         }
 
-        return text;
+        return text.trim();
     }
 
     isBadBrowser()

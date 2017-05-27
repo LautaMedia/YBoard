@@ -398,7 +398,6 @@ var YBoard = function () {
         var tooltips = elm.querySelectorAll('.tip, .ref');
 
         this.PostForm.bindPostEvents(elm);
-        this.Post.truncateLongPosts(elm);
         this.Post.bindEvents(elm);
 
         tooltips.forEach(function (elm) {
@@ -500,7 +499,7 @@ var YBoard = function () {
             }
         }
 
-        return text;
+        return text.trim();
     };
 
     YBoard.prototype.isBadBrowser = function isBadBrowser() {
@@ -1540,7 +1539,7 @@ var Notifications = function () {
                 }
 
                 // Mark as read
-                if (e.target.classList.contains('not-read')) {
+                if (e.target.closest('.notification').classList.contains('not-read')) {
                     var beaconUrl = '/api/user/notification/markread';
                     var data = new FormData();
                     data.append('id', e.target.closest('.notification').dataset.id);
@@ -1673,45 +1672,6 @@ var Post = function () {
 
         elm.querySelectorAll('.ref').forEach(function (elm) {
             elm.addEventListener('click', that.refClick);
-        });
-    };
-
-    Post.prototype.truncateLongPosts = function truncateLongPosts(elm) {
-        return;
-        var that = this;
-
-        elm.querySelectorAll('.message').forEach(function (elm) {
-            elm.dataset.height = elm.clientHeight;
-        });
-
-        elm.querySelectorAll('.message').forEach(function (elm) {
-            if (elm.dataset.height > 600) {
-                elm.classList.add('truncated');
-                var button = document.createElement('button');
-                button.addEventListener('click', function (e) {
-                    that.unTruncate(e.target.closest('.post').dataset.id);
-                });
-                button.classList.add('button', 'e-untruncate');
-                button.innerHTML = 'Show full message';
-                elm.parentNode.insertBefore(button, elm.nextSibling);
-            }
-        });
-    };
-
-    Post.prototype.unTruncate = function unTruncate(id) {
-        var post = document.getElementById('post-' + id);
-        if (post === null) {
-            return;
-        }
-
-        var message = post.querySelector('.message');
-        var button = post.querySelector('.e-untruncate');
-
-        requestAnimationFrame(function () {
-            message.classList.remove('truncated');
-            if (button !== null) {
-                button.remove();
-            }
         });
     };
 

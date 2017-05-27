@@ -25,7 +25,7 @@
     <script src="https://www.google.com/recaptcha/api.js?render=explicit" defer></script>
     <?php endif ?>
 </head>
-<body class="<?= $bodyClass ?> <?= $user->preferences->hideSidebar ? 'no-sidebar':'' ?>">
+<body class="<?= (!empty($bodyClass) ? $bodyClass : '') ?> <?= $user->preferences->hideSidebar ? 'no-sidebar':'' ?>">
 
 <?php include($viewFilesPath . '/Snippet/Sidebar.phtml') ?>
 

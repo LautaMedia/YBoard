@@ -74,7 +74,7 @@ class Notifications
                 }
 
                 // Mark as read
-                if (e.target.classList.contains('not-read')) {
+                if (e.target.closest('.notification').classList.contains('not-read')) {
                     let beaconUrl = '/api/user/notification/markread';
                     let data = new FormData();
                     data.append('id', e.target.closest('.notification').dataset.id);

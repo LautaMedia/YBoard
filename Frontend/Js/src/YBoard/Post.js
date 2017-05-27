@@ -26,48 +26,6 @@ class Post
         });
     }
 
-    truncateLongPosts(elm)
-    {
-        return;
-        let that = this;
-
-        elm.querySelectorAll('.message').forEach(function(elm) {
-            elm.dataset.height = elm.clientHeight;
-        });
-
-        elm.querySelectorAll('.message').forEach(function(elm) {
-            if (elm.dataset.height > 600) {
-                elm.classList.add('truncated');
-                let button = document.createElement('button');
-                button.addEventListener('click', function(e) {
-                    that.unTruncate(e.target.closest('.post').dataset.id);
-                });
-                button.classList.add('button', 'e-untruncate');
-                button.innerHTML = 'Show full message';
-                elm.parentNode.insertBefore(button, elm.nextSibling);
-            }
-        });
-    }
-
-    unTruncate(id)
-    {
-        let post = document.getElementById('post-' + id);
-        if (post === null) {
-            return;
-        }
-
-        let message = post.querySelector('.message');
-        let button = post.querySelector('.e-untruncate');
-
-        requestAnimationFrame(function()
-        {
-            message.classList.remove('truncated');
-            if (button !== null) {
-                button.remove();
-            }
-        });
-    }
-
     refClick(e)
     {
         let referred = e.currentTarget.dataset.id;
