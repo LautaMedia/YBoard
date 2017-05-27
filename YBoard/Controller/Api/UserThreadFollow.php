@@ -45,4 +45,16 @@ class UserThreadFollow extends ApiController
     {
         Model\UserThreadFollow::markAllReadByUser($this->db, $this->user->id);
     }
+
+    public function markRead(): void
+    {
+        if (empty($_POST['threadId'])) {
+            $this->throwJsonError(400);
+        }
+
+        $followedThread = $this->user->getFollowedThread($_POST['threadId']);
+        if ($followedThread !== null) {
+            $followedThread->markRead();
+        }
+    }
 }

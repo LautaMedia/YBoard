@@ -319,9 +319,10 @@ class Post extends ApiController
         // Delete post
         $post->delete();
 
-        // Undo last bump
+        // Undo last bump and update stats
         if (!empty($thread)) {
             $thread->updateBumpTime();
+            $thread->updateStats('replyCount', -1);
         }
     }
 

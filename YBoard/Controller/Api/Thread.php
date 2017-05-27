@@ -14,6 +14,7 @@ class Thread extends ApiController
 
         $newest = empty($_POST['newest']) ? false : true;
         $count = empty($_POST['count']) ? 100 : (int)$_POST['count'];
+        $fromId = (int)$_POST['fromId'] === 0 ? null : (int)$_POST['fromId'];
 
         // Try to get the thread or throw an error if it does not exist
         $thread = $this->getThread($_POST['threadId']);
@@ -22,12 +23,14 @@ class Thread extends ApiController
 
         $view->setVar('thread', $thread);
         $view->setVar('board', Model\Board::getById($this->db, $thread->boardId));
-        $view->setVar('replies', $thread->getReplies($count, $newest, $_POST['fromId']));
+        $view->setVar('replies', $thread->getReplies($count, $newest, $fromId));
 
         $visibleReplies = !empty($_POST['visibleReplies']) ? explode(',', $_POST['visibleReplies']) : null;
-        $deleted = $thread->getDeletedReplies($visibleReplies);
-        if ($deleted !== null) {
-            header('X-Deleted-Replies: ' . implode(',', $deleted));
+        if ($visibleReplies !== null) {
+            $deleted = $thread->getDeletedReplies($visibleReplies);
+            if ($deleted !== null) {
+                header('X-Deleted-Replies: ' . implode(',', $deleted));
+            }
         }
 
         $view->display('Ajax/ThreadExpand');
@@ -36,7 +39,9 @@ class Thread extends ApiController
         $followedThread = $this->user->getFollowedThread($_POST['threadId']);
         if ($followedThread !== null) {
             $this->user->markFollowedRead($_POST['threadId']);
-            $followedThread->setLastSeenReply($_POST['fromId']);
+            if ($fromId !== null) {
+                $followedThread->setLastSeenReply($fromId);
+            }
         }
     }
     protected function update(string $do, bool $bool): bool

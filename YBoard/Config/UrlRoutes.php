@@ -50,6 +50,7 @@ return [
     // User specific thread functions
     '#^/api/user/thread/follow/create$#' => ['Api\UserThreadFollow', 'create'],
     '#^/api/user/thread/follow/delete$#' => ['Api\UserThreadFollow', 'delete'],
+    '#^/api/user/thread/follow/markread$#' => ['Api\UserThreadFollow', 'markRead'],
     '#^/api/user/thread/follow/markallread$#' => ['Api\UserThreadFollow', 'markAllRead'],
     '#^/api/user/thread/hide/create$#' => ['Api\UserThreadHide', 'create'],
     '#^/api/user/thread/hide/delete$#' => ['Api\UserThreadHide', 'delete'],

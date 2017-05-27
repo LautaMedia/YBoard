@@ -74,7 +74,7 @@
 
 <?php if ($post->postReplies): ?>
 <div class="post-replies">
-    <span><?= _('Replies') ?>:</span>
+    <?= _('Replies') ?>:
     <?php foreach ($post->postReplies as $postReply): ?>
         <a href="/post-<?= $postReply->postId ?>" data-id="<?= $postReply->postId ?>" class="ref">&gt;&gt;<?= $postReply->postId
             . ($postReply->userId === $user->id ? ' (' . _('You') . ')' : '') ?></a>

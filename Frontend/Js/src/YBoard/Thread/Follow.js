@@ -15,6 +15,39 @@ class Follow
         {
             elm.addEventListener('click', that.markAllRead);
         });
+
+        document.querySelectorAll('.thread .e-mark-read').forEach(function(elm)
+        {
+            elm.addEventListener('click', that.markRead);
+        });
+    }
+
+    markRead(e)
+    {
+        let threadId = e.target.closest('.thread').dataset.id;
+
+        e.target.hide();
+        document.querySelectorAll('.icon-bookmark .unread-count').forEach(function(elm) {
+            let newNotificationCount = parseInt(elm.innerHTML) - 1;
+            if (newNotificationCount <= 0) {
+                elm.hide();
+            } else {
+                elm.innerHTML = newNotificationCount;
+            }
+        });
+
+        YQuery.post('/api/user/thread/follow/markread', {'threadId': threadId}).onError(function() {
+            e.target.show();
+
+            document.querySelectorAll('.icon-bookmark .unread-count').forEach(function(elm) {
+                let newNotificationCount = parseInt(elm.innerHTML) + 1;
+                if (newNotificationCount === 1) {
+                    elm.show();
+                } else {
+                    elm.innerHTML = newNotificationCount;
+                }
+            });
+        });
     }
 
     markAllRead()

@@ -401,8 +401,12 @@ var YBoard = function () {
         this.Post.bindEvents(elm);
 
         tooltips.forEach(function (elm) {
-            elm.addEventListener('mouseover', tooltipOpen);
+            that.addTooltipEventListener(elm, that);
         });
+    };
+
+    YBoard.prototype.addTooltipEventListener = function addTooltipEventListener(elm, that) {
+        elm.addEventListener('mouseover', tooltipOpen);
 
         function tooltipOpen(e) {
             var postId = null;
@@ -411,7 +415,7 @@ var YBoard = function () {
             }
             var postXhr = null;
             new _Tooltip2.default(e, {
-                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
+                'openDelay': typeof that.messagePreviewCache.postId === 'undefined' ? 50 : 0,
                 'position': 'bottom',
                 'content': that.spinnerHtml(),
                 'onOpen': opened,
@@ -419,8 +423,8 @@ var YBoard = function () {
             });
 
             function opened(tip) {
-                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                    tip.setContent(that.messagePreviewCache[postId]);
+                if (typeof that.messagePreviewCache.postId !== 'undefined') {
+                    tip.setContent(that.messagePreviewCache.postId);
 
                     return;
                 }
@@ -444,7 +448,7 @@ var YBoard = function () {
                             reflinkInTip.classList.add('referring');
                         }
                     }
-                    that.messagePreviewCache[postId] = tip.getContent();
+                    that.messagePreviewCache.postId = tip.getContent();
                 }
 
                 function ajaxError(xhr) {
@@ -1588,7 +1592,7 @@ var Notifications = function () {
             notification.classList.remove('is-read');
         });
 
-        that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notification-list')));
+        that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notifications-list')));
     };
 
     Notifications.prototype.markAllRead = function markAllRead(e, that) {
@@ -2632,7 +2636,10 @@ var Thread = function () {
         // Thread inline expansion
         var thread = e.target.closest('.thread');
         var threadId = thread.dataset.id;
-        var fromId = thread.querySelector('.reply').dataset.id;
+        var fromId = thread.querySelector('.reply');
+        if (fromId !== null) {
+            fromId = fromId.dataset.id;
+        }
         var loadCount = 100;
 
         _YQuery2.default.post('/api/thread/getreplies', {
@@ -2649,11 +2656,11 @@ var Thread = function () {
             }
 
             var expandContainer = thread.querySelector('.more-replies-container');
-            var firstVisibleReply = expandContainer.querySelector('.reply');
+            var firstVisibleReply = expandContainer.querySelector('div');
             if (firstVisibleReply === null) {
                 expandContainer.appendChild(data);
             } else {
-                thread.querySelector('.more-replies-container').insertBefore(data, firstVisibleReply);
+                expandContainer.insertBefore(data, firstVisibleReply);
             }
 
             _YBoard2.default.initElement(data);
@@ -2769,7 +2776,6 @@ var AutoUpdate = function () {
             var deletedReplies = xhr.getResponseHeader('X-Deleted-Replies');
             if (deletedReplies !== null) {
                 deletedReplies.split(',').forEach(function (id) {
-                    console.log(id);
                     var post = document.getElementById('post-' + id);
                     if (post !== null) {
                         post.remove();
@@ -2777,8 +2783,12 @@ var AutoUpdate = function () {
                 });
             }
 
-            if (manual && xhr.responseText.length === 0) {
-                _Toast2.default.info(messages.noNewReplies);
+            // Return if there's no new replies and show a notification if we're running manually
+            if (xhr.responseText.length === 0) {
+                if (manual) {
+                    _Toast2.default.info(messages.noNewReplies);
+                }
+
                 return;
             }
 
@@ -2794,6 +2804,30 @@ var AutoUpdate = function () {
             } else {
                 that.runCount = 0;
             }
+
+            // Update backlinks
+            data.querySelectorAll('.ref').forEach(function (elm) {
+                var referredId = elm.dataset.id;
+                var referredPost = document.getElementById('post-' + referredId);
+                if (referredPost === null) {
+                    return true;
+                }
+
+                // Create replies-container if it does not exist
+                var repliesElm = referredPost.querySelector('.post-replies');
+                if (repliesElm === null) {
+                    repliesElm = document.createElement('div');
+                    repliesElm.classList.add('post-replies');
+                    repliesElm.innerHTML = messages.replies + ':';
+                    referredPost.appendChild(repliesElm);
+                }
+
+                var clone = elm.cloneNode(true);
+                clone.innerHTML = clone.innerHTML.replace(' (' + messages.op + ')', '');
+                _YBoard2.default.addTooltipEventListener(clone);
+                repliesElm.appendChild(document.createTextNode(' '));
+                repliesElm.appendChild(clone);
+            });
 
             _YBoard2.default.initElement(data);
             requestAnimationFrame(function () {
@@ -2916,7 +2950,38 @@ var Follow = function () {
         document.querySelectorAll('.e-follow-mark-read').forEach(function (elm) {
             elm.addEventListener('click', that.markAllRead);
         });
+
+        document.querySelectorAll('.thread .e-mark-read').forEach(function (elm) {
+            elm.addEventListener('click', that.markRead);
+        });
     }
+
+    Follow.prototype.markRead = function markRead(e) {
+        var threadId = e.target.closest('.thread').dataset.id;
+
+        e.target.hide();
+        document.querySelectorAll('.icon-bookmark .unread-count').forEach(function (elm) {
+            var newNotificationCount = parseInt(elm.innerHTML) - 1;
+            if (newNotificationCount <= 0) {
+                elm.hide();
+            } else {
+                elm.innerHTML = newNotificationCount;
+            }
+        });
+
+        _YQuery2.default.post('/api/user/thread/follow/markread', { 'threadId': threadId }).onError(function () {
+            e.target.show();
+
+            document.querySelectorAll('.icon-bookmark .unread-count').forEach(function (elm) {
+                var newNotificationCount = parseInt(elm.innerHTML) + 1;
+                if (newNotificationCount === 1) {
+                    elm.show();
+                } else {
+                    elm.innerHTML = newNotificationCount;
+                }
+            });
+        });
+    };
 
     Follow.prototype.markAllRead = function markAllRead() {
         document.querySelectorAll('.icon-bookmark .unread-count').forEach(function (elm) {

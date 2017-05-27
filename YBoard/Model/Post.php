@@ -27,7 +27,7 @@ class Post extends Model
         c.thumb_width AS file_thumb_width, c.thumb_height AS file_thumb_height,
         c.height AS file_height, c.duration AS file_duration, c.has_thumbnail AS file_has_thumbnail,
         c.has_sound AS file_has_sound, c.is_gif AS file_is_gif, c.in_progress AS file_in_progress, d.read_count,
-        d.reply_count, d.distinct_reply_count, e.url AS board_url,
+        d.reply_count, d.distinct_reply_count, d.follow_count, d.hide_count, e.url AS board_url,
         (SELECT GROUP_CONCAT(CONCAT(post_id, '|', IFNULL(user_id, 0))) FROM post_reply WHERE post_id_replied = a.id) AS post_replies,
         (SELECT GROUP_CONCAT(CONCAT(post_id_replied, '|', IFNULL(user_id_replied, 0))) FROM post_reply WHERE post_id = a.id) AS replied_posts
         FROM post a

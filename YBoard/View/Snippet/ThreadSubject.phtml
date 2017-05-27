@@ -12,6 +12,6 @@
         <?= htmlspecialchars($thread->subject) ?>
     </a>
     <?php if (!empty($user->getThreadUnreadCount($thread->id))): ?>
-        <span class="notification-count"><?= $user->getThreadUnreadCount($thread->id) ?></span>
+        <span class="notification-count e-mark-read"><?= $user->getThreadUnreadCount($thread->id) ?></span>
     <?php endif ?>
 </h3>

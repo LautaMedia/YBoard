@@ -69,7 +69,10 @@ class Thread {
         // Thread inline expansion
         let thread = e.target.closest('.thread');
         let threadId = thread.dataset.id;
-        let fromId = thread.querySelector('.reply').dataset.id;
+        let fromId = thread.querySelector('.reply')
+        if (fromId !== null) {
+            fromId = fromId.dataset.id;
+        }
         let loadCount = 100;
 
         YQuery.post('/api/thread/getreplies', {
@@ -87,11 +90,11 @@ class Thread {
             }
 
             let expandContainer = thread.querySelector('.more-replies-container');
-            let firstVisibleReply = expandContainer.querySelector('.reply');
+            let firstVisibleReply = expandContainer.querySelector('div');
             if (firstVisibleReply === null) {
                 expandContainer.appendChild(data);
             } else {
-                thread.querySelector('.more-replies-container').insertBefore(data, firstVisibleReply);
+                expandContainer.insertBefore(data, firstVisibleReply);
             }
 
             YBoard.initElement(data);

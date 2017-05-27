@@ -4,6 +4,7 @@ namespace YBoard\Controller\Cli;
 use YBoard\CliController;
 use YBoard\Model\File;
 use YBoard\Model\Post;
+use YBoard\Model\Thread;
 use YFW\Library\Database;
 use YFW\Library\FileHandler;
 
@@ -98,6 +99,18 @@ class FixThings extends CliController
             $update->execute();
 
             echo $reply->post_id . ' --> ' . $reply->post_id_replied . " updated\n";
+        }
+    }
+
+    public function threadStats(): void
+    {
+        $q = $this->db->query('SELECT id FROM post WHERE thread_id IS NULL');
+
+        while ($row = $q->fetch()) {
+            $thread = Thread::get($this->db, $row->id);
+            $thread->recalculateStats();
+
+            echo $thread->id . " updated\n";
         }
     }
 }

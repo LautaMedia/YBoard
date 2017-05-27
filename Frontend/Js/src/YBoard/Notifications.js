@@ -124,7 +124,7 @@ class Notifications
             notification.classList.remove('is-read');
         });
 
-        that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notification-list')));
+        that.updateUnreadCount(that.getUnreadCount(e.target.closest('.notifications-list')));
     }
 
     markAllRead(e, that)

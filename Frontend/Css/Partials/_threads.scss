@@ -100,6 +100,10 @@ body:not(.thread-page) .thread.hidden {
             box-sizing: border-box;
             background-color: hsla(hue($highlightColor), saturation($highlightColor), lightness($highlightColor), 0.8);
             color: #fff;
+            cursor: pointer;
+            &:hover {
+                background-color: hsl(hue($highlightColor), saturation($highlightColor), lightness($highlightColor));
+            }
         }
     }
 

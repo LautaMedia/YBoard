@@ -81,7 +81,6 @@ class AutoUpdate
             let deletedReplies = xhr.getResponseHeader('X-Deleted-Replies');
             if (deletedReplies !== null) {
                 deletedReplies.split(',').forEach(function(id) {
-                    console.log(id);
                     let post = document.getElementById('post-' + id);
                     if (post !== null) {
                         post.remove();
@@ -89,8 +88,12 @@ class AutoUpdate
                 });
             }
 
-            if (manual && xhr.responseText.length === 0) {
-                Toast.info(messages.noNewReplies);
+            // Return if there's no new replies and show a notification if we're running manually
+            if (xhr.responseText.length === 0) {
+                if (manual) {
+                    Toast.info(messages.noNewReplies);
+                }
+
                 return;
             }
 
@@ -106,6 +109,30 @@ class AutoUpdate
             } else {
                 that.runCount = 0;
             }
+
+            // Update backlinks
+            data.querySelectorAll('.ref').forEach(function(elm) {
+                let referredId = elm.dataset.id;
+                let referredPost = document.getElementById('post-' + referredId);
+                if (referredPost === null) {
+                    return true;
+                }
+
+                // Create replies-container if it does not exist
+                let repliesElm = referredPost.querySelector('.post-replies');
+                if (repliesElm === null) {
+                    repliesElm = document.createElement('div');
+                    repliesElm.classList.add('post-replies');
+                    repliesElm.innerHTML = messages.replies + ':';
+                    referredPost.appendChild(repliesElm);
+                }
+
+                let clone = elm.cloneNode(true);
+                clone.innerHTML = clone.innerHTML.replace(' (' + messages.op + ')', '');
+                YBoard.addTooltipEventListener(clone);
+                repliesElm.appendChild(document.createTextNode(' '));
+                repliesElm.appendChild(clone);
+            });
 
             YBoard.initElement(data);
             requestAnimationFrame(function() {

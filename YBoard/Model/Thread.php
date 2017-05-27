@@ -14,6 +14,8 @@ class Thread extends Post
     public $replyCount = 0;
     public $distinctReplyCount = 0;
     public $readCount = 0;
+    public $followCount = 0;
+    public $hideCount = 0;
 
     protected static $hiddenIds = [];
 
@@ -36,14 +38,20 @@ class Thread extends Post
                     case 'subject':
                         $this->subject = $val;
                         break;
-                    case 'read_count':
-                        $this->readCount = (int)$val;
-                        break;
                     case 'reply_count':
                         $this->replyCount = (int)$val;
                         break;
                     case 'distinct_reply_count':
                         $this->distinctReplyCount = (int)$val;
+                        break;
+                    case 'read_count':
+                        $this->readCount = (int)$val;
+                        break;
+                    case 'follow_count':
+                        $this->followCount = (int)$val;
+                        break;
+                    case 'hide_count':
+                        $this->hideCount = (int)$val;
                         break;
                 }
             }
@@ -140,7 +148,7 @@ class Thread extends Post
         return $reply;
     }
 
-    public function getReplies(int $count = null, bool $newest = false, int $fromId = null): array
+    public function getReplies(int $count = null, bool $newest = false, ?int $fromId = null): array
     {
         $from = '';
         if ($newest) {
@@ -216,13 +224,29 @@ class Thread extends Post
                 return false;
         }
 
-        $q = $this->db->prepare("INSERT INTO post_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
-            ON DUPLICATE KEY UPDATE " . $column . " =  " . $column . "+:val_2");
+        $val = max(0, $this->$key + $val);
 
+        $q = $this->db->prepare("INSERT INTO post_statistics (thread_id, " . $column . ") VALUES (:thread_id, :val)
+            ON DUPLICATE KEY UPDATE " . $column . " = :val_2");
 
         $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
-        $q->bindValue(':val', max(0, $val), Database::PARAM_INT);
-        $q->bindValue(':val_2', max(0, $val), Database::PARAM_INT);
+        $q->bindValue(':val', $val, Database::PARAM_INT);
+        $q->bindValue(':val_2', $val, Database::PARAM_INT);
+        $q->execute();
+
+        return true;
+    }
+
+    public function recalculateStats(): bool
+    {
+        $q = $this->db->prepare("UPDATE post_statistics a SET
+            reply_count = (SELECT COUNT(*) FROM post b WHERE b.thread_id = a.thread_id),
+            distinct_reply_count = (SELECT COUNT(DISTINCT user_id) FROM post c WHERE c.thread_id = a.thread_id),
+            follow_count = (SELECT COUNT(*) FROM user_thread_follow d WHERE d.thread_id = a.thread_id),
+            hide_count = (SELECT COUNT(*) FROM user_thread_hide e WHERE e.thread_id = a.thread_id)
+            WHERE thread_id = :thread_id LIMIT 1");
+
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
@@ -247,8 +271,11 @@ class Thread extends Post
         if ($allData) {
             $q = $db->prepare(static::POST_QUERY . 'WHERE a.id = :id AND a.thread_id IS NULL LIMIT 1');
         } else {
-            $q = $db->prepare("SELECT id, board_id, user_id, ip, country_code, time, locked, sticky
-            FROM post WHERE id = :id AND thread_id IS NULL LIMIT 1");
+            $q = $db->prepare("SELECT id, board_id, user_id, ip, country_code, time, locked, sticky,
+            read_count, reply_count, distinct_reply_count, follow_count, hide_count
+            FROM post a
+            LEFT JOIN post_statistics b ON b.thread_id = a.id
+            WHERE id = :id AND a.thread_id IS NULL LIMIT 1");
         }
         $q->bindValue(':id', $threadId, Database::PARAM_INT);
         $q->execute();
