@@ -9,3 +9,6 @@ files/*
 YBoard/Config/Database.php
 YBoard/Config/App.php
 Profiler/*
+
+db.sql
+files.zip

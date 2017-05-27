@@ -83,24 +83,10 @@ class YBoard
     {
         let that = this;
 
-        // Performance gains are huge (like 98%), if "elm" is not a document fragment.
-        // So let's take the advantage of that for the initial page load.
-        let tooltips;
-        if (typeof elm.getElementsByClassName === 'function') {
-            // Localize dates, numbers and currencies
-            [].forEach.call(elm.getElementsByClassName('datetime'), this.localizeDatetime);
-            [].forEach.call(elm.getElementsByClassName('number'), this.localizeNumber);
-            [].forEach.call(elm.getElementsByClassName('currency'), this.localizeCurrency);
-
-            tooltips = Array.prototype.concat.apply([], elm.getElementsByClassName("tip"));
-            tooltips = Array.prototype.concat.apply(tooltips, elm.getElementsByClassName("ref"));
-        } else {
-            elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
-            elm.querySelectorAll('.number').forEach(this.localizeNumber);
-            elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
-
-            tooltips = elm.querySelectorAll('.tip, .ref');
-        }
+        elm.querySelectorAll('.datetime').forEach(this.localizeDatetime);
+        elm.querySelectorAll('.number').forEach(this.localizeNumber);
+        elm.querySelectorAll('.currency').forEach(this.localizeCurrency);
+        let tooltips = elm.querySelectorAll('.tip, .ref');
 
         this.PostForm.bindPostEvents(elm);
         this.Post.truncateLongPosts(elm);
@@ -108,71 +94,73 @@ class YBoard
 
         tooltips.forEach(function(elm)
         {
-            elm.addEventListener('mouseover', function(e)
-            {
-                let postId = null;
-                if (typeof e.target.dataset.id !== 'undefined') {
-                    postId = e.target.dataset.id;
-                }
-                let postXhr = null;
-                new Tooltip(e, {
-                    'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
-                    'position': 'bottom',
-                    'content': that.spinnerHtml(),
-                    'onOpen': function(tip)
-                    {
-                        tip.elm.style.willChange = 'contents';
-                        if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                            tip.setContent(that.messagePreviewCache[postId]);
+            elm.addEventListener('mouseover', tooltipOpen);
+        });
+
+        function tooltipOpen(e)
+        {
+            let postId = null;
+            if (typeof e.target.dataset.id !== 'undefined') {
+                postId = e.target.dataset.id;
+            }
+            let postXhr = null;
+            new Tooltip(e, {
+                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
+                'position': 'bottom',
+                'content': that.spinnerHtml(),
+                'onOpen': function(tip)
+                {
+                    tip.elm.style.willChange = 'contents';
+                    if (typeof that.messagePreviewCache[postId] !== 'undefined') {
+                        tip.setContent(that.messagePreviewCache[postId]);
+                        tip.position();
+                        tip.elm.style.willChange = '';
+                    } else {
+                        postXhr = YQuery.post('/api/post/get', {
+                            'postId': postId,
+                        }, {
+                            'errorFunction': null,
+                        }).onLoad(function(xhr)
+                        {
+                            if (tip.elm === null) {
+                                return;
+                            }
+                            tip.setContent(xhr.responseText);
                             tip.position();
                             tip.elm.style.willChange = '';
-                        } else {
-                            postXhr = YQuery.post('/api/post/get', {
-                                'postId': postId,
-                            }, {
-                                'errorFunction': null,
-                            }).onLoad(function(xhr)
-                            {
-                                if (tip.elm === null) {
-                                    return;
-                                }
-                                tip.setContent(xhr.responseText);
-                                tip.position();
-                                tip.elm.style.willChange = '';
 
-                                let referringId = e.target.closest('.post');
-                                if (referringId !== null) {
-                                    referringId = referringId.dataset.id;
-                                    if (tip.elm.querySelectorAll('.message .ref').length > 1) {
-                                        let referring = tip.elm.querySelector(
-                                            '.message .ref[data-id="' + referringId + '"]');
-                                        if (referring !== null) {
-                                            referring.classList.add('referring');
-                                        }
+                            let referringId = e.target.closest('.post');
+                            if (referringId !== null) {
+                                referringId = referringId.dataset.id;
+                                if (tip.elm.querySelectorAll('.message .ref').length > 1) {
+                                    let referring = tip.elm.querySelector(
+                                        '.message .ref[data-id="' + referringId + '"]');
+                                    if (referring !== null) {
+                                        referring.classList.add('referring');
                                     }
                                 }
-                                that.messagePreviewCache[postId] = xhr.responseText;
-                            }).onError(function(xhr)
-                            {
-                                if (xhr.responseText.length !== 0) {
-                                    let json = JSON.parse(xhr.responseText);
-                                    tip.setContent(json.message);
-                                } else {
-                                    tip.setContent(messages.errorOccurred)
-                                }
-                                tip.position();
-                            });
-                            postXhr = postXhr.getXhrObject();
-                        }
-                    },
-                    'onClose': function() {
-                        if (postXhr !== null && postXhr.readyState !== 4) {
-                            postXhr.abort();
-                        }
-                    },
-                });
+                            }
+                            that.messagePreviewCache[postId] = xhr.responseText;
+                        }).onError(function(xhr)
+                        {
+                            if (xhr.responseText.length !== 0) {
+                                let json = JSON.parse(xhr.responseText);
+                                tip.setContent(json.message);
+                            } else {
+                                tip.setContent(messages.errorOccurred)
+                            }
+                            tip.position();
+                        });
+                        postXhr = postXhr.getXhrObject();
+                    }
+                },
+                'onClose': function() {
+                    if (postXhr !== null && postXhr.readyState !== 4) {
+                        postXhr.abort();
+                    }
+                },
             });
-        });
+        }
     }
 
     localizeDatetime(elm)

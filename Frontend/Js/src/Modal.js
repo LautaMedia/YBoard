@@ -32,7 +32,7 @@ class Modal
             // Bind esc to close
             document.addEventListener('keydown', keyDownListener);
 
-            document.body.style.overflow = 'hidden';
+            //document.body.style.overflow = 'hidden';
             document.body.appendChild(this.modalRoot);
         }
 
