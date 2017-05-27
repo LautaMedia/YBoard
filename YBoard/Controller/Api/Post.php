@@ -303,7 +303,6 @@ class Post extends ApiController
 
         if (!empty($post->threadId)) {
             $thread = Model\Thread::get($this->db, $post->threadId, false);
-            $thread->undoLastBump();
         }
 
         $messageQueue = new MessageQueue();
@@ -319,6 +318,11 @@ class Post extends ApiController
 
         // Delete post
         $post->delete();
+
+        // Undo last bump
+        if (!empty($thread)) {
+            $thread->updateBumpTime();
+        }
     }
 
     public function deleteFile(): void

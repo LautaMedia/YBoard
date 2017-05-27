@@ -71,11 +71,16 @@ class Thread extends Post
         return true;
     }
 
-    public function undoLastBump(): bool
+    public function updateBumpTime(): bool
     {
-        $q = $this->db->prepare("UPDATE post a LEFT JOIN post b ON a.id = b.thread_id
-            SET a.bump_time = IFNULL(b.time, a.time) WHERE a.id = :thread_id");
-        $q->bindValue(':thread_id', (int)$this->id, Database::PARAM_INT);
+        $q = $this->db->prepare('SELECT MAX(time) as latest_bump FROM post WHERE thread_id = :thread_id');
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
+        $q->execute();
+        $latestBump = $q->fetch()->latest_bump;
+
+        $q = $this->db->prepare("UPDATE post SET bump_time = IFNULL(:latest_bump, time) WHERE id = :thread_id LIMIT 1");
+        $q->bindValue(':latest_bump', $latestBump);
+        $q->bindValue(':thread_id', $this->id, Database::PARAM_INT);
         $q->execute();
 
         return true;
