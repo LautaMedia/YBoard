@@ -86,7 +86,7 @@ class FixThings extends CliController
                 continue;
             }
 
-            $update = $this->db->prepare('UPDATE post_reply SET is_op = :is_op, user_id = :user_id
+            $update = $this->db->prepare('UPDATE post_reply SET user_id = :user_id
                 WHERE post_id = :post_id AND post_id_replied = :post_id_replied LIMIT 1');
             $update->bindValue(':user_id', $userId, Database::PARAM_INT);
             $update->bindValue(':post_id', $reply->post_id, Database::PARAM_INT);
