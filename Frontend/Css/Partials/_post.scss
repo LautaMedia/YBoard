@@ -4,10 +4,10 @@
     // Thread replies
     &.reply {
         $bg: darken($contentBgColor, 4%);
-        $ownReplyBg: hsl(hue($highlightColor)-30deg, 100, 97);
+        $ownReplyBg: darken($contentBgColor, 10%);
         @if (lightness($contentBgColor) < 50) {
             $bg: lighten($contentBgColor, 4%);
-            $ownReplyBg: hsl(hue($highlightColor)-30deg, 10, 18);
+            $ownReplyBg: lighten($contentBgColor, 10%);
         }
         background-color: $bg;
         transition: background-color $transition;
