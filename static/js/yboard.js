@@ -414,41 +414,46 @@ var YBoard = function () {
                 postId = e.target.dataset.id;
             }
             var postXhr = null;
+            var cached = typeof that.messagePreviewCache[postId] !== 'undefined';
             new _Tooltip2.default(e, {
-                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
+                'openDelay': !cached ? 50 : 0,
                 'position': 'bottom',
-                'content': that.spinnerHtml(),
-                'onOpen': opened,
-                'onClose': closed
+                'content': cached ? that.messagePreviewCache[postId] : that.spinnerHtml(),
+                'onOpen': !cached ? opened : null,
+                'onClose': !cached ? closed : null
             });
 
             function opened(tip) {
-                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                    tip.setContent(that.messagePreviewCache[postId]);
 
-                    return;
-                }
-
-                tip.elm.style.willChange = 'contents';
                 postXhr = _YQuery2.default.post('/api/post/get', { 'postId': postId }, { 'errorFunction': null }).onLoad(ajaxLoaded).onError(ajaxError);
                 postXhr = postXhr.getXhrObject();
 
                 function ajaxLoaded(xhr) {
-                    if (tip.elm === null) {
-                        return;
+                    // Close and reopen to reflow the contents
+                    // For some reason by just setting the contents it stays really narrow
+                    if (tip.elm !== null) {
+                        tip.close();
                     }
-                    that.initElement(tip.elm);
-                    tip.setContent(xhr.responseText);
-                    tip.elm.style.willChange = '';
+                    tip = new _Tooltip2.default(tip.event, {
+                        'openDelay': 0,
+                        'position': tip.options.position,
+                        'content': xhr.responseText,
+                        'onOpen': function onOpen(tip) {
+                            tip.elm.style.willChange = 'contents';
 
-                    var referringPost = e.target.closest('.post');
-                    if (referringPost !== null) {
-                        var reflinkInTip = tip.elm.querySelector('.message .ref[data-id="' + referringPost.dataset.id + '"]');
-                        if (reflinkInTip !== null) {
-                            reflinkInTip.classList.add('referring');
+                            that.initElement(tip.elm);
+
+                            var referringPost = e.target.closest('.post');
+                            if (referringPost !== null) {
+                                var reflinkInTip = tip.elm.querySelector('.message .ref[data-id="' + referringPost.dataset.id + '"]');
+                                if (reflinkInTip !== null) {
+                                    reflinkInTip.classList.add('referring');
+                                }
+                            }
+                            tip.elm.style.willChange = '';
+                            that.messagePreviewCache[postId] = tip.getContent();
                         }
-                    }
-                    that.messagePreviewCache[postId] = tip.getContent();
+                    });
                 }
 
                 function ajaxError(xhr) {
@@ -460,7 +465,6 @@ var YBoard = function () {
                     }
                 }
             }
-
             function closed() {
                 if (postXhr !== null && postXhr.readyState !== 4) {
                     postXhr.abort();
@@ -1222,7 +1226,7 @@ var Tooltip = function () {
         }
         this.elm.dataset.id = this.id;
 
-        this.setContent(this.options.content);
+        this.setContent(this.options.content, false);
 
         var closeEventFn = function closeEventFn() {
             that.event.target.removeEventListener(that.options.closeEvent, closeEventFn);
@@ -1255,11 +1259,17 @@ var Tooltip = function () {
     };
 
     Tooltip.prototype.setContent = function setContent(content) {
+        var position = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
         if (this.elm === null) {
             return;
         }
 
         this.elm.innerHTML = '<div class="tooltip-content">' + content + '</div>';
+
+        if (position) {
+            this.position();
+        }
     };
 
     Tooltip.prototype.getContent = function getContent() {
@@ -1289,14 +1299,15 @@ var Tooltip = function () {
             return;
         }
 
-        this.targetRect = this.event.target.getBoundingClientRect();
-        this.tipRect = this.elm.getBoundingClientRect();
+        var style = window.getComputedStyle(this.elm);
+        this.targetRect = this.getRect(this.event.target);
+        this.tipRect = this.getRect(this.elm, style);
 
         this.spaceAvailable = {
-            'top': this.targetRect.top,
-            'right': window.innerWidth - this.targetRect.right,
-            'bottom': window.innerHeight - this.targetRect.bottom,
-            'left': this.targetRect.left
+            'top': this.targetRect.top - this.options.offset - parseFloat(style.marginBottom) - parseFloat(style.marginTop),
+            'right': window.innerWidth - this.targetRect.right - this.options.offset - parseFloat(style.marginLeft) - parseFloat(style.marginRight),
+            'bottom': window.innerHeight - this.targetRect.bottom - this.options.offset - parseFloat(style.marginBottom) - parseFloat(style.marginTop),
+            'left': this.targetRect.left - this.options.offset - parseFloat(style.marginLeft) - parseFloat(style.marginRight)
         };
 
         this.calculatePosition(this.options.position);
@@ -1328,8 +1339,8 @@ var Tooltip = function () {
                 if (this.tipRect.width + this.options.offset > this.spaceAvailable.right) {
                     if (this.overflows || this.spaceAvailable.left < this.spaceAvailable.right) {
                         // Fits better to right than to left
-                        this.elm.style.maxWidth = this.spaceAvailable.right - this.options.offset + 'px';
-                        this.tipRect = this.elm.getBoundingClientRect();
+                        this.elm.style.maxWidth = this.spaceAvailable.right + 'px';
+                        this.tipRect = this.getRect(this.elm);
                     } else {
                         // Overflows, position on left
                         return this.recalculatePosition('left');
@@ -1342,8 +1353,8 @@ var Tooltip = function () {
                 if (this.x < 0) {
                     if (this.overflows || this.spaceAvailable.right < this.spaceAvailable.left) {
                         // Fits better to left than to right
-                        this.elm.style.maxWidth = this.spaceAvailable.left - this.options.offset + 'px';
-                        this.tipRect = this.elm.getBoundingClientRect();
+                        this.elm.style.maxWidth = this.spaceAvailable.left + 'px';
+                        this.tipRect = this.getRect(this.elm);
                     } else {
                         // Overflows, position on right
                         return this.recalculatePosition('right');
@@ -1361,8 +1372,8 @@ var Tooltip = function () {
                     if (this.overflows || this.spaceAvailable.bottom < this.spaceAvailable.top) {
                         // Fits better to top than to bottom
                         this.y = 0;
-                        this.elm.style.maxHeight = this.spaceAvailable.top - this.options.offset + 'px';
-                        this.tipRect = this.elm.getBoundingClientRect();
+                        this.elm.style.maxHeight = this.spaceAvailable.top + 'px';
+                        this.tipRect = this.getRect(this.elm);
                     } else {
                         // Overflows, position on bottom
                         return this.recalculatePosition('bottom');
@@ -1375,8 +1386,8 @@ var Tooltip = function () {
                     // Tip is larger than available space
                     if (this.overflows || this.spaceAvailable.top < this.spaceAvailable.bottom) {
                         // Fits better to bottom than to top
-                        this.elm.style.maxHeight = this.spaceAvailable.bottom - this.options.offset + 'px';
-                        this.tipRect = this.elm.getBoundingClientRect();
+                        this.elm.style.maxHeight = this.spaceAvailable.bottom + 'px';
+                        this.tipRect = this.getRect(this.elm);
                     } else {
                         // Overflows, position on top
                         return this.recalculatePosition('top');
@@ -1391,6 +1402,24 @@ var Tooltip = function () {
                 }
                 break;
         }
+    };
+
+    Tooltip.prototype.getRect = function getRect(elm) {
+        var style = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        var rect = elm.getBoundingClientRect();
+        if (style === null) {
+            style = window.getComputedStyle(elm);
+        }
+
+        return {
+            'top': rect.top - parseFloat(style.marginTop) - parseFloat(style.borderTopWidth),
+            'right': rect.right + parseFloat(style.marginRight) + parseFloat(style.borderRightWidth),
+            'bottom': rect.bottom + parseFloat(style.marginBottom) + parseFloat(style.borderBottomWidth),
+            'left': rect.left - parseFloat(style.marginLeft) - parseFloat(style.borderLeftWidth),
+            'width': rect.width + parseFloat(style.marginLeft) + parseFloat(style.borderLeftWidth) + parseFloat(style.marginRight) + parseFloat(style.borderRightWidth),
+            'height': rect.height + parseFloat(style.marginTop) + parseFloat(style.borderTopWidth) + parseFloat(style.marginBottom) + parseFloat(style.borderBottomWidth)
+        };
     };
 
     Tooltip.prototype.recalculatePosition = function recalculatePosition(position) {

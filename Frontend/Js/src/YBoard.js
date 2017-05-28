@@ -107,48 +107,50 @@ class YBoard
                 postId = e.target.dataset.id;
             }
             let postXhr = null;
+            let cached = typeof that.messagePreviewCache[postId] !== 'undefined';
             new Tooltip(e, {
-                'openDelay': typeof that.messagePreviewCache[postId] === 'undefined' ? 50 : 0,
+                'openDelay': !cached ? 50 : 0,
                 'position': 'bottom',
-                'content': that.spinnerHtml(),
-                'onOpen': opened,
-                'onClose': closed,
+                'content': cached ? that.messagePreviewCache[postId] : that.spinnerHtml(),
+                'onOpen': !cached ? opened : null,
+                'onClose': !cached ? closed : null,
             });
 
             function opened(tip)
             {
-                if (typeof that.messagePreviewCache[postId] !== 'undefined') {
-                    tip.setContent(that.messagePreviewCache[postId] );
 
-                    return;
-                }
-
-                tip.elm.style.willChange = 'contents';
-                postXhr = YQuery.post(
-                    '/api/post/get',
-                    {'postId': postId},
-                    {'errorFunction': null}
-                ).onLoad(ajaxLoaded).onError(ajaxError);
+                postXhr = YQuery.post('/api/post/get', {'postId': postId}, {'errorFunction': null}).onLoad(
+                    ajaxLoaded).onError(ajaxError);
                 postXhr = postXhr.getXhrObject();
 
                 function ajaxLoaded(xhr)
                 {
-                    if (tip.elm === null) {
-                        return;
+                    // Close and reopen to reflow the contents
+                    // For some reason by just setting the contents it stays really narrow
+                    if (tip.elm !== null) {
+                        tip.close();
                     }
-                    that.initElement(tip.elm);
-                    tip.setContent(xhr.responseText);
-                    tip.elm.style.willChange = '';
+                    tip = new Tooltip(tip.event, {
+                        'openDelay': 0,
+                        'position': tip.options.position,
+                        'content': xhr.responseText,
+                        'onOpen': function(tip) {
+                            tip.elm.style.willChange = 'contents';
 
-                    let referringPost = e.target.closest('.post');
-                    if (referringPost !== null) {
-                        let reflinkInTip = tip.elm.querySelector(
-                            '.message .ref[data-id="' + referringPost.dataset.id + '"]');
-                        if (reflinkInTip !== null) {
-                            reflinkInTip.classList.add('referring');
-                        }
-                    }
-                    that.messagePreviewCache[postId] = tip.getContent();
+                            that.initElement(tip.elm);
+
+                            let referringPost = e.target.closest('.post');
+                            if (referringPost !== null) {
+                                let reflinkInTip = tip.elm.querySelector(
+                                    '.message .ref[data-id="' + referringPost.dataset.id + '"]');
+                                if (reflinkInTip !== null) {
+                                    reflinkInTip.classList.add('referring');
+                                }
+                            }
+                            tip.elm.style.willChange = '';
+                            that.messagePreviewCache[postId] = tip.getContent();
+                        },
+                    });
                 }
 
                 function ajaxError(xhr)
@@ -161,7 +163,6 @@ class YBoard
                     }
                 }
             }
-
             function closed()
             {
                 if (postXhr !== null && postXhr.readyState !== 4) {
