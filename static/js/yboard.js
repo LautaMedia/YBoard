@@ -2378,7 +2378,6 @@ var File = function () {
             requestAnimationFrame(function () {
                 changeSrc(e.target, e.target.parentNode.getAttribute('href'));
                 e.target.closest('.post-file').classList.remove('thumbnail');
-                that.Post.unTruncate(e.target.closest('.post').dataset.id);
             });
         } else {
             // Restore thumbnail
@@ -2422,12 +2421,6 @@ var File = function () {
         _YQuery2.default.post('/api/file/getmediaplayer', { 'fileId': fileId }).onLoad(function (xhr) {
             var figure = e.target.closest('.post-file');
             var message = e.target.closest('.message');
-
-            // Untruncate the message
-            that.Post.unTruncate(e.target.closest('.post').dataset.id);
-            if (message.nextElementSibling !== null && message.nextElementSibling.classList.contains('e-untruncate')) {
-                message.nextElementSibling.remove();
-            }
 
             var data = document.createElement('div');
             data.innerHTML = xhr.responseText;
