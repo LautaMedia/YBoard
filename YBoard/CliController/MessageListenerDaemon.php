@@ -1,5 +1,5 @@
 <?php
-namespace YBoard\Controller\Cli;
+namespace YBoard\CliController;
 
 use YBoard\MessageQueue;
 use YBoard\Model\File;

@@ -1166,7 +1166,6 @@ _YQuery2.default.ajaxSetup({
 
 window.YBoard = _YBoard2.default;
 window.YQuery = _YQuery2.default;
-window.Toast = _Toast2.default;
 window.Modal = _Modal2.default;
 
 /***/ }),

@@ -50,5 +50,4 @@ YQuery.ajaxSetup({
 
 window.YBoard = YBoard;
 window.YQuery = YQuery;
-window.Toast = Toast;
 window.Modal = Modal;

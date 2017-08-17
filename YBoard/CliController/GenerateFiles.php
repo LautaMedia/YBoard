@@ -1,5 +1,5 @@
 <?php
-namespace YBoard\Controller\Cli;
+namespace YBoard\CliController;
 
 use YFW\Library\i18n;
 
